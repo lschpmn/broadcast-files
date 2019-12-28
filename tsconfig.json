@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "allowSyntheticDefaultImports": true,
+    "inlineSourceMap": true,
+    "jsx": "react",
+    "moduleResolution": "node",
+    "target": "es6"
+  }
+}
