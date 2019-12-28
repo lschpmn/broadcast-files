@@ -1,4 +1,3 @@
-const { app, BrowserWindow } = require('electron');
 const getIncrementalPort = require('get-incremental-port');
 const _ = require('lodash');
 const webpackDevServer = require('webpack-dev-server');
@@ -6,9 +5,6 @@ const webpack = require('webpack');
 const config = require('./webpack.config.js');
 
 let port;
-let win;
-
-const openWindow = _.after(2, createWindow);
 
 (async function () {
   port = await getIncrementalPort(5000);
@@ -24,30 +20,5 @@ const openWindow = _.after(2, createWindow);
 
   server.listen(port, '', () => {
     console.log(`dev server listening on port ${port}`);
-    openWindow();
   });
 })();
-
-function createWindow() {
-  win = new BrowserWindow({
-    height: 720,
-    webPreferences: {
-      nodeIntegration: true,
-    },
-    width: 1280,
-  });
-
-  win.loadURL(`http://localhost:${port}/index.html`);
-
-  win.webContents.openDevTools();
-
-  win.on('closed', () => {
-    app.quit();
-  });
-}
-
-app.on('ready', openWindow);
-
-app.on('window-all-closed', () => {
-  app.quit();
-});
