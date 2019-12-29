@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { readAsync as read, writeAsync as write, listAsync as list } from 'fs-jetpack';
+import { readAsync as read, writeAsync as write, listAsync as list, inspectAsync as inspect } from 'fs-jetpack';
 import * as getIncrementalPort from 'get-incremental-port';
 import * as express from 'express';
 import { join } from 'path';
@@ -32,12 +32,21 @@ async function startServer() {
 
   routes.forEach(route => {
     app.use(route.urlPath, async (req: Request, res: Response) => {
-      const path = join(route.filePath, req.url);
+      const path = join(route.filePath, decodeURIComponent(req.url));
       console.log(path);
-      const files = await list(path);
-      console.log(files);
+      const inspection = await inspect(path);
 
-      res.send(files);
+      if (inspection.type === 'dir') {
+        const files = await list(path);
+        const inspections = await Promise.all(files.map(async file => await inspect(join(path, file))));
+
+        return res.send(inspections);
+      } else {
+        console.log('got something else');
+        console.log(inspection);
+      }
+
+      res.send([])
     })
   });
 
