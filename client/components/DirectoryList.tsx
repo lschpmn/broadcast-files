@@ -21,8 +21,10 @@ const DirectoryList = ({ back, route }: Props) => {
       .catch(console.log);
   }, [currentLocation]);
 
-  console.log(currentLocation);
-  console.log(list);
+  const inspect = name =>
+    fetch(`http://localhost:${port}${currentLocation.join('/') + '/' + encodeURIComponent(name)}`)
+      .then(async res => console.log(await res.json()))
+      .catch(console.log);
 
   return <div>
     <div style={{ display: 'flex' }}>
@@ -51,7 +53,9 @@ const DirectoryList = ({ back, route }: Props) => {
       {list.map(item =>
         <Button
           key={item.name}
-          onClick={() => item.type === 'dir' && setCurrentLocation([...currentLocation, item.name])}
+          onClick={() => item.type === 'dir'
+            ? setCurrentLocation([...currentLocation, item.name])
+            : inspect(item.name)}
           style={{ wordBreak: 'break-word', height: '7.5rem', width: '20rem' }}
         >
           {item.name}

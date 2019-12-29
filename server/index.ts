@@ -41,11 +41,13 @@ async function startServer() {
         const inspections = await Promise.all(files.map(async file => await inspect(join(path, file))));
 
         return res.send(inspections);
-      } else {
-        console.log('got something else');
+      } else if (inspection.type === 'file') {
         console.log(inspection);
+        return res.send(inspection);
       }
 
+      console.log('got something else');
+      console.log(inspection);
       res.send([])
     })
   });
