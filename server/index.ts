@@ -1,6 +1,10 @@
-import { readAsync as read, writeAsync as write } from 'fs-jetpack';
+import { Request, Response } from 'express';
+import { readAsync as read, writeAsync as write, listAsync as list } from 'fs-jetpack';
 import * as getIncrementalPort from 'get-incremental-port';
+import * as express from 'express';
 import { join } from 'path';
+import { routes } from '../config';
+import * as cors from 'cors';
 
 const START_PORT = 3000;
 let retries = 10;
@@ -18,6 +22,26 @@ export let port;
 async function startServer() {
   port = await getIncrementalPort(START_PORT);
   await writePortToIndex();
+
+  const app = express();
+  app.use(cors());
+
+  app.get('/config', (req: Request, res: Response) => {
+    res.send(routes);
+  });
+
+  routes.forEach(route => {
+    app.use(route.urlPath, async (req: Request, res: Response) => {
+      const path = join(route.filePath, req.url);
+      console.log(path);
+      const files = await list(path);
+      console.log(files);
+
+      res.send(files);
+    })
+  });
+
+  app.listen(port, () => console.log(`started server on port ${port}`));
 }
 
 async function writePortToIndex() {

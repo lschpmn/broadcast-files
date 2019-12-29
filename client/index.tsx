@@ -8,7 +8,11 @@ import loggerMiddleware from './lib/loggerMiddleware';
 import reducers from './lib/reducers';
 
 const store = createStore(reducers, applyMiddleware(loggerMiddleware));
-const theme = createMuiTheme();
+const theme = createMuiTheme({
+  palette: {
+    type: 'dark',
+  },
+});
 
 render((
   <Provider store={store}>
