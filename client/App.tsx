@@ -1,16 +1,20 @@
 import Button from '@material-ui/core/Button';
 import makeStyles from '@material-ui/core/styles/makeStyles';
 import * as React from 'react';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { hot } from 'react-hot-loader/root';
 import { DirectoryRoute } from '../types';
+import DirectoryList from './components/DirectoryList';
 
 // @ts-ignore
 const port = window.__PORT__;
 
 const App = () => {
+  const [route, setRoute] = useState(null as null | DirectoryRoute);
   const [routes, setRoutes] = useState([]);
   const classes = useStyles({});
+
+  const back = useCallback(() => setRoute(null), []);
 
   useEffect(() => {
     fetch(`http://localhost:${port}/config`)
@@ -19,21 +23,29 @@ const App = () => {
   }, []);
 
   return <div className={classes.container}>
-    {routes.map((route: DirectoryRoute) =>
-      <Button key={route.label} className={classes.button} style={{ width: 100 / routes.length + '%' }}>
+    {!route && routes.map((route: DirectoryRoute) =>
+      <Button
+        className={classes.button}
+        key={route.label}
+        onClick={() => setRoute(route)}
+        style={{ width: 100 / routes.length + '%' }}
+      >
         {route.label}
       </Button>
     )}
+    {route &&
+      <DirectoryList back={back} route={route} />
+    }
   </div>;
 };
 
 const useStyles = makeStyles(theme => ({
+  button: {
+    height: '100%',
+  },
   container: {
     backgroundColor: theme.palette.background.default,
     color: theme.palette.text.primary,
-    height: '100%',
-  },
-  button: {
     height: '100%',
   },
 }));
