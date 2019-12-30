@@ -6,6 +6,7 @@ import { join } from 'path';
 import { routes } from '../config';
 import * as cors from 'cors';
 
+const IS_PROD = process.argv.includes('--prod');
 const START_PORT = 3000;
 let retries = 10;
 export let port;
@@ -24,7 +25,9 @@ async function startServer() {
   await writePortToIndex();
 
   const app = express();
-  app.use(cors());
+  !IS_PROD && app.use(cors());
+
+  IS_PROD && app.use('/all', express.static(join(__dirname, '..', 'public')));
 
   app.get('/config', (req: Request, res: Response) => {
     res.send(routes);
@@ -59,9 +62,10 @@ async function startServer() {
 
 async function writePortToIndex() {
   const index = await read(join(__dirname, '../client/index.html'));
+  const url = IS_PROD ? '' : `http://localhost:${port}`;
   await write(
     join(__dirname, '../public/index.html'),
-    index.replace('PORT__ = 0', `PORT__ = ${port}`),
+    index.replace('DOMAIN__ = ""', `DOMAIN__ = "${url}"`),
   );
   console.log(`wrote index.html file with port ${port}`);
 }

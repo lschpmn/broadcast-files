@@ -5,9 +5,9 @@ import { useCallback, useEffect, useState } from 'react';
 import { hot } from 'react-hot-loader/root';
 import { DirectoryRoute } from '../types';
 import DirectoryList from './components/DirectoryList';
+import { CustomWindowProperties } from './types';
 
-// @ts-ignore
-const port = window.__PORT__;
+const domain = (window as any as CustomWindowProperties).__DOMAIN__;
 
 const App = () => {
   const [route, setRoute] = useState(null as null | DirectoryRoute);
@@ -17,7 +17,7 @@ const App = () => {
   const back = useCallback(() => setRoute(null), []);
 
   useEffect(() => {
-    fetch(`http://localhost:${port}/config`)
+    fetch(`${domain}/config`)
       .then(async res => setRoutes(await res.json()))
       .catch(console.log);
   }, []);

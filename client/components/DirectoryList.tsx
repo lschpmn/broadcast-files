@@ -2,9 +2,9 @@ import Button from '@material-ui/core/Button';
 import { InspectResult } from 'fs-jetpack/types';
 import React, { useEffect, useState } from 'react';
 import { DirectoryRoute } from '../../types';
+import { CustomWindowProperties } from '../types';
 
-// @ts-ignore
-const port = window.__PORT__;
+const domain = (window as any as CustomWindowProperties).__DOMAIN__;
 
 type Props = {
   back: () => void,
@@ -16,7 +16,7 @@ const DirectoryList = ({ back, route }: Props) => {
   const [list, setList] = useState([] as InspectResult[]);
 
   useEffect(() => {
-    fetch(`http://localhost:${port}${currentLocation.join('/')}`)
+    fetch(`${domain}${currentLocation.join('/')}`)
       .then(async res => setList(await res.json()))
       .catch(console.log);
   }, [currentLocation]);
@@ -47,7 +47,7 @@ const DirectoryList = ({ back, route }: Props) => {
         <Button
           key={item.name}
           href={item.type === 'file'
-            ? `http://localhost:${port}${currentLocation.join('/') + '/' + encodeURIComponent(item.name)}`
+            ? domain + currentLocation.join('/') + '/' + encodeURIComponent(item.name)
             : ''}
           onClick={() => item.type === 'dir'
             && setCurrentLocation([...currentLocation, item.name])}
