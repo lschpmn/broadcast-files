@@ -21,11 +21,6 @@ const DirectoryList = ({ back, route }: Props) => {
       .catch(console.log);
   }, [currentLocation]);
 
-  const inspect = name =>
-    fetch(`http://localhost:${port}${currentLocation.join('/') + '/' + encodeURIComponent(name)}`)
-      .then(async res => console.log(await res.json()))
-      .catch(console.log);
-
   return <div>
     <div style={{ display: 'flex' }}>
       <Button onClick={back}>
@@ -33,7 +28,6 @@ const DirectoryList = ({ back, route }: Props) => {
       </Button>
 
       <h1 style={{ padding: '6px 8px' }}>/</h1>
-
       <Button onClick={() => setCurrentLocation([route.urlPath])}>
         <h1>{route.label}</h1>
       </Button>
@@ -41,7 +35,6 @@ const DirectoryList = ({ back, route }: Props) => {
       {currentLocation.slice(1).map((loc, i) =>
         <React.Fragment key={i}>
           <h1 style={{ padding: '6px 8px' }}>/</h1>
-
           <Button onClick={() => currentLocation.length !== i + 2 && setCurrentLocation(currentLocation.slice(0, i + 2))}>
             <h1>{loc}</h1>
           </Button>
@@ -53,9 +46,11 @@ const DirectoryList = ({ back, route }: Props) => {
       {list.map(item =>
         <Button
           key={item.name}
+          href={item.type === 'file'
+            ? `http://localhost:${port}${currentLocation.join('/') + '/' + encodeURIComponent(item.name)}`
+            : ''}
           onClick={() => item.type === 'dir'
-            ? setCurrentLocation([...currentLocation, item.name])
-            : inspect(item.name)}
+            && setCurrentLocation([...currentLocation, item.name])}
           style={{ wordBreak: 'break-word', height: '7.5rem', width: '20rem' }}
         >
           {item.name}

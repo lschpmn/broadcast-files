@@ -43,7 +43,9 @@ async function startServer() {
         return res.send(inspections);
       } else if (inspection.type === 'file') {
         console.log(inspection);
-        return res.send(inspection);
+        console.log('streaming file');
+
+        return res.sendFile(path);
       }
 
       console.log('got something else');
