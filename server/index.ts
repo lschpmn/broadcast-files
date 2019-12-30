@@ -28,7 +28,7 @@ async function startServer() {
   const app = express();
 
   app.use((req, res, next) => {
-    log(req.url);
+    log(`url - ${req.url}`);
     next();
   });
 
