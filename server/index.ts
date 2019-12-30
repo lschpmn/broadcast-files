@@ -1,10 +1,10 @@
-import { Request, Response } from 'express';
-import { readAsync as read, writeAsync as write, listAsync as list, inspectAsync as inspect } from 'fs-jetpack';
-import * as getIncrementalPort from 'get-incremental-port';
+import * as cors from 'cors';
 import * as express from 'express';
+import { Request, Response } from 'express';
+import { inspectAsync as inspect, listAsync as list, readAsync as read, writeAsync as write } from 'fs-jetpack';
+import * as getIncrementalPort from 'get-incremental-port';
 import { join } from 'path';
 import { routes } from '../config';
-import * as cors from 'cors';
 
 const IS_PROD = process.argv.includes('--prod');
 const START_PORT = 3000;
@@ -25,6 +25,12 @@ async function startServer() {
   await writePortToIndex();
 
   const app = express();
+
+  app.use((req, res, next) => {
+    console.log(`${new Date().toISOString()} - ${req.url}`);
+    next();
+  });
+
   !IS_PROD && app.use(cors());
 
   IS_PROD && app.use('/all', express.static(join(__dirname, '..', 'public')));
@@ -36,7 +42,7 @@ async function startServer() {
   routes.forEach(route => {
     app.use(route.urlPath, async (req: Request, res: Response) => {
       const path = join(route.filePath, decodeURIComponent(req.url));
-      console.log(path);
+      console.log(`path - ${path}`);
       const inspection = await inspect(path);
 
       if (inspection.type === 'dir') {
@@ -48,6 +54,7 @@ async function startServer() {
         console.log(inspection);
         console.log('streaming file');
 
+        res.contentType('video/mp4');
         return res.sendFile(path);
       }
 
@@ -62,7 +69,7 @@ async function startServer() {
 
 async function writePortToIndex() {
   const index = await read(join(__dirname, '../client/index.html'));
-  const url = IS_PROD ? '' : `http://localhost:${port}`;
+  const url = IS_PROD ? '' : `http://127.0.0.1:${port}`;
   await write(
     join(__dirname, '../public/index.html'),
     index.replace('DOMAIN__ = ""', `DOMAIN__ = "${url}"`),
