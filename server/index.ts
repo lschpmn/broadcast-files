@@ -14,6 +14,7 @@ export let port;
 (function serverRestarter() {
   startServer()
     .catch(err => {
+      log('error');
       console.log(err);
       retries--;
       if (retries > 0) serverRestarter();
@@ -27,7 +28,7 @@ async function startServer() {
   const app = express();
 
   app.use((req, res, next) => {
-    console.log(`${new Date().toISOString()} - ${req.url}`);
+    log(req.url);
     next();
   });
 
@@ -42,7 +43,7 @@ async function startServer() {
   routes.forEach(route => {
     app.use(route.urlPath, async (req: Request, res: Response) => {
       const path = join(route.filePath, decodeURIComponent(req.url));
-      console.log(`path - ${path}`);
+      log(`path - ${path}`);
       const inspection = await inspect(path);
 
       if (inspection.type === 'dir') {
@@ -51,21 +52,31 @@ async function startServer() {
 
         return res.send(inspections);
       } else if (inspection.type === 'file') {
-        console.log(inspection);
-        console.log('streaming file');
-
+        log('streaming file');
         res.contentType('video/mp4');
+        res.on('close', () => log('stream closed'));
         return res.sendFile(path);
       }
 
-      console.log('got something else');
+      log('got something else');
       console.log(inspection);
       res.send([])
     })
   });
 
-  app.listen(port, () => console.log(`started server on port ${port}`));
+  app.listen(port, () => log(`started server on port ${port}`));
 }
+
+// @ts-ignore
+const log = (message: string) => console.log(`${new Date().toLocaleString(undefined, {
+  day: 'numeric',
+  hour: 'numeric',
+  minute: 'numeric',
+  month: 'short',
+  second: '2-digit',
+  weekday: 'short',
+  year: 'numeric',
+})} - ${message}`);
 
 async function writePortToIndex() {
   const index = await read(join(__dirname, '../client/index.html'));
@@ -74,5 +85,5 @@ async function writePortToIndex() {
     join(__dirname, '../public/index.html'),
     index.replace('DOMAIN__ = ""', `DOMAIN__ = "${url}"`),
   );
-  console.log(`wrote index.html file with port ${port}`);
+  log(`wrote index.html file with port ${port}`);
 }
