@@ -34,34 +34,43 @@ async function startServer() {
 
   !IS_PROD && app.use(cors());
 
-  IS_PROD && app.use('/all', express.static(join(__dirname, '..', 'public')));
+  app.use(express.static(join(__dirname, '..', 'public')));
 
   app.get('/config', (req: Request, res: Response) => {
     res.send(routes);
   });
 
   routes.forEach(route => {
-    app.use(route.urlPath, async (req: Request, res: Response) => {
-      const path = join(route.filePath, decodeURIComponent(req.url));
+    const dirBase = '/dir' + route.urlPath;
+    app.get([dirBase, dirBase + '/*'], async (req: Request, res: Response) => {
+      const path = join(route.filePath, decodeURIComponent(req.url.replace(dirBase, '')));
       log(`path - ${path}`);
-      const inspection = await inspect(path);
 
-      if (inspection.type === 'dir') {
+      try {
         const files = await list(path);
         const inspections = await Promise.all(files.map(async file => await inspect(join(path, file))));
 
-        return res.send(inspections);
-      } else if (inspection.type === 'file') {
-        log('streaming file');
-        res.contentType('video/mp4');
-        res.on('close', () => log('stream closed'));
-        return res.sendFile(path);
+        res.send(inspections);
+      } catch (err) {
+        res.status(500).send(err.message);
       }
+    });
 
-      log('got something else');
-      console.log(inspection);
-      res.send([])
-    })
+    const fileBase = '/file' + route.urlPath;
+    app.get([fileBase, fileBase + '/*'], async (req: Request, res: Response) => {
+      const path = join(route.filePath, decodeURIComponent(req.url.replace(fileBase, '')));
+      log(`path - ${path}`);
+
+      log('streaming file');
+      res.contentType('video/mp4');
+      res.on('close', () => log('stream closed'));
+      return res.sendFile(path);
+    });
+  });
+
+  app.use((req: Request, res: Response) => {
+    log(`404 - sending index.html - ${req.url}`);
+    res.sendFile(join(__dirname, '..', 'public', 'index.html'));
   });
 
   app.listen(port, () => log(`started server on port ${port}`));

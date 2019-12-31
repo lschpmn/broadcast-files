@@ -10,6 +10,7 @@ let port;
   port = await getIncrementalPort(5000);
   const options = {
     contentBase: './public',
+    historyApiFallback: true,
     hot: true,
     host: 'localhost',
   };

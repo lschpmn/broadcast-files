@@ -1,20 +1,17 @@
-import Button from '@material-ui/core/Button';
 import makeStyles from '@material-ui/core/styles/makeStyles';
 import * as React from 'react';
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { hot } from 'react-hot-loader/root';
-import { DirectoryRoute } from '../types';
+import { BrowserRouter, Route } from 'react-router-dom';
 import DirectoryList from './components/DirectoryList';
+import Landing from './components/Landing';
 import { CustomWindowProperties } from './types';
 
 const domain = (window as any as CustomWindowProperties).__DOMAIN__;
 
 const App = () => {
-  const [route, setRoute] = useState(null as null | DirectoryRoute);
   const [routes, setRoutes] = useState([]);
   const classes = useStyles({});
-
-  const back = useCallback(() => setRoute(null), []);
 
   useEffect(() => {
     fetch(`${domain}/config`)
@@ -23,26 +20,14 @@ const App = () => {
   }, []);
 
   return <div className={classes.container}>
-    {!route && routes.map((route: DirectoryRoute) =>
-      <Button
-        className={classes.button}
-        key={route.label}
-        onClick={() => setRoute(route)}
-        style={{ width: 100 / routes.length + '%' }}
-      >
-        {route.label}
-      </Button>
-    )}
-    {route &&
-      <DirectoryList back={back} route={route} />
-    }
+    <BrowserRouter>
+      <Route path="/all/*" render={() => <DirectoryList />} />
+      <Route path="/all" exact render={() => <Landing routes={routes} />} />
+    </BrowserRouter>
   </div>;
 };
 
 const useStyles = makeStyles(theme => ({
-  button: {
-    height: '100%',
-  },
   container: {
     backgroundColor: theme.palette.background.default,
     color: theme.palette.text.primary,
