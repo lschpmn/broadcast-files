@@ -13,7 +13,7 @@ const Landing = ({ routes }: Props) => {
 
   return <>
     {routes.map((route: DirectoryRoute) =>
-      <Link key={route.label} to={'/all' + route.urlPath}>
+      <Link key={route.label} to={route.urlPath}>
         <Button
           className={classes.button}
           style={{ width: (100 / routes.length) + '%' }}

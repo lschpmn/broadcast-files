@@ -9,18 +9,17 @@ const domain = (window as any as CustomWindowProperties).__DOMAIN__;
 const DirectoryList = () => {
   const [list, setList] = useState([] as InspectResult[]);
   const { pathname } = useLocation();
-  const path = pathname.replace('/all', '');
-  const routes = pathname.split('/').slice(2);
+  const routes = pathname.split('/').slice(1);
 
   useEffect(() => {
-    fetch(`${domain}/dir${path}`)
+    fetch(`${domain}/dir${pathname}`)
       .then(async res => setList(await res.json()))
       .catch(console.log);
   }, [pathname]);
 
   return <div>
     <div style={{ display: 'flex' }}>
-      <Link to="/all">
+      <Link to="/">
         <Button>
           <h1>~</h1>
         </Button>
@@ -29,7 +28,7 @@ const DirectoryList = () => {
       {routes.map((route, i) =>
         <React.Fragment key={i}>
           <h1 style={{ padding: '6px 8px' }}>/</h1>
-          <Link to={'/all/' + routes.slice(0, i + 1).join('/')}>
+          <Link to={'/' + routes.slice(0, i + 1).join('/')}>
             <Button>
               <h1>{route}</h1>
             </Button>
@@ -43,14 +42,14 @@ const DirectoryList = () => {
         item.type === 'dir'
           ? <Link
             key={item.name}
-            to={`/all${path}/${encodeURIComponent(item.name)}`}
+            to={`${pathname}/${encodeURIComponent(item.name)}`}
           >
             <Button style={styles.button}>
               {item.name}
             </Button>
           </Link>
           : <Button
-            href={`${domain}/file${path}/${encodeURIComponent(item.name)}`}
+            href={`${domain}/file${pathname}/${encodeURIComponent(item.name)}`}
             key={item.name}
             style={styles.button}
           >

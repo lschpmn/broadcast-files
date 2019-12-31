@@ -20,9 +20,9 @@ const App = () => {
   }, []);
 
   return <div className={classes.container}>
-    <BrowserRouter>
-      <Route path="/all/*" render={() => <DirectoryList />} />
-      <Route path="/all" exact render={() => <Landing routes={routes} />} />
+    <BrowserRouter basename="/all">
+      <Route path="/" exact render={() => <Landing routes={routes} />} />
+      <Route path="/*" render={() => <DirectoryList />} />
     </BrowserRouter>
   </div>;
 };
