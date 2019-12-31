@@ -20,8 +20,8 @@ const App = () => {
   }, []);
 
   return <div className={classes.container}>
-    <BrowserRouter basename="/all">
-      <Route path="/*" render={props => props.history.location.pathname !== '/' &&  <DirectoryList />} />
+    <BrowserRouter>
+      <Route path="/*" render={props => props.location.pathname !== '/' &&  <DirectoryList />} />
       <Route path="/" exact render={() => <Landing routes={routes} />} />
     </BrowserRouter>
   </div>;
