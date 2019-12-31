@@ -21,8 +21,8 @@ const App = () => {
 
   return <div className={classes.container}>
     <BrowserRouter basename="/all">
+      <Route path="/*" render={props => props.history.location.pathname !== '/' &&  <DirectoryList />} />
       <Route path="/" exact render={() => <Landing routes={routes} />} />
-      <Route path="/*" render={() => <DirectoryList />} />
     </BrowserRouter>
   </div>;
 };
