@@ -6,5 +6,11 @@ export type DirectoryRoute = {
 };
 
 export type DbSchema = {
-  users: [],
+  users: User[],
+};
+
+export type User = {
+  username: string,
+  password?: string,
+  permissions: string[],
 };

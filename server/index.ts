@@ -9,6 +9,7 @@ import * as FileAsync from 'lowdb/adapters/FileAsync';
 import { join } from 'path';
 import { routes } from '../config';
 import { DbSchema } from '../types';
+import { initUsers } from './Users';
 
 const IS_PROD = process.argv.includes('--prod');
 const START_PORT = 3000;
@@ -45,6 +46,8 @@ async function startServer() {
     next();
   });
 
+  await initUsers(app, db);
+
   !IS_PROD && app.use(cors());
 
   app.use(express.static(join(__dirname, '..', 'public')));
@@ -74,8 +77,7 @@ async function startServer() {
       const path = join(route.filePath, decodeURIComponent(req.url.replace(fileBase, '')));
       log(`path - ${path}`);
 
-      log('streaming file');
-      res.contentType('video/mp4');
+      log('downloading file');
       res.on('close', () => log('stream closed'));
       return res.sendFile(path);
     });
