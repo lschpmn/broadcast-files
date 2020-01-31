@@ -4,7 +4,6 @@ const { join } = require('path');
 
 module.exports = {
   devServer: {
-    hot: true,
     port: 5000,
   },
 
@@ -19,10 +18,6 @@ module.exports = {
 
   module: {
     rules: [
-      {
-        test: /\.(html|png|jpg|gif|svg|eot|ttf|woff|woff2)$/,
-        loader: 'file-loader?name=[name].[ext]',
-      },
       {
         test: /.tsx?$/,
         exclude: /node_modules/,
@@ -49,6 +44,7 @@ module.exports = {
   output: {
     filename: 'bundle.js',
     path: join(__dirname, 'public/'),
+    publicPath: '/',
   },
 
   resolve: {
