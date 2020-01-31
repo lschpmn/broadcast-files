@@ -4,3 +4,7 @@ export type DirectoryRoute = {
   label: string,
   urlPath: string,
 };
+
+export type DbSchema = {
+  users: [],
+};

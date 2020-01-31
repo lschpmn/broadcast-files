@@ -4,9 +4,11 @@ import { Request, Response } from 'express';
 import { inspectAsync as inspect, listAsync as list, readAsync as read, writeAsync as write } from 'fs-jetpack';
 import * as getIncrementalPort from 'get-incremental-port';
 import * as lowdb from 'lowdb';
+import { LowdbAsync } from 'lowdb';
 import * as FileAsync from 'lowdb/adapters/FileAsync';
 import { join } from 'path';
 import { routes } from '../config';
+import { DbSchema } from '../types';
 
 const IS_PROD = process.argv.includes('--prod');
 const START_PORT = 3000;
@@ -29,11 +31,14 @@ async function startServer() {
 
   const app = express();
   const adapter = new FileAsync(join(__dirname, '..', 'db.json'));
-  const db = await lowdb(adapter);
+  const db: LowdbAsync<DbSchema> = await lowdb(adapter);
 
-  db.defaults({
-    users: [],
-  }).write().catch(console.log);
+  db
+    .defaults({
+      users: [],
+    })
+    .write()
+    .catch(console.log);
 
   app.use((req, res, next) => {
     log(`url - ${req.url}`);
