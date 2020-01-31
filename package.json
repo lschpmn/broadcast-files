@@ -52,6 +52,7 @@
     "express": "4.17.1",
     "fs-jetpack": "2.2.3",
     "get-incremental-port": "gist:5566749d5222db411f51c4414171b17d",
-    "lodash": "4.17.15"
+    "lodash": "4.17.15",
+    "lowdb": "1.0.0"
   }
 }

@@ -2,3 +2,4 @@
 node_modules/
 public/
 config.ts
+db.json

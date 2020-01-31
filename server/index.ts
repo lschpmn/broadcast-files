@@ -3,6 +3,8 @@ import * as express from 'express';
 import { Request, Response } from 'express';
 import { inspectAsync as inspect, listAsync as list, readAsync as read, writeAsync as write } from 'fs-jetpack';
 import * as getIncrementalPort from 'get-incremental-port';
+import * as lowdb from 'lowdb';
+import * as FileAsync from 'lowdb/adapters/FileAsync';
 import { join } from 'path';
 import { routes } from '../config';
 
@@ -26,6 +28,12 @@ async function startServer() {
   await writePortToIndex();
 
   const app = express();
+  const adapter = new FileAsync(join(__dirname, '..', 'db.json'));
+  const db = await lowdb(adapter);
+
+  db.defaults({
+    users: [],
+  }).write().catch(console.log);
 
   app.use((req, res, next) => {
     log(`url - ${req.url}`);
