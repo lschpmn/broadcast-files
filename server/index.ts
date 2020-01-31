@@ -1,6 +1,6 @@
 import * as cors from 'cors';
 import * as express from 'express';
-import { Request, Response } from 'express';
+import { Express, Request, Response } from 'express';
 import { inspectAsync as inspect, listAsync as list, readAsync as read, writeAsync as write } from 'fs-jetpack';
 import * as getIncrementalPort from 'get-incremental-port';
 import * as lowdb from 'lowdb';
@@ -9,11 +9,13 @@ import * as FileAsync from 'lowdb/adapters/FileAsync';
 import { join } from 'path';
 import { routes } from '../config';
 import { DbSchema } from '../types';
-import { initUsers } from './Users';
+import { setupUsers } from './Users';
 
 const IS_PROD = process.argv.includes('--prod');
 const START_PORT = 3000;
 let retries = 10;
+export let app: Express;
+export let db: LowdbAsync<DbSchema>;
 export let port;
 
 (function serverRestarter() {
@@ -30,9 +32,9 @@ async function startServer() {
   port = await getIncrementalPort(START_PORT);
   await writePortToIndex();
 
-  const app = express();
   const adapter = new FileAsync(join(__dirname, '..', 'db.json'));
-  const db: LowdbAsync<DbSchema> = await lowdb(adapter);
+  app = express();
+  db = await lowdb(adapter);
 
   db
     .defaults({
@@ -46,11 +48,11 @@ async function startServer() {
     next();
   });
 
-  await initUsers(app, db);
-
-  !IS_PROD && app.use(cors());
-
+  !IS_PROD && app.use(cors({ credentials: true, origin: 'http://127.0.0.1:5000' }));
+  app.use(express.json());
   app.use(express.static(join(__dirname, '..', 'public')));
+
+  await setupUsers();
 
   app.get('/config', (req: Request, res: Response) => {
     res.send(routes);

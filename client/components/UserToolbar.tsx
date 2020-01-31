@@ -11,9 +11,6 @@ import VisibilityOff from '@material-ui/icons/VisibilityOff';
 import * as React from 'react';
 import { useCallback, useState } from 'react';
 import { jsonPostRequest } from '../lib/utils';
-import { CustomWindowProperties } from '../types';
-
-const domain = (window as any as CustomWindowProperties).__DOMAIN__;
 
 const UserToolbar = () => {
   const [username, setUsername] = useState('');
@@ -32,11 +29,12 @@ const UserToolbar = () => {
   const login = useCallback(() => {
     jsonPostRequest({ username, password })
       .then(async res => {
-        const response = await res.text();
-        console.log('response');
-        console.log(response);
+        res.status < 300
+          ? console.log('login success')
+          : console.log('login failure');
       })
       .catch(err => {
+        console.log('login error');
         console.log(err.message);
         console.log(err);
       });
