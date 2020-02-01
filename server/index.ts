@@ -10,6 +10,7 @@ import { join } from 'path';
 import { routes } from '../config';
 import { DbSchema } from '../types';
 import { setupUsers } from './Users';
+import * as cookieParser from 'cookie-parser';
 
 const IS_PROD = process.argv.includes('--prod');
 const START_PORT = 3000;
@@ -38,6 +39,7 @@ async function startServer() {
 
   db
     .defaults({
+      crypto: {},
       users: [],
     })
     .write()
@@ -49,6 +51,7 @@ async function startServer() {
   });
 
   !IS_PROD && app.use(cors({ credentials: true, origin: 'http://127.0.0.1:5000' }));
+  app.use(cookieParser());
   app.use(express.json());
   app.use(express.static(join(__dirname, '..', 'public')));
 

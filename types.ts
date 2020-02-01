@@ -6,6 +6,10 @@ export type DirectoryRoute = {
 };
 
 export type DbSchema = {
+  crypto: {
+    publicKey: string,
+    privateKey: string,
+  },
   users: User[],
 };
 

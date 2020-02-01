@@ -1,12 +1,20 @@
 import * as bcrypt from 'bcrypt';
+import { generateKeyPair as generateKeyPairCallback } from 'crypto';
 import { Response } from 'express';
-import { sign } from 'jsonwebtoken';
+import { sign, verify } from 'jsonwebtoken';
+import { promisify } from 'util';
 import { users } from '../config';
+import { User } from '../types';
 import { app, db } from './index';
 
-const SECRET = Math.random().toString(36).slice(-10);
+type JWT = User & {
+  iat: string,
+};
 
-export const setupUsers =  async () => {
+const generateKeyPair = promisify(generateKeyPairCallback);
+
+export const setupUsers = async () => {
+  await initCrypto();
   // cleanup
   await db
     .get('users')
@@ -55,6 +63,30 @@ export const setupUsers =  async () => {
     });
     res.send();
   });
+
+  app.use((req, res, next) => {
+    if (!req.cookies.auth) return next();
+    const publicKey = db.get('crypto.publicKey').value();
+
+    verify(
+      req.cookies.auth,
+      publicKey,
+      { algorithms: ['RS256'] },
+      (err, decoded: JWT) => {
+        if (err) {
+          console.log(`failed to verify user ${decoded.username}`);
+          console.log(err.message);
+          console.log(err);
+          next();
+          return;
+        }
+
+        console.log(`verified user ${decoded.username}`);
+        res.locals.user = decoded;
+        next();
+      },
+    );
+  });
 };
 
 const getUser = (username: string) => db
@@ -62,18 +94,49 @@ const getUser = (username: string) => db
   .find({ username })
   .value();
 
-const setJwtCookie = (res: Response, payload) => {
-  return new Promise((resolve, reject) => {
-    sign(payload, SECRET, (err, jwt) => {
-      if (err) {
-        console.log('error');
-        console.log(err);
-        return reject(err);
-      }
+const initCrypto = async () => {
+  const crypto = db.get('crypto').value();
 
-      console.log('setting jwt');
-      res.cookie('auth', jwt);
-      resolve();
-    });
+  if (!crypto.publicKey) {
+    const publicPrivateKey = await generateKeyPair(
+      'rsa',
+      {
+        modulusLength: 4096,
+        publicKeyEncoding: {
+          type: 'spki',
+          format: 'pem',
+        },
+        privateKeyEncoding: {
+          type: 'pkcs8',
+          format: 'pem',
+        },
+      },
+    );
+
+    await db.set('crypto', publicPrivateKey).write();
+    console.log('Successfully generated public/private RSA key');
+  }
+};
+
+const setJwtCookie = async (res: Response, payload) => {
+  const privateKey = db.get('crypto.privateKey').value();
+
+  return new Promise((resolve, reject) => {
+    sign(
+      payload,
+      privateKey,
+      { algorithm: 'RS256' },
+      (err, jwt) => {
+        if (err) {
+          console.log('error');
+          console.log(err);
+          return reject(err);
+        }
+
+        console.log('setting jwt');
+        res.cookie('auth', jwt);
+        resolve();
+      },
+    );
   });
 };

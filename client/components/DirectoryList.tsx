@@ -12,7 +12,7 @@ const DirectoryList = () => {
   const routes = pathname.split('/').slice(1);
 
   useEffect(() => {
-    fetch(`${domain}/dir${pathname}`)
+    fetch(`${domain}/dir${pathname}`, { credentials: 'include' })
       .then(async res => setList(await res.json()))
       .catch(console.log);
   }, [pathname]);
