@@ -15,7 +15,7 @@ const App = () => {
   const classes = useStyles({});
 
   useEffect(() => {
-    fetch(`${domain}/config`)
+    fetch(`${domain}/config`, { credentials: 'include' })
       .then(async res => setRoutes(await res.json()))
       .catch(console.log);
   }, []);

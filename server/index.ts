@@ -40,7 +40,7 @@ async function startServer() {
   db
     .defaults({
       crypto: {},
-      users: [],
+      users: {},
     })
     .write()
     .catch(console.log);

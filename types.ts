@@ -10,7 +10,9 @@ export type DbSchema = {
     publicKey: string,
     privateKey: string,
   },
-  users: User[],
+  users: {
+    [username: string]: User,
+  },
 };
 
 export type User = {
