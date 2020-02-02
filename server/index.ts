@@ -57,6 +57,8 @@ async function startServer() {
   await setupUsers();
   setupDirectories();
 
+  app.use(['/api', '/dir', '/file'], (req, res) => res.status(404).end());
+
   app.use((req: Request, res: Response) => {
     log(`404 - sending index.html - ${req.url}`);
     res.sendFile(join(__dirname, '..', 'public', 'index.html'));

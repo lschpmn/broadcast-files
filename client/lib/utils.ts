@@ -37,14 +37,24 @@ export const useJwt = () => {
   return jwt;
 };
 
-export const jsonPostRequest = (body: Object) => fetch(
-  `${domain}/api/users/login`,
+export const get = (path) => fetch(
+  `${domain}/api${path}`,
   {
-    body: JSON.stringify(body),
+    credentials: 'include',
+    method: 'GET',
+    mode: 'cors',
+  },
+);
+
+export const post = (path, body?: Object) => fetch(
+  `${domain}/api${path}`,
+  {
+    body: body ? JSON.stringify(body) : '{}',
     credentials: 'include',
     headers: {
       'Content-Type': 'application/json',
     },
     method: 'POST',
     mode: 'cors',
-  });
+  },
+);

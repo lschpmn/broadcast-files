@@ -6,7 +6,7 @@ import { BrowserRouter, Route } from 'react-router-dom';
 import DirectoryList from './components/DirectoryList';
 import Landing from './components/Landing';
 import UserToolbar from './components/UserToolbar';
-import { JwtContext, useJwt } from './lib/utils';
+import { get, JwtContext, useJwt } from './lib/utils';
 import { CustomWindowProperties } from './types';
 
 const domain = (window as any as CustomWindowProperties).__DOMAIN__;
@@ -16,7 +16,7 @@ const App = () => {
   const classes = useStyles({});
 
   useEffect(() => {
-    fetch(`${domain}/config`, { credentials: 'include' })
+    get('/config')
       .then(async res => setRoutes(await res.json()))
       .catch(console.log);
   }, []);

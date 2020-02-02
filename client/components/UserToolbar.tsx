@@ -9,9 +9,9 @@ import Toolbar from '@material-ui/core/Toolbar';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import VisibilityOff from '@material-ui/icons/VisibilityOff';
 import * as React from 'react';
-import { useCallback, useContext, useState } from 'react';
+import { useCallback, useContext, useEffect, useState } from 'react';
 import { JWT } from '../../types';
-import { jsonPostRequest, JwtContext } from '../lib/utils';
+import { JwtContext, post } from '../lib/utils';
 
 const UserToolbar = () => {
   const [username, setUsername] = useState('');
@@ -19,7 +19,6 @@ const UserToolbar = () => {
   const [showLogin, setShowLogin] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const classes = useStyles({});
-
   const jwt: JWT = useContext(JwtContext) as any;
 
   const close = useCallback(() => {
@@ -30,7 +29,7 @@ const UserToolbar = () => {
   }, []);
 
   const login = useCallback(() => {
-    jsonPostRequest({ username, password })
+    post('/users/login', { username, password })
       .then(async res => {
         res.status < 300
           ? console.log('login success')
@@ -45,6 +44,10 @@ const UserToolbar = () => {
 
   const toggleShowPassword = useCallback(() =>
     setShowPassword(!showPassword), [showPassword]);
+
+  useEffect(() => {
+    close();
+  }, [jwt]);
 
   return <div>
     <AppBar position='relative' >

@@ -8,7 +8,7 @@ import { DirectoryRoute, JWT } from '../types';
 import { app, log } from './index';
 
 export const setupDirectories = () => {
-  app.get('/config', (req: Request, res: Response) => {
+  app.get('/api/config', (req: Request, res: Response) => {
     const routesToShow = routes
       .filter(route => checkAccess(route, res.locals.user));
 
