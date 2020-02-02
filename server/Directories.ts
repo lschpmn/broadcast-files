@@ -16,7 +16,7 @@ export const setupDirectories = () => {
   });
 
   routes.forEach(route => {
-    const dirBase = '/dir' + route.urlPath;
+    const dirBase = '/api/dir' + route.urlPath;
     app.get([dirBase, dirBase + '/*'], async (req: Request, res: Response) => {
       if (!checkAccess(route, res.locals.user)) return res.status(404).end();
 
@@ -33,7 +33,7 @@ export const setupDirectories = () => {
       }
     });
 
-    const fileBase = '/file' + route.urlPath;
+    const fileBase = '/api/file' + route.urlPath;
     app.get([fileBase, fileBase + '/*'], async (req: Request, res: Response) => {
       if (!checkAccess(route, res.locals.user)) return res.status(404).end();
 

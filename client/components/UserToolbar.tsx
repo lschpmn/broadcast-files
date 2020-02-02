@@ -1,3 +1,4 @@
+import Typography from '@material-ui/core/Typography';
 import AppBar from '@material-ui/core/AppBar';
 import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
@@ -16,12 +17,14 @@ import { JwtContext, post } from '../lib/utils';
 const UserToolbar = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [loginError, setLoginError] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const classes = useStyles({});
   const jwt: JWT = useContext(JwtContext) as any;
 
   const close = useCallback(() => {
+    setLoginError(false);
     setShowLogin(false);
     setShowPassword(false);
     setUsername('');
@@ -30,15 +33,11 @@ const UserToolbar = () => {
 
   const login = useCallback(() => {
     post('/users/login', { username, password })
-      .then(async res => {
-        res.status < 300
-          ? console.log('login success')
-          : console.log('login failure');
-      })
+      .then(async res => res.status >= 300 && setLoginError(true))
       .catch(err => {
         console.log('login error');
-        console.log(err.message);
         console.log(err);
+        setLoginError(true);
       });
   }, [username, password]);
 
@@ -62,6 +61,9 @@ const UserToolbar = () => {
       classes={{ paper: classes.dialog }}
     >
       <DialogContent style={{ display: 'flex', flexDirection: 'column' }}>
+        <Typography align='center' color='error'>
+          {loginError ? 'Login Error' : <>&nbsp;</>}
+        </Typography>
         <div>Username</div>
         <div>
           <TextField

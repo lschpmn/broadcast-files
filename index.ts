@@ -4,10 +4,8 @@ const webpackDevServer = require('webpack-dev-server');
 const webpack = require('webpack');
 const config = require('./webpack.config.js');
 
-let port;
-
 (async function () {
-  port = await getIncrementalPort(5000);
+  const port = await getIncrementalPort(5000);
   const options = {
     contentBase: './public',
     historyApiFallback: true,

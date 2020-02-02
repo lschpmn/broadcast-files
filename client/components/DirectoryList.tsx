@@ -12,7 +12,7 @@ const DirectoryList = () => {
   const routes = pathname.split('/').slice(1);
 
   useEffect(() => {
-    fetch(`${domain}/dir${pathname}`, { credentials: 'include' })
+    fetch(`${domain}/api/dir${pathname}`, { credentials: 'include' })
       .then(async res => setList(await res.json()))
       .catch(console.log);
   }, [pathname]);
@@ -49,7 +49,7 @@ const DirectoryList = () => {
             </Button>
           </Link>
           : <Button
-            href={`${domain}/file${pathname}/${encodeURIComponent(item.name)}`}
+            href={`${domain}/api/file${pathname}/${encodeURIComponent(item.name)}`}
             key={item.name}
             style={styles.button}
           >
