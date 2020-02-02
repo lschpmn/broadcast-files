@@ -2,6 +2,8 @@ import * as bcrypt from 'bcrypt';
 import { generateKeyPair as generateKeyPairCallback } from 'crypto';
 import { Response } from 'express';
 import { decode, sign, verify } from 'jsonwebtoken';
+// @ts-ignore
+import * as isEqual from 'lodash/isEqual';
 import { promisify } from 'util';
 import { users } from '../config';
 import { JWT, User } from '../types';
@@ -22,15 +24,18 @@ export const setupUsers = async () => {
 
   // init
   await users.map(async user => {
-    const userExists = db
-      .has(`users.${user.username}`)
+    const dbUser = db
+      .get(`users.${user.username}`)
       .value();
 
-    if (!userExists) {
+    if (!dbUser) {
       console.log(`Adding user ${user.username}`);
       await db
         .set(`users.${user.username}`, user)
         .write();
+    } else if (!isEqual(dbUser.permissions, user.permissions)) {
+      dbUser.permissions = user.permissions;
+      await db.write();
     }
   });
 
