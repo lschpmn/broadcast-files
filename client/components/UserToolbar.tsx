@@ -9,8 +9,9 @@ import Toolbar from '@material-ui/core/Toolbar';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import VisibilityOff from '@material-ui/icons/VisibilityOff';
 import * as React from 'react';
-import { useCallback, useState } from 'react';
-import { jsonPostRequest } from '../lib/utils';
+import { useCallback, useContext, useState } from 'react';
+import { JWT } from '../../types';
+import { jsonPostRequest, JwtContext } from '../lib/utils';
 
 const UserToolbar = () => {
   const [username, setUsername] = useState('');
@@ -18,6 +19,8 @@ const UserToolbar = () => {
   const [showLogin, setShowLogin] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const classes = useStyles({});
+
+  const jwt: JWT = useContext(JwtContext) as any;
 
   const close = useCallback(() => {
     setShowLogin(false);
@@ -46,7 +49,7 @@ const UserToolbar = () => {
   return <div>
     <AppBar position='relative' >
       <Toolbar className={classes.toolbar}>
-        <Button onMouseDown={() => setShowLogin(true)}>Login</Button>
+        <Button onMouseDown={() => setShowLogin(true)}>{jwt.username || 'Login'}</Button>
       </Toolbar>
     </AppBar>
 

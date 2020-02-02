@@ -4,15 +4,10 @@ import { Response } from 'express';
 import { decode, sign, verify } from 'jsonwebtoken';
 import { promisify } from 'util';
 import { users } from '../config';
-import { User } from '../types';
+import { JWT, User } from '../types';
 import { app, db } from './index';
 
-type JWT = User & {
-  iat: string,
-  password: undefined,
-};
-
-const SESSION_TIMEOUT = 60 * 60 * 24; //1 day
+const SESSION_TIMEOUT = 120;
 const generateKeyPair = promisify(generateKeyPairCallback);
 
 export const setupUsers = async () => {
@@ -136,7 +131,7 @@ const setJwtCookie = async (res: Response, payload) => {
         }
 
         console.log('setting jwt');
-        res.cookie('auth', jwt);
+        res.cookie('auth', jwt, { maxAge: SESSION_TIMEOUT * 1000 });
         resolve();
       },
     );

@@ -15,6 +15,12 @@ export type DbSchema = {
   },
 };
 
+export type JWT = User & {
+  exp: number,
+  iat: number,
+  password: undefined,
+};
+
 export type User = {
   username: string,
   password?: string,
