@@ -7,7 +7,7 @@ import { users } from '../config';
 import { JWT, User } from '../types';
 import { app, db } from './index';
 
-const SESSION_TIMEOUT = 120;
+const SESSION_TIMEOUT = 60 * 5;
 const generateKeyPair = promisify(generateKeyPairCallback);
 
 export const setupUsers = async () => {
