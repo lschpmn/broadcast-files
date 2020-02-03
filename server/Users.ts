@@ -13,7 +13,6 @@ const SESSION_TIMEOUT = 60 * 5;
 const generateKeyPair = promisify(generateKeyPairCallback);
 
 export const setupUsers = async () => {
-  await initCrypto();
   // cleanup
   const dbUsers = db.get('users').value();
   Object
@@ -96,7 +95,7 @@ export const setupUsers = async () => {
   });
 };
 
-const initCrypto = async () => {
+export const initCrypto = async () => {
   const crypto = db.get('crypto').value();
 
   if (!crypto.publicKey) {
@@ -109,7 +108,7 @@ const initCrypto = async () => {
           format: 'pem',
         },
         privateKeyEncoding: {
-          type: 'pkcs8',
+          type: 'pkcs1',
           format: 'pem',
         },
       },

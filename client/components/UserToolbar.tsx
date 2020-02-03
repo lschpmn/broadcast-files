@@ -1,4 +1,3 @@
-import Typography from '@material-ui/core/Typography';
 import AppBar from '@material-ui/core/AppBar';
 import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
@@ -7,12 +6,19 @@ import InputAdornment from '@material-ui/core/InputAdornment';
 import makeStyles from '@material-ui/core/styles/makeStyles';
 import TextField from '@material-ui/core/TextField';
 import Toolbar from '@material-ui/core/Toolbar';
+import Typography from '@material-ui/core/Typography';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import VisibilityOff from '@material-ui/icons/VisibilityOff';
 import * as React from 'react';
 import { useCallback, useContext, useEffect, useState } from 'react';
 import { JWT } from '../../types';
-import { JwtContext, post } from '../lib/utils';
+import { JwtContext, post, str2ab } from '../lib/utils';
+import { CustomWindowProperties } from '../types';
+
+const publicKeyStr = (window as any as CustomWindowProperties).__PUBLIC_KEY__
+  .replace('-----BEGIN PUBLIC KEY-----\n', '')
+  .replace('-----END PUBLIC KEY-----\n', '')
+  .replace(/\n/g, '');
 
 const UserToolbar = () => {
   const [username, setUsername] = useState('');
@@ -31,12 +37,46 @@ const UserToolbar = () => {
     setPassword('');
   }, []);
 
-  const login = useCallback(() => {
+  const login = useCallback(async () => {
+    let encrypt;
+
+    try {
+      const usernamePassword = {
+        username,
+        password,
+      };
+      const publicKey = await crypto.subtle.importKey(
+        'spki',
+        str2ab(atob(publicKeyStr)), //key
+        {
+          name: 'RSA-OAEP',
+          hash: 'SHA-256',
+        } as any,
+        false,
+        ['encrypt'],
+      );
+      console.log('publicKey');
+      console.log(publicKey);
+      const encoded = str2ab(JSON.stringify(usernamePassword));
+      encrypt = await crypto.subtle.encrypt(
+        {
+          name: 'RSA-OAEP',
+        },
+        publicKey,
+        encoded,
+      );
+
+      console.log('encryption successful');
+      console.log(encrypt);
+    } catch (err) {
+      console.error(err);
+    }
+
     post('/users/login', { username, password })
       .then(async res => res.status >= 300 && setLoginError(true))
       .catch(err => {
         console.log('login error');
-        console.log(err);
+        console.error(err);
         setLoginError(true);
       });
   }, [username, password]);
@@ -49,7 +89,7 @@ const UserToolbar = () => {
   }, [jwt]);
 
   return <div>
-    <AppBar position='relative' >
+    <AppBar position='relative'>
       <Toolbar className={classes.toolbar}>
         <Button onMouseDown={() => setShowLogin(true)}>{jwt.username || 'Login'}</Button>
       </Toolbar>
@@ -111,7 +151,7 @@ const useStyles = makeStyles({
     minHeight: '3rem',
   },
   visibilityIcon: {
-    cursor: 'pointer'
+    cursor: 'pointer',
   },
 });
 

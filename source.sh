@@ -5,4 +5,4 @@ BIN=$DIR/node_modules/.bin
 PATH=:$BIN:$DIR/bin:$PATH;
 alias start-server="nodemon ./server/index.ts -w ./server/ </dev/null"
 alias start-client="ts-node index.ts";
-alias start="start-server & start-client &";
+alias start="start-client & start-server &";

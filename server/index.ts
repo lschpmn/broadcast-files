@@ -10,7 +10,7 @@ import * as FileAsync from 'lowdb/adapters/FileAsync';
 import { join } from 'path';
 import { DbSchema } from '../types';
 import { setupDirectories } from './Directories';
-import { setupUsers } from './Users';
+import { initCrypto, setupUsers } from './Users';
 
 const IS_PROD = process.argv.includes('--prod');
 const START_PORT = 3000;
@@ -31,7 +31,6 @@ export let port;
 
 async function startServer() {
   port = await getIncrementalPort(START_PORT);
-  await writePortToIndex();
 
   const adapter = new FileAsync(join(__dirname, '..', 'db.json'));
   app = express();
@@ -43,6 +42,9 @@ async function startServer() {
       users: {},
     })
     .write();
+
+  await initCrypto();
+  await writePortToIndex();
 
   app.use((req, res, next) => {
     log(`url - ${req.url}`);
@@ -80,10 +82,11 @@ export const log = (message: string) => console.log(`${new Date().toLocaleString
 
 async function writePortToIndex() {
   const index = await read(join(__dirname, '../client/index.html'));
+  const publicKey = db.get('crypto.publicKey').value();
   const url = IS_PROD ? '' : `http://127.0.0.1:${port}`;
-  await write(
-    join(__dirname, '../public/index.html'),
-    index.replace('DOMAIN__ = ""', `DOMAIN__ = "${url}"`),
-  );
+  const newIndex = index
+    .replace('__DOMAIN__ = "";', `__DOMAIN__ = "${url}";`)
+    .replace('__PUBLIC_KEY__ = "";', `__PUBLIC_KEY__ = \`${publicKey}\`;`);
+  await write(join(__dirname, '../public/index.html'), newIndex);
   log(`wrote index.html file with port ${port}`);
 }
