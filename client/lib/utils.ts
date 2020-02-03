@@ -6,6 +6,9 @@ import { CustomWindowProperties } from '../types';
 
 const domain = (window as any as CustomWindowProperties).__DOMAIN__;
 const jwtRegex = /auth=[^.]*\.([^.]*)\..*/;
+const publicKeyStr = (window as any as CustomWindowProperties).__PUBLIC_KEY__
+  .replace('-----BEGIN PUBLIC KEY-----\n', '')
+  .replace('-----END PUBLIC KEY-----\n', '')
 
 export const useAction = <T extends Function>(action: T, deps?): T => {
   const dispatch = useDispatch();
@@ -14,9 +17,41 @@ export const useAction = <T extends Function>(action: T, deps?): T => {
     dispatch(action(...args)), deps ? [dispatch, ...deps] : [dispatch]) as any;
 };
 
+export const arrayBufferToString = (ab: ArrayBuffer): string => {
+  const array8Bit = new Uint8Array(ab);
+  let str = '';
+  for (let x = 0;x < array8Bit.length;x++) {
+    str += String.fromCharCode(array8Bit[x]);
+  }
+  return str;
+};
+
+export const encryptString = async (str: string) => {
+  const publicKey = await crypto.subtle.importKey(
+    'spki',
+    stringToArrayBuffer(atob(publicKeyStr)), //key
+    {
+      name: 'RSA-OAEP',
+      hash: 'SHA-256',
+    } as any,
+    false,
+    ['encrypt'],
+  );
+  const arrayBuffer = stringToArrayBuffer(str);
+  const encryptedBuffer = await crypto.subtle.encrypt(
+    {
+      name: 'RSA-OAEP',
+    },
+    publicKey,
+    arrayBuffer,
+  );
+
+  return arrayBufferToString(encryptedBuffer);
+};
+
 export const JwtContext = createContext({});
 
-export  const  str2ab = (str: string): ArrayBuffer => {
+export const stringToArrayBuffer = (str: string): ArrayBuffer => {
   const buf = new ArrayBuffer(str.length);
   const bufView = new Uint8Array(buf);
   for (let i = 0, strLen = str.length; i < strLen; i++) {
@@ -55,10 +90,10 @@ export const get = (path) => fetch(
   },
 );
 
-export const post = (path, body?: Object) => fetch(
+export const post = (path, body: string='{}') => fetch(
   `${domain}/api${path}`,
   {
-    body: body ? JSON.stringify(body) : '{}',
+    body: body,
     credentials: 'include',
     headers: {
       'Content-Type': 'application/json',

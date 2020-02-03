@@ -12,13 +12,7 @@ import VisibilityOff from '@material-ui/icons/VisibilityOff';
 import * as React from 'react';
 import { useCallback, useContext, useEffect, useState } from 'react';
 import { JWT } from '../../types';
-import { JwtContext, post, str2ab } from '../lib/utils';
-import { CustomWindowProperties } from '../types';
-
-const publicKeyStr = (window as any as CustomWindowProperties).__PUBLIC_KEY__
-  .replace('-----BEGIN PUBLIC KEY-----\n', '')
-  .replace('-----END PUBLIC KEY-----\n', '')
-  .replace(/\n/g, '');
+import { encryptString, JwtContext, post } from '../lib/utils';
 
 const UserToolbar = () => {
   const [username, setUsername] = useState('');
@@ -38,47 +32,20 @@ const UserToolbar = () => {
   }, []);
 
   const login = useCallback(async () => {
-    let encrypt;
-
     try {
-      const usernamePassword = {
+      const usernamePassword = JSON.stringify({
         username,
         password,
-      };
-      const publicKey = await crypto.subtle.importKey(
-        'spki',
-        str2ab(atob(publicKeyStr)), //key
-        {
-          name: 'RSA-OAEP',
-          hash: 'SHA-256',
-        } as any,
-        false,
-        ['encrypt'],
-      );
-      console.log('publicKey');
-      console.log(publicKey);
-      const encoded = str2ab(JSON.stringify(usernamePassword));
-      encrypt = await crypto.subtle.encrypt(
-        {
-          name: 'RSA-OAEP',
-        },
-        publicKey,
-        encoded,
-      );
-
-      console.log('encryption successful');
-      console.log(encrypt);
-    } catch (err) {
-      console.error(err);
-    }
-
-    post('/users/login', { username, password })
-      .then(async res => res.status >= 300 && setLoginError(true))
-      .catch(err => {
-        console.log('login error');
-        console.error(err);
-        setLoginError(true);
       });
+
+      const encrypted = await encryptString(usernamePassword);
+
+      await post('/users/login', JSON.stringify({ encrypted }));
+    } catch (err) {
+      console.log('login error');
+      console.error(err);
+      setLoginError(true);
+    }
   }, [username, password]);
 
   const toggleShowPassword = useCallback(() =>

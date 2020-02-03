@@ -1,5 +1,5 @@
 import * as bcrypt from 'bcrypt';
-import { generateKeyPair as generateKeyPairCallback } from 'crypto';
+import { generateKeyPair as generateKeyPairCallback, privateDecrypt } from 'crypto';
 import { Response } from 'express';
 import { decode, sign, verify } from 'jsonwebtoken';
 // @ts-ignore
@@ -40,34 +40,45 @@ export const setupUsers = async () => {
 
   // user login
   app.post('/api/users/login', async (req, res) => {
-    const { username, password } = req.body;
-    const user: User = db
-      .get(`users.${username}`)
-      .value();
+    if (req.body.encrypted) {
+      try {
+        const decrypted = await decryptString(req.body.encrypted);
+        const { username, password } = JSON.parse(decrypted);
+        const user: User = db
+          .get(`users.${username}`)
+          .value();
 
-    if (!user) {
-      console.log(`user ${username} not found`);
-      res.status(403).end();
-      return;
+        if (!user) {
+          console.log(`user ${username} not found`);
+          res.status(403).end();
+          return;
+        }
+
+        if (user.password && !(await bcrypt.compare(password, user.password))) {
+          console.log(`Unauthorized login attempt by user ${username}`);
+          return res.status(403).end();
+        }
+
+        if (!user.password) {
+          console.log('First login, generating hashed and salted password');
+          user.password = await bcrypt.hash(password, 10);
+          await db.write();
+        }
+
+        console.log(`Successful login by user ${username}`);
+        await setJwtCookie(res, {
+          username: user.username,
+          permissions: user.permissions,
+        });
+        res.send();
+        return;
+      } catch (err) {
+        console.log('decrypt error');
+        console.error(err);
+      }
     }
 
-    if (user.password && !(await bcrypt.compare(password, user.password))) {
-      console.log(`Unauthorized login attempt by user ${username}`);
-      return res.status(403).end();
-    }
-
-    if (!user.password) {
-      console.log('First login, generating hashed and salted password');
-      user.password = await bcrypt.hash(password, 10);
-      await db.write();
-    }
-
-    console.log(`Successful login by user ${username}`);
-    await setJwtCookie(res, {
-      username: user.username,
-      permissions: user.permissions,
-    });
-    res.send();
+    res.status(403).end();
   });
 
   // auth
@@ -93,6 +104,29 @@ export const setupUsers = async () => {
       },
     );
   });
+};
+
+export const bufferToString = (ab: Buffer): string => {
+  const array8Bit = new Uint8Array(ab);
+  let str = '';
+  for (let x = 0; x < array8Bit.length; x++) {
+    str += String.fromCharCode(array8Bit[x]);
+  }
+  return str;
+};
+
+export const decryptString = async (encrypted: string) => {
+  const buffer = stringToArrayBuffer(encrypted);
+  const privateKey = db.get('crypto.privateKey').value();
+  const decrypt = await privateDecrypt(
+    {
+      key: privateKey,
+      oaepHash: 'SHA256',
+    },
+    new Uint8Array(buffer),
+  );
+
+  return bufferToString(decrypt);
 };
 
 export const initCrypto = async () => {
@@ -140,4 +174,13 @@ const setJwtCookie = async (res: Response, payload) => {
       },
     );
   });
+};
+
+export const stringToArrayBuffer = (str: string): ArrayBuffer => {
+  const buf = new ArrayBuffer(str.length);
+  const bufView = new Uint8Array(buf);
+  for (let i = 0, strLen = str.length; i < strLen; i++) {
+    bufView[i] = str.charCodeAt(i);
+  }
+  return buf;
 };
