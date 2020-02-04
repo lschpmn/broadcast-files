@@ -19,24 +19,19 @@ export const setupUsers = async () => {
     .keys(dbUsers)
     .filter(username => users.every(u => u.username !== username))
     .map(username => delete dbUsers[username]);
-  await db.write();
 
   // init
-  await users.map(async user => {
-    const dbUser = db
-      .get(`users.${user.username}`)
-      .value();
+  users.forEach(user => {
+    const dbUser = dbUsers[user.username];
 
     if (!dbUser) {
       console.log(`Adding user ${user.username}`);
-      await db
-        .set(`users.${user.username}`, user)
-        .write();
+      dbUsers[user.username] = user;
     } else if (!isEqual(dbUser.permissions, user.permissions)) {
       dbUser.permissions = user.permissions;
-      await db.write();
     }
   });
+  await db.write();
 
   // user login
   app.post('/api/users/login', async (req, res) => {

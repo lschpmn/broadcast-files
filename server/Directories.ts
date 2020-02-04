@@ -1,4 +1,3 @@
-import { Request, Response } from 'express';
 import { inspectAsync as inspect, listAsync as list } from 'fs-jetpack';
 // @ts-ignore
 import * as intersection from 'lodash/intersection';
@@ -8,7 +7,7 @@ import { DirectoryRoute, JWT } from '../types';
 import { app, log } from './index';
 
 export const setupDirectories = () => {
-  app.get('/api/config', (req: Request, res: Response) => {
+  app.get('/api/config', (req, res) => {
     const routesToShow = routes
       .filter(route => checkAccess(route, res.locals.user));
 
@@ -17,7 +16,7 @@ export const setupDirectories = () => {
 
   routes.forEach(route => {
     const dirBase = '/api/dir' + route.urlPath;
-    app.get([dirBase, dirBase + '/*'], async (req: Request, res: Response) => {
+    app.get([dirBase, dirBase + '/*'], async (req, res) => {
       if (!checkAccess(route, res.locals.user)) return res.status(404).end();
 
       const path = join(route.filePath, decodeURIComponent(req.url.replace(dirBase, '')));
@@ -25,7 +24,15 @@ export const setupDirectories = () => {
 
       try {
         const files = await list(path);
-        const inspections = await Promise.all(files.map(async file => await inspect(join(path, file))));
+        const inspections = await Promise.all(files.map(async file => {
+          const filePath = join(path, file);
+          try {
+            return await inspect(filePath);
+          } catch (err) {
+            console.log(`error with ${filePath}`);
+            return { type: 'forbidden' };
+          }
+        }));
 
         res.send(inspections);
       } catch (err) {
@@ -34,7 +41,7 @@ export const setupDirectories = () => {
     });
 
     const fileBase = '/api/file' + route.urlPath;
-    app.get([fileBase, fileBase + '/*'], async (req: Request, res: Response) => {
+    app.get([fileBase, fileBase + '/*'], async (req, res) => {
       if (!checkAccess(route, res.locals.user)) return res.status(404).end();
 
       const path = join(route.filePath, decodeURIComponent(req.url.replace(fileBase, '')));
