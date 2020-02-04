@@ -39,6 +39,7 @@ async function startServer() {
   await db
     .defaults({
       crypto: {},
+      imageCache: {},
       users: {},
     })
     .write();

@@ -1,11 +1,12 @@
-import { inspectAsync as inspect, listAsync as list } from 'fs-jetpack';
+import * as ffmpeg from 'fluent-ffmpeg';
+import { dirAsync, inspectAsync as inspect, listAsync as list } from 'fs-jetpack';
 import { InspectResult } from 'fs-jetpack/types';
 // @ts-ignore
 import * as intersection from 'lodash/intersection';
 import { join } from 'path';
 import { routes } from '../config';
 import { DirectoryRoute, JWT } from '../types';
-import { app, log } from './index';
+import { app, db, log } from './index';
 
 export const setupDirectories = () => {
   app.get('/api/config', (req, res) => {
@@ -66,6 +67,36 @@ export const setupDirectories = () => {
       res.on('close', () => log('stream closed'));
       return res.sendFile(path);
     });
+  });
+
+  app.post('/api/thumbnail', async (req, res) => {
+    const path = req.body.path;
+
+    if (db.has(['imageCache', path]).value()) {
+      res.send({ path: db.get(['imageCache', path]).value() });
+      return;
+    }
+
+    const id = Math.random().toString(36).slice(-8);
+    const imagePath = join(__dirname, '..', 'public', 'images', id);
+    await dirAsync(imagePath);
+
+    ffmpeg(path)
+      .on('error', (err) => {
+        console.log(err);
+        res.status(500).send({ error: err.message });
+      })
+      .on('end', async () => {
+        const imagePath = `/images/${id}/1.png`;
+        await db.set(['imageCache', path], imagePath).write();
+        res.send({ path: imagePath });
+      })
+      .screenshots({
+        filename: '1.png',
+        folder: imagePath,
+        size: '360x?',
+        timemarks: ['10%'],
+      });
   });
 };
 
