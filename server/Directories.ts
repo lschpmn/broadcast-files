@@ -1,4 +1,5 @@
 import { inspectAsync as inspect, listAsync as list } from 'fs-jetpack';
+import { InspectResult } from 'fs-jetpack/types';
 // @ts-ignore
 import * as intersection from 'lodash/intersection';
 import { join } from 'path';
@@ -24,15 +25,29 @@ export const setupDirectories = () => {
 
       try {
         const files = await list(path);
-        const inspections = await Promise.all(files.map(async file => {
+        const inspections: InspectResult[] = await Promise.all(files.map(async file => {
           const filePath = join(path, file);
           try {
             return await inspect(filePath);
           } catch (err) {
             console.log(`error with ${filePath}`);
-            return { type: 'forbidden' };
+            return { type: 'forbidden' } as any;
           }
         }));
+        inspections
+          // @ts-ignore
+          .filter(file => file.type !== 'forbidden')
+          .sort((aItem, bItem) => {
+            if (aItem.type === 'file' && bItem.type === 'file') {
+              return aItem.name.localeCompare(bItem.name);
+            } else if (aItem.type === 'file' && bItem.type !== 'file') {
+              return -1;
+            } else if (aItem.type !== 'file' && bItem.type === 'file') {
+              return 1;
+            }
+
+            return aItem.name.localeCompare(bItem.name);
+          });
 
         res.send(inspections);
       } catch (err) {

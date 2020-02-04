@@ -1,4 +1,5 @@
 import Button from '@material-ui/core/Button';
+import T from '@material-ui/core/Typography';
 import { InspectResult } from 'fs-jetpack/types';
 import React, { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
@@ -16,6 +17,9 @@ const DirectoryList = () => {
       .then(async res => setList(await res.json()))
       .catch(console.log);
   }, [pathname]);
+
+  const files = list.filter(item => item.type === 'file');
+  const directories = list.filter(item => item.type === 'dir');
 
   return <div>
     <div style={{ display: 'flex' }}>
@@ -38,24 +42,36 @@ const DirectoryList = () => {
     </div>
 
     <div style={{ display: 'flex', flexWrap: 'wrap' }}>
-      {list.map(item =>
-        item.type === 'dir'
-          ? <Link
-            key={item.name}
-            to={`${pathname}/${encodeURIComponent(item.name)}`}
-          >
-            <Button style={styles.button}>
-              {item.name}
-            </Button>
-          </Link>
-          : <Button
-            href={`${domain}/api/file${pathname}/${encodeURIComponent(item.name)}`}
-            key={item.name}
-            style={styles.button}
-          >
-            {item.name}
-          </Button>
+      {!!files.length && !!directories.length && (
+        <T color='textSecondary' style={{ margin: '0.5rem 2rem', width: '100%' }}>
+          Files <hr/>
+        </T>
       )}
+      {files.map(file => (
+        <Button
+          href={`${domain}/api/file${pathname}/${encodeURIComponent(file.name)}`}
+          key={file.name}
+          style={styles.button}
+        >
+          {file.name}
+        </Button>
+      ))}
+
+      {!!files.length && !!directories.length && (
+        <T color='textSecondary' style={{ margin: '0.5rem 2rem', width: '100%' }}>
+          Directories <hr/>
+        </T>
+      )}
+      {directories.map(directory => (
+        <Link
+          key={directory.name}
+          to={`${pathname}/${encodeURIComponent(directory.name)}`}
+        >
+          <Button style={styles.button}>
+            {directory.name}
+          </Button>
+        </Link>
+      ))}
     </div>
   </div>;
 };
@@ -63,6 +79,7 @@ const DirectoryList = () => {
 const styles = {
   button: {
     height: '7.5rem',
+    textAlign: 'center',
     width: '20rem',
     wordBreak: 'break-word',
   } as React.CSSProperties,
