@@ -34,7 +34,7 @@ const DirectoryList = () => {
           <h1 style={{ padding: '6px 8px' }}>/</h1>
           <Link to={'/' + routes.slice(0, i + 1).join('/')}>
             <Button>
-              <h1>{route}</h1>
+              <h1>{decodeURIComponent(route)}</h1>
             </Button>
           </Link>
         </React.Fragment>,

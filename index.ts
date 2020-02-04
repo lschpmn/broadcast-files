@@ -8,7 +8,9 @@ const config = require('./webpack.config.js');
   const port = await getIncrementalPort(5000);
   const options = {
     contentBase: './public',
-    historyApiFallback: true,
+    historyApiFallback: {
+      disableDotRule: true,
+    },
     hot: true,
     host: 'localhost',
   };
