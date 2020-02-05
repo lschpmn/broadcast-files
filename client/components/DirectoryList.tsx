@@ -20,6 +20,7 @@ const DirectoryList = () => {
 
   const files = list.filter(item => item.type === 'file');
   const directories = list.filter(item => item.type === 'dir');
+  const showLabels = !!files.length && !!directories.length;
 
   return <div>
     <div style={{ display: 'flex' }}>
@@ -42,8 +43,8 @@ const DirectoryList = () => {
     </div>
 
     <div style={{ display: 'flex', flexWrap: 'wrap' }}>
-      {!!files.length && !!directories.length && (
-        <T color='textSecondary' style={{ margin: '0.5rem 2rem', width: '100%' }}>
+      {showLabels && (
+        <T color='textSecondary' component='span' style={{ margin: '0.5rem 2rem', width: '100%' }}>
           Files <hr/>
         </T>
       )}
@@ -57,8 +58,8 @@ const DirectoryList = () => {
         </Button>
       ))}
 
-      {!!files.length && !!directories.length && (
-        <T color='textSecondary' style={{ margin: '0.5rem 2rem', width: '100%' }}>
+      {showLabels && (
+        <T color='textSecondary' component='span' style={{ margin: '0.5rem 2rem', width: '100%' }}>
           Directories <hr/>
         </T>
       )}
