@@ -2,13 +2,12 @@ import isEqual from 'lodash/isEqual';
 import { createContext, useCallback, useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { JWT } from '../../types';
-import { CustomWindowProperties } from '../types';
 
-const domain = (window as any as CustomWindowProperties).__DOMAIN__;
+const domain = window.__DOMAIN__;
 const jwtRegex = /auth=[^.]*\.([^.]*)\..*/;
-const publicKeyStr = (window as any as CustomWindowProperties).__PUBLIC_KEY__
+const publicKeyStr = window.__PUBLIC_KEY__
   .replace('-----BEGIN PUBLIC KEY-----\n', '')
-  .replace('-----END PUBLIC KEY-----\n', '')
+  .replace('-----END PUBLIC KEY-----\n', '');
 
 export const useAction = <T extends Function>(action: T, deps?): T => {
   const dispatch = useDispatch();

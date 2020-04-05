@@ -3,9 +3,8 @@ import T from '@material-ui/core/Typography';
 import { InspectResult } from 'fs-jetpack/types';
 import React, { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { CustomWindowProperties } from '../types';
 
-const domain = (window as any as CustomWindowProperties).__DOMAIN__;
+const domain = window.__DOMAIN__;
 
 const DirectoryList = () => {
   const [list, setList] = useState([] as InspectResult[]);

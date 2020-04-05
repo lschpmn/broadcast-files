@@ -3,7 +3,9 @@ export type ReducerState = {
 
 };
 
-export type CustomWindowProperties = {
-  __DOMAIN__: string,
-  __PUBLIC_KEY__: string,
-};
+declare global {
+  interface Window {
+    __DOMAIN__: string,
+    __PUBLIC_KEY__: string,
+  }
+}
