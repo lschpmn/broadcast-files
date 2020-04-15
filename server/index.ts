@@ -9,8 +9,9 @@ import { LowdbAsync } from 'lowdb';
 import * as FileAsync from 'lowdb/adapters/FileAsync';
 import { join } from 'path';
 import { DbSchema } from '../types';
-import { setupDirectories } from './Directories';
-import { initCrypto, setupUsers } from './Users';
+import { DirectoriesRouter } from './Directories';
+import { initCrypto } from './lib/crypto';
+import { setupUsers, UsersRouter } from './Users';
 
 const IS_PROD = process.argv.includes('--prod');
 const START_PORT = 3000;
@@ -44,7 +45,6 @@ async function startServer() {
     })
     .write();
 
-  await initCrypto();
   await writePortToIndex();
 
   app.use((req, res, next) => {
@@ -57,9 +57,11 @@ async function startServer() {
   app.use(express.json());
   app.use(express.static(join(__dirname, '..', 'public')));
 
+  await initCrypto(db);
   await setupUsers();
-  setupDirectories();
 
+  app.use('/api', UsersRouter);
+  app.use('/api', DirectoriesRouter);
   app.use('/api', (req, res) => res.status(404).end());
 
   app.use((req: Request, res: Response) => {
