@@ -6,19 +6,14 @@ import * as isEqual from 'lodash/isEqual';
 import { users } from '../config';
 import { JWT, User } from '../types';
 import { db } from './index';
-import { decryptString } from './lib/crypto';
 
 const SESSION_TIMEOUT = 60 * 5;
 
 export const UsersRouter = Router();
 
 UsersRouter.post('/users/login', async (req, res) => {
-  if (!req.body.encrypted) return res.status(403).end();
-
   try {
-    const privateKey = db.get('crypto.privateKey').value();
-    const decrypted = await decryptString(privateKey, req.body.encrypted);
-    const { username, password } = JSON.parse(decrypted);
+    const { username, password } = JSON.parse(req.body);
     const user: User = db
       .get(`users.${username}`)
       .value();

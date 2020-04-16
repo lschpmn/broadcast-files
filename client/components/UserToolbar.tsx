@@ -12,7 +12,7 @@ import VisibilityOff from '@material-ui/icons/VisibilityOff';
 import * as React from 'react';
 import { useCallback, useContext, useEffect, useState } from 'react';
 import { JWT } from '../../types';
-import { encryptString, JwtContext, post } from '../lib/utils';
+import { JwtContext, post } from '../lib/utils';
 
 const UserToolbar = () => {
   const [username, setUsername] = useState('');
@@ -33,14 +33,12 @@ const UserToolbar = () => {
 
   const login = useCallback(async () => {
     try {
-      const usernamePassword = JSON.stringify({
+      const usernamePassword = {
         username,
         password,
-      });
+      };
 
-      const encrypted = await encryptString(usernamePassword);
-
-      await post('/users/login', JSON.stringify({ encrypted }));
+      await post('/users/login', usernamePassword);
     } catch (err) {
       console.log('login error');
       console.error(err);

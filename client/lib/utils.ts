@@ -89,15 +89,22 @@ export const get = (path) => fetch(
   },
 );
 
-export const post = (path, body: string='{}') => fetch(
-  `${domain}/api${path}`,
-  {
-    body: body,
-    credentials: 'include',
-    headers: {
-      'Content-Type': 'application/json',
+export const post = async (path, body: {}) => {
+  console.log('POST request');
+  console.log(body);
+
+  const encryptedBody = await encryptString(JSON.stringify(body));
+
+  return fetch(
+    `${domain}/api${path}`,
+    {
+      body: encryptedBody,
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'text/plain',
+      },
+      method: 'POST',
+      mode: 'cors',
     },
-    method: 'POST',
-    mode: 'cors',
-  },
-);
+  );
+}

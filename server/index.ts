@@ -9,6 +9,7 @@ import { LowdbAsync } from 'lowdb';
 import * as FileAsync from 'lowdb/adapters/FileAsync';
 import { join } from 'path';
 import { DbSchema } from '../types';
+import { AuthenticationRouter } from './Authentication';
 import { DirectoriesRouter } from './Directories';
 import { initCrypto } from './lib/crypto';
 import { setupUsers, UsersRouter } from './Users';
@@ -54,12 +55,13 @@ async function startServer() {
 
   !IS_PROD && app.use(cors({ credentials: true, origin: 'http://127.0.0.1:5000' }));
   app.use(cookieParser());
-  app.use(express.json());
+  app.use(express.text());
   app.use(express.static(join(__dirname, '..', 'public')));
 
   await initCrypto(db);
   await setupUsers();
 
+  app.use('/api', AuthenticationRouter);
   app.use('/api', UsersRouter);
   app.use('/api', DirectoriesRouter);
   app.use('/api', (req, res) => res.status(404).end());
