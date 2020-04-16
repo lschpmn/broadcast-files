@@ -5,9 +5,14 @@ import { decryptString } from './lib/crypto';
 export const AuthenticationRouter = Router();
 
 AuthenticationRouter.use(async (req, res, next) => {
-  if (req.body) {
+  if (typeof req.body === 'string') {
     const privateKey = db.get('crypto.privateKey').value();
-    req.body = await decryptString(privateKey, req.body);
+    try {
+      req.body = await decryptString(privateKey, req.body);
+    } catch (err) {
+      console.log('decryption error');
+      console.log(err);
+    }
   }
 
   next();
