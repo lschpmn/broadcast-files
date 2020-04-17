@@ -3,6 +3,7 @@ import T from '@material-ui/core/Typography';
 import { InspectResult } from 'fs-jetpack/types';
 import React, { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { get } from '../lib/utils';
 
 const domain = window.__DOMAIN__;
 
@@ -12,8 +13,8 @@ const DirectoryList = () => {
   const routes = pathname.split('/').slice(1);
 
   useEffect(() => {
-    fetch(`${domain}/api/dir${pathname}`, { credentials: 'include' })
-      .then(async res => setList(await res.json()))
+    get(`/dir${pathname}`)
+      .then(res => setList(res))
       .catch(console.log);
   }, [pathname]);
 

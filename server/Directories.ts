@@ -8,14 +8,18 @@ import { join } from 'path';
 import { routes } from '../config';
 import { DirectoryRoute, JWT } from '../types';
 import { db, log } from './index';
+import { encryptString, getPublicKeyFromHeader } from './lib/crypto';
 
 export const DirectoriesRouter = Router();
 
-DirectoriesRouter.get('/config', (req, res) => {
+DirectoriesRouter.get('/config', async (req, res) => {
   const routesToShow = routes
     .filter(route => checkAccess(route, res.locals.user));
 
-  res.send(routesToShow);
+  const publicKey = getPublicKeyFromHeader(req as any);
+  const encryptedString = await encryptString(publicKey, JSON.stringify(routesToShow));
+
+  res.send(encryptedString);
 });
 
 routes.forEach(route => {
@@ -52,8 +56,12 @@ routes.forEach(route => {
           return aItem.name.localeCompare(bItem.name);
         });
 
-      res.send(inspections);
+      const publicKey = getPublicKeyFromHeader(req as any);
+      const encryptedString = await encryptString(publicKey, JSON.stringify(inspections));
+
+      res.send(encryptedString);
     } catch (err) {
+      console.log(err);
       res.status(500).send(err.message);
     }
   });

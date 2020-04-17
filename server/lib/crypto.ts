@@ -1,4 +1,4 @@
-import { generateKeyPair as generateKeyPairCallback, privateDecrypt } from 'crypto';
+import { generateKeyPair as generateKeyPairCallback, privateDecrypt, publicEncrypt, constants } from 'crypto';
 import { LowdbAsync } from 'lowdb';
 import { promisify } from 'util';
 import { DbSchema } from '../../types';
@@ -12,6 +12,23 @@ export const bufferToString = (ab: Buffer): string => {
     str += String.fromCharCode(array8Bit[x]);
   }
   return str;
+};
+
+export const getPublicKeyFromHeader = (req: Request) => '-----BEGIN PUBLIC KEY-----\n'  +
+  req.headers['key'] +
+  '\n-----END PUBLIC KEY-----';
+
+export const encryptString = async (publicKey: string, data: string) => {
+  const buffer = stringToArrayBuffer(data);
+  const encryptedBuffer = publicEncrypt(
+    {
+      key: publicKey,
+      oaepHash: 'SHA256',
+    },
+    new Uint8Array(buffer),
+  )
+
+  return bufferToString(encryptedBuffer);
 };
 
 export const decryptString = async (privateKey: string, encrypted: string) => {
@@ -51,7 +68,7 @@ export const initCrypto = async (db: LowdbAsync<DbSchema>) => {
   }
 };
 
-export const stringToArrayBuffer = (str: string): ArrayBuffer => {
+const stringToArrayBuffer = (str: string): ArrayBuffer => {
   const buf = new ArrayBuffer(str.length);
   const bufView = new Uint8Array(buf);
   for (let i = 0, strLen = str.length; i < strLen; i++) {

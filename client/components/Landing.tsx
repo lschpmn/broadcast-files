@@ -12,7 +12,7 @@ const Landing = () => {
 
   useEffect(() => {
     get('/config')
-      .then(async res => setRoutes(await res.json()))
+      .then(res => setRoutes(res))
       .catch(console.log);
   }, [jwt]);
 

@@ -2,12 +2,10 @@ import isEqual from 'lodash/isEqual';
 import { createContext, useCallback, useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { JWT } from '../../types';
+import { decryptString, encryptString, getPublicKey } from './crypto';
 
 const domain = window.__DOMAIN__;
 const jwtRegex = /auth=[^.]*\.([^.]*)\..*/;
-const publicKeyStr = window.__PUBLIC_KEY__
-  .replace('-----BEGIN PUBLIC KEY-----\n', '')
-  .replace('-----END PUBLIC KEY-----\n', '');
 
 export const useAction = <T extends Function>(action: T, deps?): T => {
   const dispatch = useDispatch();
@@ -16,48 +14,7 @@ export const useAction = <T extends Function>(action: T, deps?): T => {
     dispatch(action(...args)), deps ? [dispatch, ...deps] : [dispatch]) as any;
 };
 
-export const arrayBufferToString = (ab: ArrayBuffer): string => {
-  const array8Bit = new Uint8Array(ab);
-  let str = '';
-  for (let x = 0;x < array8Bit.length;x++) {
-    str += String.fromCharCode(array8Bit[x]);
-  }
-  return str;
-};
-
-export const encryptString = async (str: string) => {
-  const publicKey = await crypto.subtle.importKey(
-    'spki',
-    stringToArrayBuffer(atob(publicKeyStr)), //key
-    {
-      name: 'RSA-OAEP',
-      hash: 'SHA-256',
-    } as any,
-    false,
-    ['encrypt'],
-  );
-  const arrayBuffer = stringToArrayBuffer(str);
-  const encryptedBuffer = await crypto.subtle.encrypt(
-    {
-      name: 'RSA-OAEP',
-    },
-    publicKey,
-    arrayBuffer,
-  );
-
-  return arrayBufferToString(encryptedBuffer);
-};
-
 export const JwtContext = createContext({});
-
-export const stringToArrayBuffer = (str: string): ArrayBuffer => {
-  const buf = new ArrayBuffer(str.length);
-  const bufView = new Uint8Array(buf);
-  for (let i = 0, strLen = str.length; i < strLen; i++) {
-    bufView[i] = str.charCodeAt(i);
-  }
-  return buf;
-};
 
 export const useJwt = () => {
   const [jwt, setJwt] = useState({} as JWT);
@@ -80,20 +37,37 @@ export const useJwt = () => {
   return jwt;
 };
 
-export const get = (path) => fetch(
-  `${domain}/api${path}`,
-  {
-    credentials: 'include',
-    method: 'GET',
-    mode: 'cors',
-  },
-);
+export const get = async (path) => {
+  const publicKey = await getPublicKey();
+
+  const response = await fetch(
+    `${domain}/api${path}`,
+    {
+      credentials: 'include',
+      headers: {
+        key: publicKey,
+      },
+      method: 'GET',
+      mode: 'cors',
+    },
+  );
+
+  const encrypted = await response.text();
+  console.log('encrypted');
+  console.log(encrypted);
+  const decrypted = await decryptString(encrypted);
+  console.log('decrypted');
+  console.log(decrypted);
+
+  return JSON.parse(decrypted);
+};
 
 export const post = async (path, body: {}) => {
   console.log('POST request');
   console.log(body);
 
   const encryptedBody = await encryptString(JSON.stringify(body));
+  const publicKey = await getPublicKey();
 
   return fetch(
     `${domain}/api${path}`,
@@ -102,9 +76,10 @@ export const post = async (path, body: {}) => {
       credentials: 'include',
       headers: {
         'Content-Type': 'text/plain',
+        key: publicKey,
       },
       method: 'POST',
       mode: 'cors',
     },
   );
-}
+};
