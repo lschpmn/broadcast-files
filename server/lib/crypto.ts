@@ -1,4 +1,4 @@
-import { generateKeyPair as generateKeyPairCallback, privateDecrypt, publicEncrypt, constants } from 'crypto';
+import { createCipheriv, generateKeyPair as generateKeyPairCallback, privateDecrypt } from 'crypto';
 import { LowdbAsync } from 'lowdb';
 import { promisify } from 'util';
 import { DbSchema } from '../../types';
@@ -14,25 +14,23 @@ export const bufferToString = (ab: Buffer): string => {
   return str;
 };
 
-export const getPublicKeyFromHeader = (req: Request) => '-----BEGIN PUBLIC KEY-----\n'  +
-  req.headers['key'] +
-  '\n-----END PUBLIC KEY-----';
+export const parseHeaders = (headers) => ({
+  encryptedCipher: headers['x-crypto-key'],
+  iv: headers['x-crypto-iv'],
+});
 
-export const encryptString = async (publicKey: string, data: string) => {
-  const buffer = stringToArrayBuffer(data);
-  const encryptedBuffer = publicEncrypt(
-    {
-      key: publicKey,
-      oaepHash: 'SHA256',
-    },
-    new Uint8Array(buffer),
-  )
+export const encryptString = async (cipherKey: string, iv: string, data: string) => {
+  const keyBuffer = Buffer.from(stringToArrayBuffer(atob(cipherKey)));
+  const ivBuffer = Buffer.from(stringToArrayBuffer(atob(iv)));
+  const cipher = createCipheriv('aes-256-gcm', keyBuffer, ivBuffer);
 
-  return bufferToString(encryptedBuffer);
+  return Buffer
+    .concat([cipher.update(data, 'utf8'), cipher.final(), cipher.getAuthTag()])
+    .toString('base64');
 };
 
 export const decryptString = async (privateKey: string, encrypted: string) => {
-  const buffer = stringToArrayBuffer(encrypted);
+  const buffer = stringToArrayBuffer(atob(encrypted));
   const decrypt = await privateDecrypt(
     {
       key: privateKey,
@@ -76,3 +74,12 @@ const stringToArrayBuffer = (str: string): ArrayBuffer => {
   }
   return buf;
 };
+
+function atob(str) {
+  return Buffer.from(str, 'base64').toString('binary');
+}
+
+function btoa(str) {
+  return Buffer.from(str.toString(), 'binary').toString('base64');
+}
+

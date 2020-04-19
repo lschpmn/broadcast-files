@@ -2,7 +2,7 @@ import isEqual from 'lodash/isEqual';
 import { createContext, useCallback, useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { JWT } from '../../types';
-import { decryptString, encryptString, getPublicKey } from './crypto';
+import { arrayBufferToString, decryptString, encryptString, generateIV, getSecureKey } from './crypto';
 
 const domain = window.__DOMAIN__;
 const jwtRegex = /auth=[^.]*\.([^.]*)\..*/;
@@ -38,14 +38,16 @@ export const useJwt = () => {
 };
 
 export const get = async (path) => {
-  const publicKey = await getPublicKey();
+  const iv = generateIV();
+  const secureKey = await getSecureKey();
 
   const response = await fetch(
     `${domain}/api${path}`,
     {
       credentials: 'include',
       headers: {
-        key: publicKey,
+        'x-crypto-iv': btoa(arrayBufferToString(iv)),
+        'x-crypto-key': secureKey,
       },
       method: 'GET',
       mode: 'cors',
@@ -55,7 +57,7 @@ export const get = async (path) => {
   const encrypted = await response.text();
   console.log('encrypted');
   console.log(encrypted);
-  const decrypted = await decryptString(encrypted);
+  const decrypted = await decryptString(iv, atob(encrypted));
   console.log('decrypted');
   console.log(decrypted);
 
@@ -66,17 +68,19 @@ export const post = async (path, body: {}) => {
   console.log('POST request');
   console.log(body);
 
-  const encryptedBody = await encryptString(JSON.stringify(body));
-  const publicKey = await getPublicKey();
+  const iv = generateIV();
+  const secureKey = await getSecureKey();
+  const encrypted = await encryptString(iv, JSON.stringify(body));
 
   return fetch(
     `${domain}/api${path}`,
     {
-      body: encryptedBody,
+      body: encrypted,
       credentials: 'include',
       headers: {
         'Content-Type': 'text/plain',
-        key: publicKey,
+        'x-crypto-iv': btoa(arrayBufferToString(iv)),
+        'x-crypto-key': secureKey,
       },
       method: 'POST',
       mode: 'cors',

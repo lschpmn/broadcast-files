@@ -46,8 +46,6 @@ async function startServer() {
     })
     .write();
 
-  await writePortToIndex();
-
   app.use((req, res, next) => {
     log(`url - ${req.url}`);
     next();
@@ -66,12 +64,19 @@ async function startServer() {
   app.use('/api', DirectoriesRouter);
   app.use('/api', (req, res) => res.status(404).end());
 
+  app.use((err, req, res, next) => {
+    console.log(err);
+    console.log(err.stack);
+    res.status(500).send(err);
+  });
+
   app.use((req: Request, res: Response) => {
     log(`404 - sending index.html - ${req.url}`);
     res.sendFile(join(__dirname, '..', 'public', 'index.html'));
   });
 
   app.listen(port, () => log(`started server on port ${port}`));
+  await writePortToIndex();
 }
 
 // @ts-ignore
