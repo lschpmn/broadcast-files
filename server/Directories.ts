@@ -8,26 +8,14 @@ import { join } from 'path';
 import { routes } from '../config';
 import { DirectoryRoute, JWT } from '../types';
 import { db, log } from './index';
-import { decryptString, encryptString, parseHeaders } from './lib/crypto';
 
 export const DirectoriesRouter = Router();
 
-DirectoriesRouter.get('/config', async (req, res) => {
-  try {
-    const routesToShow = routes
-      .filter(route => checkAccess(route, res.locals.user));
+DirectoriesRouter.get('/config', (req, res) => {
+  const routesToShow = routes
+    .filter(route => checkAccess(route, res.locals.user));
 
-    const { encryptedCipher, iv } = parseHeaders(req.headers);
-    const privateKey = db.get('crypto.privateKey').value();
-    const cipher = await decryptString(privateKey, encryptedCipher);
-    const encryptedString = await encryptString(cipher, iv, JSON.stringify(routesToShow));
-
-    res.send(encryptedString);
-  } catch (err) {
-    console.log(err);
-    console.log(err.message);
-    res.status(500).send(err);
-  }
+  res.send(routesToShow);
 });
 
 routes.forEach(route => {
@@ -64,12 +52,7 @@ routes.forEach(route => {
           return aItem.name.localeCompare(bItem.name);
         });
 
-      const { encryptedCipher, iv } = parseHeaders(req.headers);
-      const privateKey = db.get('crypto.privateKey').value();
-      const cipher = await decryptString(privateKey, encryptedCipher);
-      const encryptedString = await encryptString(cipher, iv, JSON.stringify(inspections));
-
-      res.send(encryptedString);
+      res.status(201).send(inspections);
     } catch (err) {
       console.log(err);
       res.status(500).send(err.message);

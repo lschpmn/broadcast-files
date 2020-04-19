@@ -19,19 +19,19 @@ export const parseHeaders = (headers) => ({
   iv: headers['x-crypto-iv'],
 });
 
-export const encryptString = async (cipherKey: string, iv: string, data: string) => {
+export const encryptString = (cipherKey: string, iv: string, data: string) => {
   const keyBuffer = Buffer.from(stringToArrayBuffer(atob(cipherKey)));
   const ivBuffer = Buffer.from(stringToArrayBuffer(atob(iv)));
-  const cipher = createCipheriv('aes-256-gcm', keyBuffer, ivBuffer);
+  const cipher = createCipheriv('aes-128-gcm', keyBuffer, ivBuffer);
 
   return Buffer
     .concat([cipher.update(data, 'utf8'), cipher.final(), cipher.getAuthTag()])
     .toString('base64');
 };
 
-export const decryptString = async (privateKey: string, encrypted: string) => {
+export const decryptString = (privateKey: string, encrypted: string) => {
   const buffer = stringToArrayBuffer(atob(encrypted));
-  const decrypt = await privateDecrypt(
+  const decrypt = privateDecrypt(
     {
       key: privateKey,
       oaepHash: 'SHA256',
@@ -49,7 +49,7 @@ export const initCrypto = async (db: LowdbAsync<DbSchema>) => {
     const publicPrivateKey = await generateKeyPair(
       'rsa',
       {
-        modulusLength: 4096,
+        modulusLength: 2048,
         publicKeyEncoding: {
           type: 'spki',
           format: 'pem',

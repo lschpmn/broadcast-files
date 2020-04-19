@@ -76,7 +76,7 @@ const getKey = async () => {
   return key = await crypto.subtle.generateKey(
     {
       name: 'AES-GCM',
-      length: 256,
+      length: 128,
     },
     true,
     ['encrypt', 'decrypt']
