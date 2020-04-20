@@ -51,7 +51,7 @@ export const generateIV = (): Uint8Array => {
 export const getSecureKey = async (): Promise<string> => {
   const cipherKey = await getKey();
   const extractedKey = await crypto.subtle.exportKey('raw', cipherKey);
-  const cipher = btoa(arrayBufferToString(extractedKey));
+  const cipher = arrayBufferToString(extractedKey);
 
   return encryptStringWithPublicKey(cipher);
 };
@@ -67,7 +67,7 @@ const encryptStringWithPublicKey = async (str: string): Promise<string> => {
     arrayBuffer,
   );
 
-  return btoa(arrayBufferToString(encryptedBuffer));
+  return arrayBufferToString(encryptedBuffer);
 };
 
 const getKey = async () => {

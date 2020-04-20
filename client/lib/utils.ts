@@ -38,6 +38,7 @@ export const useJwt = () => {
 };
 
 export const get = async (path) => {
+  console.log(`GET ${path}`);
   const iv = generateIV();
   const secureKey = await getSecureKey();
 
@@ -47,7 +48,7 @@ export const get = async (path) => {
       credentials: 'include',
       headers: {
         'x-crypto-iv': btoa(arrayBufferToString(iv)),
-        'x-crypto-key': secureKey,
+        'x-crypto-key': btoa(secureKey),
       },
       method: 'GET',
       mode: 'cors',
@@ -55,35 +56,41 @@ export const get = async (path) => {
   );
 
   const encrypted = await response.text();
-  console.log('encrypted');
-  console.log(encrypted);
-  const decrypted = await decryptString(iv, atob(encrypted));
-  console.log('decrypted');
-  console.log(decrypted);
+  if (encrypted) {
+    const decrypted = await decryptString(iv, atob(encrypted));
+    console.log(decrypted);
 
-  return JSON.parse(decrypted);
+    return JSON.parse(decrypted);
+  } else return null;
 };
 
 export const post = async (path, body: {}) => {
-  console.log('POST request');
+  console.log(`POST request ${path}`);
   console.log(body);
 
   const iv = generateIV();
   const secureKey = await getSecureKey();
-  const encrypted = await encryptString(iv, JSON.stringify(body));
+  const encryptedBody = await encryptString(iv, JSON.stringify(body));
 
-  return fetch(
+  const response = await fetch(
     `${domain}/api${path}`,
     {
-      body: encrypted,
+      body: encryptedBody,
       credentials: 'include',
       headers: {
-        'Content-Type': 'text/plain',
         'x-crypto-iv': btoa(arrayBufferToString(iv)),
-        'x-crypto-key': secureKey,
+        'x-crypto-key': btoa(secureKey),
       },
       method: 'POST',
       mode: 'cors',
     },
   );
+
+  const encrypted = await response.text();
+  if (encrypted) {
+    const decrypted = await decryptString(iv, atob(encrypted));
+    console.log(decrypted);
+
+    return JSON.parse(decrypted);
+  } else return null;
 };

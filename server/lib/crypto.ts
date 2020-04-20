@@ -1,18 +1,9 @@
-import { createCipheriv, generateKeyPair as generateKeyPairCallback, privateDecrypt } from 'crypto';
+import { createCipheriv, createDecipheriv, generateKeyPair as generateKeyPairCallback, privateDecrypt } from 'crypto';
 import { LowdbAsync } from 'lowdb';
 import { promisify } from 'util';
 import { DbSchema } from '../../types';
 
 const generateKeyPair = promisify(generateKeyPairCallback);
-
-export const bufferToString = (ab: Buffer): string => {
-  const array8Bit = new Uint8Array(ab);
-  let str = '';
-  for (let x = 0; x < array8Bit.length; x++) {
-    str += String.fromCharCode(array8Bit[x]);
-  }
-  return str;
-};
 
 export const parseHeaders = (headers) => ({
   encryptedCipher: headers['x-crypto-key'],
@@ -20,8 +11,8 @@ export const parseHeaders = (headers) => ({
 });
 
 export const encryptString = (cipherKey: string, iv: string, data: string) => {
-  const keyBuffer = Buffer.from(stringToArrayBuffer(atob(cipherKey)));
-  const ivBuffer = Buffer.from(stringToArrayBuffer(atob(iv)));
+  const keyBuffer = Buffer.from(cipherKey, 'binary');
+  const ivBuffer = Buffer.from(iv, 'base64');
   const cipher = createCipheriv('aes-128-gcm', keyBuffer, ivBuffer);
 
   return Buffer
@@ -29,8 +20,20 @@ export const encryptString = (cipherKey: string, iv: string, data: string) => {
     .toString('base64');
 };
 
+export const decryptCipherString = (cipherKey: string, iv: string, data: string) => {
+  const keyBuffer = Buffer.from(cipherKey, 'binary');
+  const ivBuffer = Buffer.from(iv, 'base64');
+  const cipher = createDecipheriv('aes-128-gcm', keyBuffer, ivBuffer);
+  const encrypted = data.slice(0, -16);
+  cipher.setAuthTag(Buffer.from(data.slice(-16), 'binary'));
+  const decrypted = cipher.update(encrypted, 'binary', 'utf8');
+  cipher.final();
+
+  return decrypted;
+}
+
 export const decryptString = (privateKey: string, encrypted: string) => {
-  const buffer = stringToArrayBuffer(atob(encrypted));
+  const buffer = Buffer.from(encrypted, 'base64');
   const decrypt = privateDecrypt(
     {
       key: privateKey,
@@ -39,7 +42,7 @@ export const decryptString = (privateKey: string, encrypted: string) => {
     new Uint8Array(buffer),
   );
 
-  return bufferToString(decrypt);
+  return decrypt.toString('binary');
 };
 
 export const initCrypto = async (db: LowdbAsync<DbSchema>) => {
@@ -65,21 +68,3 @@ export const initCrypto = async (db: LowdbAsync<DbSchema>) => {
     console.log('Successfully generated public/private RSA key');
   }
 };
-
-const stringToArrayBuffer = (str: string): ArrayBuffer => {
-  const buf = new ArrayBuffer(str.length);
-  const bufView = new Uint8Array(buf);
-  for (let i = 0, strLen = str.length; i < strLen; i++) {
-    bufView[i] = str.charCodeAt(i);
-  }
-  return buf;
-};
-
-function atob(str) {
-  return Buffer.from(str, 'base64').toString('binary');
-}
-
-function btoa(str) {
-  return Buffer.from(str.toString(), 'binary').toString('base64');
-}
-
