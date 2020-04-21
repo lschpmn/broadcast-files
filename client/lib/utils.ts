@@ -57,7 +57,7 @@ export const get = async (path) => {
 
   const encrypted = await response.text();
   if (encrypted) {
-    const decrypted = await decryptString(iv, atob(encrypted));
+    const decrypted = await decryptString(iv, encrypted);
     console.log(decrypted);
 
     return JSON.parse(decrypted);
@@ -88,7 +88,7 @@ export const post = async (path, body: {}) => {
 
   const encrypted = await response.text();
   if (encrypted) {
-    const decrypted = await decryptString(iv, atob(encrypted));
+    const decrypted = await decryptString(iv, encrypted);
     console.log(decrypted);
 
     return JSON.parse(decrypted);

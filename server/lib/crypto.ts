@@ -16,8 +16,8 @@ export const encryptString = (cipherKey: string, iv: string, data: string) => {
   const cipher = createCipheriv('aes-128-gcm', keyBuffer, ivBuffer);
 
   return Buffer
-    .concat([cipher.update(data, 'utf8'), cipher.final(), cipher.getAuthTag()])
-    .toString('base64');
+    .concat([cipher.update(data, 'binary'), cipher.final(), cipher.getAuthTag()])
+    .toString('binary');
 };
 
 export const decryptCipherString = (cipherKey: string, iv: string, data: string) => {
@@ -26,7 +26,7 @@ export const decryptCipherString = (cipherKey: string, iv: string, data: string)
   const cipher = createDecipheriv('aes-128-gcm', keyBuffer, ivBuffer);
   const encrypted = data.slice(0, -16);
   cipher.setAuthTag(Buffer.from(data.slice(-16), 'binary'));
-  const decrypted = cipher.update(encrypted, 'binary', 'utf8');
+  const decrypted = cipher.update(encrypted, 'binary', 'binary');
   cipher.final();
 
   return decrypted;

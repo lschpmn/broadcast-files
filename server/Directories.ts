@@ -52,7 +52,7 @@ routes.forEach(route => {
           return aItem.name.localeCompare(bItem.name);
         });
 
-      res.status(201).send(inspections);
+      res.send(inspections);
     } catch (err) {
       console.log(err);
       res.status(500).send(err.message);
