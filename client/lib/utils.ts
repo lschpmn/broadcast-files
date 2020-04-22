@@ -39,7 +39,6 @@ export const useJwt = () => {
 
 export const get = async (path) => {
   console.log(`GET ${path}`);
-  const iv = generateIV();
   const secureKey = await getSecureKey();
 
   const response = await fetch(
@@ -47,7 +46,6 @@ export const get = async (path) => {
     {
       credentials: 'include',
       headers: {
-        'x-crypto-iv': btoa(arrayBufferToString(iv)),
         'x-crypto-key': btoa(secureKey),
       },
       method: 'GET',
@@ -57,6 +55,7 @@ export const get = async (path) => {
 
   const encrypted = await response.text();
   if (encrypted) {
+    const iv = atob(response.headers.get('x-crypto-iv'));
     const decrypted = await decryptString(iv, encrypted);
     console.log(decrypted);
 
@@ -88,7 +87,8 @@ export const post = async (path, body: {}) => {
 
   const encrypted = await response.text();
   if (encrypted) {
-    const decrypted = await decryptString(iv, encrypted);
+    const responseIv = atob(response.headers['x-crypto-iv']);
+    const decrypted = await decryptString(responseIv, encrypted);
     console.log(decrypted);
 
     return JSON.parse(decrypted);

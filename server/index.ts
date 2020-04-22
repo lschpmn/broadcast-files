@@ -51,7 +51,7 @@ async function startServer() {
     next();
   });
 
-  !IS_PROD && app.use(cors({ credentials: true, origin: 'http://127.0.0.1:5000' }));
+  !IS_PROD && app.use(cors({ credentials: true, origin: 'http://127.0.0.1:5000', exposedHeaders: 'x-crypto-iv' }));
   app.use(cookieParser());
   app.use(express.text());
   app.use(express.static(join(__dirname, '..', 'public')));
@@ -65,8 +65,8 @@ async function startServer() {
   app.use('/api', (req, res) => res.status(404).end());
 
   app.use((err, req, res, next) => {
-    console.log(err);
-    console.log(err.stack);
+    log(err);
+    log(err.stack);
     res.status(500).send(err);
   });
 

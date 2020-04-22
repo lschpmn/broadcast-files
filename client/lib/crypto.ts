@@ -14,8 +14,9 @@ export const arrayBufferToString = (ab: ArrayBuffer): string => {
   return str;
 };
 
-export const decryptString = async (iv: ArrayBuffer, encrypted: string) => {
+export const decryptString = async (ivStr: string, encrypted: string) => {
   const cipherKey = await getKey();
+  const iv = stringToArrayBuffer(ivStr);
   const buffer = stringToArrayBuffer(encrypted);
   const decryptedBuffer = await crypto.subtle.decrypt(
     {

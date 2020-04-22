@@ -1,36 +1,39 @@
-import { createCipheriv, createDecipheriv, generateKeyPair as generateKeyPairCallback, privateDecrypt } from 'crypto';
+import {
+  createCipheriv,
+  createDecipheriv,
+  generateKeyPair as generateKeyPairCallback,
+  privateDecrypt,
+  randomBytes,
+} from 'crypto';
 import { LowdbAsync } from 'lowdb';
 import { promisify } from 'util';
 import { DbSchema } from '../../types';
 
 const generateKeyPair = promisify(generateKeyPairCallback);
 
-export const parseHeaders = (headers) => ({
-  encryptedCipher: headers['x-crypto-key'],
-  iv: headers['x-crypto-iv'],
-});
+export const parseEncryptedCipher = (headers): string => headers['x-crypto-key'];
 
-export const encryptString = (cipherKey: string, iv: string, data: string) => {
+export const parseIV = (headers): string => headers['x-crypto-iv'];
+
+export const encryptString = (cipherKey: string, iv: Buffer, data: string) => {
   const keyBuffer = Buffer.from(cipherKey, 'binary');
-  const ivBuffer = Buffer.from(iv, 'base64');
-  const cipher = createCipheriv('aes-128-gcm', keyBuffer, ivBuffer);
+  const cipher = createCipheriv('aes-128-gcm', keyBuffer, iv);
 
   return Buffer
     .concat([cipher.update(data, 'binary'), cipher.final(), cipher.getAuthTag()])
     .toString('binary');
 };
 
-export const decryptCipherString = (cipherKey: string, iv: string, data: string) => {
+export const decryptCipherString = (cipherKey: string, iv: Buffer, data: string) => {
   const keyBuffer = Buffer.from(cipherKey, 'binary');
-  const ivBuffer = Buffer.from(iv, 'base64');
-  const cipher = createDecipheriv('aes-128-gcm', keyBuffer, ivBuffer);
+  const cipher = createDecipheriv('aes-128-gcm', keyBuffer, iv);
   const encrypted = data.slice(0, -16);
   cipher.setAuthTag(Buffer.from(data.slice(-16), 'binary'));
   const decrypted = cipher.update(encrypted, 'binary', 'binary');
   cipher.final();
 
   return decrypted;
-}
+};
 
 export const decryptString = (privateKey: string, encrypted: string) => {
   const buffer = Buffer.from(encrypted, 'base64');
@@ -68,3 +71,5 @@ export const initCrypto = async (db: LowdbAsync<DbSchema>) => {
     console.log('Successfully generated public/private RSA key');
   }
 };
+
+export const generateIV = () => randomBytes(12);
