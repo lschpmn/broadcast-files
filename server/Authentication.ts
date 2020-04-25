@@ -14,7 +14,7 @@ export const AuthenticationRouter = Router();
 AuthenticationRouter.use((req, res, next) => {
   const encryptedCipher = parseEncryptedCipher(req.headers);
   const privateKey = db.get('crypto.privateKey').value();
-  const cipher = decryptString(privateKey, encryptedCipher);
+  const cipher = encryptedCipher ? decryptString(privateKey, encryptedCipher) : '';
   const iv = generateIV();
 
   if (req.method === 'POST') {
