@@ -66,7 +66,7 @@ DirectoriesRouter.get('/file/:base/:path(*)', async (req, res, next) => {
   log(`path - ${path}`);
 
   log('downloading file');
-  res.on('close', () => log('stream closed'));
+  res.on('close', () => log(`stream for ${path} closed`));
   return res.sendFile(path);
 });
 
