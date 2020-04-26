@@ -24,8 +24,10 @@ AuthenticationRouter.use((req, res, next) => {
 
   const send = res.send.bind(res);
   // @ts-ignore
-  res.send = (body: string | object) => {
+  res.send = (body: string | object | Buffer | null) => {
     if (body) {
+      if (body instanceof Buffer) return send(body);
+
       const bodyStr = typeof body === 'string' ? body : JSON.stringify(body);
       const encryptedString = encryptString(cipher, iv, bodyStr);
       res.set('x-crypto-iv', iv.toString('base64'));
