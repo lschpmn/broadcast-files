@@ -45,21 +45,6 @@ const DirectoryList = () => {
     <div style={{ display: 'flex', flexWrap: 'wrap' }}>
       {showLabels && (
         <T color='textSecondary' component='span' style={{ margin: '0.5rem 2rem', width: '100%' }}>
-          Files <hr/>
-        </T>
-      )}
-      {files.map(file => (
-        <Button
-          href={`${domain}/api/file${pathname}/${encodeURIComponent(file.name)}`}
-          key={file.name}
-          style={styles.button}
-        >
-          {file.name}
-        </Button>
-      ))}
-
-      {showLabels && (
-        <T color='textSecondary' component='span' style={{ margin: '0.5rem 2rem', width: '100%' }}>
           Directories <hr/>
         </T>
       )}
@@ -72,6 +57,21 @@ const DirectoryList = () => {
             {directory.name}
           </Button>
         </Link>
+      ))}
+
+      {showLabels && (
+        <T color='textSecondary' component='span' style={{ margin: '0.5rem 2rem', width: '100%' }}>
+          Files <hr/>
+        </T>
+      )}
+      {files.map(file => (
+        <Button
+          href={`${domain}/api/file${pathname}/${encodeURIComponent(file.name)}`}
+          key={file.name}
+          style={styles.button}
+        >
+          {file.name}
+        </Button>
       ))}
     </div>
   </div>;
