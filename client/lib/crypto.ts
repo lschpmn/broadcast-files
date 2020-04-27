@@ -2,8 +2,9 @@
 const publicKeyStr = window.__PUBLIC_KEY__
   .replace('-----BEGIN PUBLIC KEY-----\n', '')
   .replace('-----END PUBLIC KEY-----\n', '');
-let publicServerKey: CryptoKey;
-let key: CryptoKey;
+let publicServerKey: PromiseLike<CryptoKey>;
+let key: PromiseLike<CryptoKey>;
+let secureKey: Promise<string>;
 
 export const arrayBufferToString = (ab: ArrayBuffer): string => {
   const array8Bit = new Uint8Array(ab);
@@ -50,11 +51,13 @@ export const generateIV = (): Uint8Array => {
 };
 
 export const getSecureKey = async (): Promise<string> => {
+  if (secureKey) return secureKey;
+
   const cipherKey = await getKey();
   const extractedKey = await crypto.subtle.exportKey('raw', cipherKey);
   const cipher = arrayBufferToString(extractedKey);
 
-  return encryptStringWithPublicKey(cipher);
+  return secureKey = encryptStringWithPublicKey(cipher);
 };
 
 const encryptStringWithPublicKey = async (str: string): Promise<string> => {
@@ -74,7 +77,7 @@ const encryptStringWithPublicKey = async (str: string): Promise<string> => {
 const getKey = async () => {
   if (key) return key;
 
-  return key = await crypto.subtle.generateKey(
+  return key = crypto.subtle.generateKey(
     {
       name: 'AES-GCM',
       length: 128,
@@ -87,7 +90,7 @@ const getKey = async () => {
 const getPublicServerKey = async (): Promise<CryptoKey> => {
   if (publicServerKey) return publicServerKey;
 
-  return publicServerKey = await crypto.subtle.importKey(
+  return publicServerKey = crypto.subtle.importKey(
     'spki',
     stringToArrayBuffer(atob(publicKeyStr)),
     {
