@@ -89,8 +89,51 @@ export const post = async (path, body: {}) => {
   if (encrypted) {
     const responseIv = atob(response.headers['x-crypto-iv']);
     const decrypted = await decryptString(responseIv, encrypted);
+    console.log('decrypted');
     console.log(decrypted);
 
     return JSON.parse(decrypted);
   } else return null;
+};
+
+export const stream = async (path: string) => {
+  console.log(`stream ${path}`);
+  const secureKey = await getSecureKey();
+
+  /*const xhr = new XMLHttpRequest();
+  xhr.open("GET", `${domain}/api${path}`, true);
+  xhr.onprogress = function () {
+    //responseText contains ALL the data received
+    console.log("PROGRESS:", xhr.responseText)
+  };
+  xhr.send();*/
+
+  const response = await fetch(
+    `${domain}/api${path}`,
+    {
+      credentials: 'include',
+      headers: {
+        'x-crypto-key': btoa(secureKey),
+      },
+      method: 'GET',
+      mode: 'cors',
+    },
+  );
+
+  const body = response.body.getReader();
+  console.log(await body.read());
+  console.log(await body.read());
+  console.log(await body.read());
+  console.log(await body.read());
+
+  /*const encrypted = await response.text();
+
+  if (encrypted) {
+    const iv = atob(response.headers.get('x-crypto-iv'));
+    const decrypted = await decryptString(iv, encrypted);
+    console.log('decrypted');
+    console.log(decrypted);
+
+    return JSON.parse(decrypted);
+  } else return null;*/
 };

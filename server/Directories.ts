@@ -4,10 +4,12 @@ import { dirAsync, inspectAsync as inspect, listAsync as list } from 'fs-jetpack
 import { InspectResult } from 'fs-jetpack/types';
 // @ts-ignore
 import * as intersection from 'lodash/intersection';
-import { join } from 'path';
+import { join, extname } from 'path';
 import { routes } from '../config';
+import { VIDEO_EXTENSIONS } from '../constants';
 import { DirectoryRoute, JWT } from '../types';
 import { db, log } from './index';
+import { wait } from './lib/utils';
 
 export const DirectoriesRouter = Router();
 
@@ -68,6 +70,31 @@ DirectoriesRouter.get('/file/:base/:path(*)', async (req, res, next) => {
   log('downloading file');
   res.on('close', () => log(`stream for ${path} closed`));
   return res.sendFile(path);
+});
+
+DirectoriesRouter.get('/thumbnails/:base/:path(*)', async (req, res) => {
+  const route = routes.find(r => r.urlPath === req.params.base);
+  if (!route || !checkAccess(route, res.locals.user)) return res.status(404).end();
+
+  const path = join(route.filePath, req.params.path);
+  log(`thumbnail path - ${path}`);
+
+  const files = await list(path);
+
+  const media = files.filter(file => VIDEO_EXTENSIONS.includes(extname(file)));
+
+  const buffer = Buffer.alloc(1024 * 8);
+
+  res.write('test');
+  await wait(1000);
+  res.write('test2');
+  await wait(1000);
+  res.write('test3');
+  await wait(1000);
+  res.write('test4');
+  await wait(1000);
+  res.write('hi!');
+  res.end();
 });
 
 DirectoriesRouter.post('/thumbnail', async (req, res) => {

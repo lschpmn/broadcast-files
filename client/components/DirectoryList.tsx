@@ -5,7 +5,7 @@ import InsertDriveFileIcon from '@material-ui/icons/InsertDriveFile';
 import { InspectResult } from 'fs-jetpack/types';
 import React, { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { get } from '../lib/utils';
+import { get, stream } from '../lib/utils';
 
 const domain = window.__DOMAIN__;
 
@@ -16,11 +16,22 @@ const DirectoryList = () => {
 
   useEffect(() => {
     get(`/dir${pathname}`)
-      .then(res => setList(res))
+      .then(setList)
       .catch(console.log);
   }, [pathname]);
 
   const [files, directories, showLabels] = useFilesAndDirectories(list);
+
+  useEffect(() => {
+    if (files.length) {
+      stream(`/thumbnails${pathname}`)
+        .then(res => {
+          console.log('thumbnails');
+          console.log(res);
+        })
+        .catch(console.log);
+    }
+  }, [files]);
 
   const classes = useStyles({});
 
@@ -70,6 +81,7 @@ const DirectoryList = () => {
         <Button
           className={classes.button}
           href={`${domain}/api/file${pathname}/${encodeURIComponent(file.name)}`}
+          target='_blank'
           key={file.name}
         >
           <InsertDriveFileIcon/>
