@@ -96,17 +96,9 @@ export const post = async (path, body: {}) => {
   } else return null;
 };
 
-export const stream = async (path: string) => {
+export const stream = async (path: string, listener: (message: any) => void) => {
   console.log(`stream ${path}`);
   const secureKey = await getSecureKey();
-
-  /*const xhr = new XMLHttpRequest();
-  xhr.open("GET", `${domain}/api${path}`, true);
-  xhr.onprogress = function () {
-    //responseText contains ALL the data received
-    console.log("PROGRESS:", xhr.responseText)
-  };
-  xhr.send();*/
 
   const response = await fetch(
     `${domain}/api${path}`,
@@ -117,23 +109,21 @@ export const stream = async (path: string) => {
       },
       method: 'GET',
       mode: 'cors',
-    },
+    }
   );
 
-  const body = response.body.getReader();
-  console.log(await body.read());
-  console.log(await body.read());
-  console.log(await body.read());
-  console.log(await body.read());
+  const reader = response.body.getReader();
+  let done = false;
 
-  /*const encrypted = await response.text();
-
-  if (encrypted) {
-    const iv = atob(response.headers.get('x-crypto-iv'));
-    const decrypted = await decryptString(iv, encrypted);
-    console.log('decrypted');
-    console.log(decrypted);
-
-    return JSON.parse(decrypted);
-  } else return null;*/
+  while (!done) {
+    const read = await reader.read();
+    done = read.done;
+    try {
+      const message = arrayBufferToString(read.value);
+      console.log(message);
+      listener(message);
+    } catch (err) {
+      console.log(err);
+    }
+  }
 };

@@ -24,11 +24,12 @@ const DirectoryList = () => {
 
   useEffect(() => {
     if (files.length) {
-      stream(`/thumbnails${pathname}`)
-        .then(res => {
-          console.log('thumbnails');
-          console.log(res);
-        })
+      const listener = (data) => {
+        console.log('thumbnails');
+        console.log(data);
+      };
+
+      stream(`/thumbnails${pathname}`, listener)
         .catch(console.log);
     }
   }, [files]);
