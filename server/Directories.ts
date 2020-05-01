@@ -4,12 +4,13 @@ import { dirAsync, inspectAsync as inspect, listAsync as list } from 'fs-jetpack
 import { InspectResult } from 'fs-jetpack/types';
 // @ts-ignore
 import * as intersection from 'lodash/intersection';
-import { join, extname } from 'path';
+import { extname, join } from 'path';
 import { routes } from '../config';
 import { VIDEO_EXTENSIONS } from '../constants';
 import { DirectoryRoute, JWT } from '../types';
 import { db, log } from './index';
-import { wait } from './lib/utils';
+import { createThumbnail } from './lib/files';
+import Streams from './lib/Streams';
 
 export const DirectoriesRouter = Router();
 
@@ -78,23 +79,50 @@ DirectoriesRouter.get('/thumbnails/:base/:path(*)', async (req, res) => {
 
   const path = join(route.filePath, req.params.path);
   log(`thumbnail path - ${path}`);
+  res.set('Content-Type', 'text/event-stream');
 
+  const write = (obj: {}) => res.write(JSON.stringify(obj) + ',');
   const files = await list(path);
 
-  const media = files.filter(file => VIDEO_EXTENSIONS.includes(extname(file)));
+  const promises = files
+    .filter(file => VIDEO_EXTENSIONS.includes(extname(file)))
+    .map(file => {
+      return async () => {
+        const filePath = join(path, file);
+        const existing = db.get(['imageCache', filePath]).value();
+        if (existing) return write({
+          image: existing,
+          path: filePath,
+          status: 'loaded',
+        });
 
-  const buffer = Buffer.alloc(1024 * 8);
+        write({
+          path: filePath,
+          status: 'loading',
+        });
 
-  res.write('test');
-  await wait(1000);
-  res.write('test2');
-  await wait(1000);
-  res.write('test3');
-  await wait(1000);
-  res.write('test4');
-  await wait(1000);
-  res.write('hi!');
-  res.end();
+        try {
+          const imagePath = await createThumbnail(filePath);
+          await db.set(['imageCache', filePath], imagePath).write();
+          write({
+            image: imagePath,
+            path: filePath,
+            status: 'loaded',
+          });
+        } catch (err) {
+          console.log('creating thumbnail error');
+          console.log(err);
+          write({
+            path: filePath,
+            status: 'error',
+          });
+        }
+      };
+    });
+
+  const streams = new Streams(promises, 3);
+
+  streams.onDone = () => res.end();
 });
 
 DirectoriesRouter.post('/thumbnail', async (req, res) => {
