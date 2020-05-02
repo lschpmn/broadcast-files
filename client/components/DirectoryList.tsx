@@ -2,6 +2,7 @@ import Button from '@material-ui/core/Button';
 import makeStyles from '@material-ui/core/styles/makeStyles';
 import T from '@material-ui/core/Typography';
 import InsertDriveFileIcon from '@material-ui/icons/InsertDriveFile';
+import LoopIcon from '@material-ui/icons/Loop';
 import { InspectResult } from 'fs-jetpack/types';
 import React, { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
@@ -20,19 +21,9 @@ const DirectoryList = () => {
       .catch(console.log);
   }, [pathname]);
 
-  const [files, directories, showLabels] = useFilesAndDirectories(list);
-
-  useEffect(() => {
-    if (files.length) {
-      const listener = (data) => {
-        console.log('thumbnails');
-        console.log(data);
-      };
-
-      stream(`/thumbnails${pathname}`, listener)
-        .catch(console.log);
-    }
-  }, [files]);
+  const [files, directories, showLabels] = useFilesAndDirectories(list, pathname);
+  console.log('files');
+  console.log(files);
 
   const classes = useStyles({});
 
@@ -85,7 +76,9 @@ const DirectoryList = () => {
           target='_blank'
           key={file.name}
         >
-          <InsertDriveFileIcon/>
+          {file.status === 'loading' && <LoopIcon/> }
+          {!!file.image && <img src={file.image} />}
+          {(!file.status || file.status === 'error') && <InsertDriveFileIcon/>}
           {file.name}
         </Button>
       ))}
@@ -93,8 +86,11 @@ const DirectoryList = () => {
   </div>;
 };
 
-const useFilesAndDirectories = (list: InspectResult[]): [InspectResult[], InspectResult[], boolean] => {
-  const [files, setFiles] = useState([] as InspectResult[]);
+const useFilesAndDirectories = (
+  list: InspectResult[],
+  pathname: string
+): [(InspectResult & Message)[], InspectResult[], boolean] => {
+  const [files, setFiles] = useState([] as (InspectResult & Message)[]);
   const [directories, setDirectories] = useState([] as InspectResult[]);
   const [showLabels, setShowLabels] = useState(false);
 
@@ -105,16 +101,44 @@ const useFilesAndDirectories = (list: InspectResult[]): [InspectResult[], Inspec
     setFiles(tmpFiles);
     setDirectories(tmpDirectories);
     setShowLabels(!!tmpFiles.length && !!tmpDirectories.length);
+
+    if (!tmpFiles.length) return;
+    const listener = (messages: Message[]) => {
+      const messageObj = {} as { [s: string]: Message};
+      messages.forEach(message => messageObj[message.name] = message);
+
+      setFiles(prevFiles =>
+        prevFiles.map(prevFile => {
+          const message = messageObj[prevFile.name];
+          if (message) return {
+            ...prevFile,
+            image: message.image,
+            status: message.status,
+          }
+          else return prevFile;
+        })
+      );
+    };
+
+    stream(`/thumbnails${pathname}`, listener)
+      .catch(console.log);
   }, [list]);
 
   return [files, directories, showLabels];
 };
 
+type Message = {
+  image?: string
+  name: string,
+  status?: 'loading' | 'loaded' | 'error',
+};
+
 const useStyles = makeStyles({
   button: {
-    height: '7.5rem',
+    // height: '7.5rem',
     textAlign: 'center',
-    width: '20rem',
+    margin: '0 0.5rem',
+    width: '360px',
     wordBreak: 'break-word',
 
     '& > span': {

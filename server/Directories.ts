@@ -6,7 +6,7 @@ import { InspectResult } from 'fs-jetpack/types';
 import * as intersection from 'lodash/intersection';
 import { extname, join } from 'path';
 import { routes } from '../config';
-import { VIDEO_EXTENSIONS } from '../constants';
+import { MESSAGE_SEPARATOR, VIDEO_EXTENSIONS } from '../constants';
 import { DirectoryRoute, JWT } from '../types';
 import { db, log } from './index';
 import { createThumbnail } from './lib/files';
@@ -81,7 +81,7 @@ DirectoriesRouter.get('/thumbnails/:base/:path(*)', async (req, res) => {
   log(`thumbnail path - ${path}`);
   res.set('Content-Type', 'text/event-stream');
 
-  const write = (obj: {}) => res.write(JSON.stringify(obj) + ',');
+  const write = (obj: {}) => res.write(JSON.stringify(obj) + MESSAGE_SEPARATOR);
   const files = await list(path);
 
   const promises = files
@@ -92,12 +92,12 @@ DirectoriesRouter.get('/thumbnails/:base/:path(*)', async (req, res) => {
         const existing = db.get(['imageCache', filePath]).value();
         if (existing) return write({
           image: existing,
-          path: filePath,
+          name: file,
           status: 'loaded',
         });
 
         write({
-          path: filePath,
+          name: file,
           status: 'loading',
         });
 
@@ -106,21 +106,21 @@ DirectoriesRouter.get('/thumbnails/:base/:path(*)', async (req, res) => {
           await db.set(['imageCache', filePath], imagePath).write();
           write({
             image: imagePath,
-            path: filePath,
+            name: file,
             status: 'loaded',
           });
         } catch (err) {
           console.log('creating thumbnail error');
           console.log(err);
           write({
-            path: filePath,
+            name: file,
             status: 'error',
           });
         }
       };
     });
 
-  const streams = new Streams(promises, 3);
+  const streams = new Streams(promises, 2);
 
   streams.onDone = () => res.end();
 });

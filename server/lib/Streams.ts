@@ -8,8 +8,9 @@ export default class Streams {
   private _isDone: boolean = false;
 
   constructor(promises: (() => Promise<any>)[], streamNum: number) {
-    this.streams = new Array(streamNum).fill(null).map(() => []);
-    this.streamDone = _.after(streamNum, () => this.onDone && this.onDone());
+    const num = Math.min(promises.length, streamNum)
+    this.streams = new Array(num).fill(null).map(() => []);
+    this.streamDone = _.after(num, () => this.onDone && this.onDone());
 
     // reversed so I can use .pop() and still be in chronological order
     promises.reverse().forEach((promise, i) => {

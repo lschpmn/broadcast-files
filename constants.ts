@@ -1,4 +1,5 @@
-// General Data
+
+export const MESSAGE_SEPARATOR = '@#@';
 
 export const VIDEO_EXTENSIONS = [
   '.3g2',

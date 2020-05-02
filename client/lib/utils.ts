@@ -1,6 +1,7 @@
 import isEqual from 'lodash/isEqual';
 import { createContext, useCallback, useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
+import { MESSAGE_SEPARATOR } from '../../constants';
 import { JWT } from '../../types';
 import { arrayBufferToString, decryptString, encryptString, generateIV, getSecureKey } from './crypto';
 
@@ -119,9 +120,22 @@ export const stream = async (path: string, listener: (message: any) => void) => 
     const read = await reader.read();
     done = read.done;
     try {
-      const message = arrayBufferToString(read.value);
-      console.log(message);
-      listener(message);
+      const messages = arrayBufferToString(read.value)
+        .split(MESSAGE_SEPARATOR)
+        .map(message => {
+          if (!message) return null;
+          try {
+            return JSON.parse(message);
+          } catch (err) {
+            console.log('message parsing error');
+            console.log(err);
+            return null;
+          }
+        })
+        .filter(Boolean);
+      console.log('messages');
+      console.log(messages);
+      listener(messages);
     } catch (err) {
       console.log(err);
     }
