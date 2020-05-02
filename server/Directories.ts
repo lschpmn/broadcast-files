@@ -120,6 +120,7 @@ DirectoriesRouter.get('/thumbnails/:base/:path(*)', async (req, res) => {
       };
     });
 
+  if (!promises.length) return res.end();
   const streams = new Streams(promises, 2);
 
   streams.onDone = () => res.end();

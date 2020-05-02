@@ -22,8 +22,6 @@ const DirectoryList = () => {
   }, [pathname]);
 
   const [files, directories, showLabels] = useFilesAndDirectories(list, pathname);
-  console.log('files');
-  console.log(files);
 
   const classes = useStyles({});
 

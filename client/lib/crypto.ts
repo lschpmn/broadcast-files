@@ -1,9 +1,10 @@
+import * as forge  from 'node-forge';
+// @ts-ignore
+forge.options.usePureJavaScript = true;
 
-const publicKeyStr = window.__PUBLIC_KEY__
-  .replace('-----BEGIN PUBLIC KEY-----\n', '')
-  .replace('-----END PUBLIC KEY-----\n', '');
-let publicServerKey: PromiseLike<CryptoKey>;
-let key: PromiseLike<CryptoKey>;
+const publicKeyStr = window.__PUBLIC_KEY__;
+let publicServerKey: forge.pki.rsa.PublicKey;
+let key: PromiseLike<string>;
 let secureKey: Promise<string>;
 
 export const arrayBufferToString = (ab: ArrayBuffer): string => {
@@ -15,98 +16,65 @@ export const arrayBufferToString = (ab: ArrayBuffer): string => {
   return str;
 };
 
-export const decryptString = async (ivStr: string, encrypted: string) => {
+export const decryptString = async (iv: string, encrypted: string) => {
   const cipherKey = await getKey();
-  const iv = stringToArrayBuffer(ivStr);
-  const buffer = stringToArrayBuffer(encrypted);
-  const decryptedBuffer = await crypto.subtle.decrypt(
-    {
-      name: 'AES-GCM',
-      iv,
-    },
-    cipherKey,
-    buffer
-  )
-
-  return arrayBufferToString(decryptedBuffer);
+  const decipher = forge.cipher.createDecipher('AES-GCM', cipherKey);
+  decipher.start({ iv, tag: forge.util.createBuffer(encrypted.slice(-16)) });
+  decipher.update(forge.util.createBuffer(encrypted.slice(0, -16)));
+  decipher.finish();
+  return decipher.output.data;
 };
 
-export const encryptString = async (iv: Uint8Array, str: string): Promise<string> => {
+export const encryptString = async (iv: string, str: string): Promise<string> => {
   const cipherKey = await getKey();
-  const arrayBuffer = stringToArrayBuffer(str);
-  const encryptedBuffer = await crypto.subtle.encrypt(
-    {
-      name: 'AES-GCM',
-      iv,
-    },
-    cipherKey,
-    arrayBuffer,
-  );
+  const cipher = forge.cipher.createCipher('AES-GCM', cipherKey);
+  cipher.start({ iv });
+  cipher.update(forge.util.createBuffer(str));
+  cipher.finish();
 
-  return arrayBufferToString(encryptedBuffer);
+  return cipher.output.data + cipher.mode.tag.data;
 };
 
-export const generateIV = (): Uint8Array => {
-  return crypto.getRandomValues(new Uint8Array(12));
+export const generateIV = (): Promise<string> => {
+  return getRandomString(12);
 };
+
+export const getRandomString = async (bytes: number): Promise<string> => {
+  return new Promise((res, rej) => {
+    // @ts-ignore
+    forge.random.getBytes(bytes, (err, bytes: string) => {
+      if (err) rej(err);
+      else res(bytes);
+    });
+  });
+}
 
 export const getSecureKey = async (): Promise<string> => {
   if (secureKey) return secureKey;
-
-  const cipherKey = await getKey();
-  const extractedKey = await crypto.subtle.exportKey('raw', cipherKey);
-  const cipher = arrayBufferToString(extractedKey);
-
-  return secureKey = encryptStringWithPublicKey(cipher);
+  return secureKey = new Promise(async (res, rej) => {
+    try {
+      const cipher = await getKey();
+      res(encryptStringWithPublicKey(cipher));
+    } catch (err) {
+      console.log(err);
+      rej(err);
+    }
+  });
 };
 
-const encryptStringWithPublicKey = async (str: string): Promise<string> => {
-  const publicKey = await getPublicServerKey();
-  const arrayBuffer = stringToArrayBuffer(str);
-  const encryptedBuffer = await crypto.subtle.encrypt(
-    {
-      name: 'RSA-OAEP',
-    },
-    publicKey,
-    arrayBuffer,
-  );
-
-  return arrayBufferToString(encryptedBuffer);
+const encryptStringWithPublicKey = (str: string): string => {
+  const publicKey = getPublicServerKey();
+  return publicKey.encrypt(str);
 };
 
 const getKey = async () => {
   if (key) return key;
 
-  return key = crypto.subtle.generateKey(
-    {
-      name: 'AES-GCM',
-      length: 128,
-    },
-    true,
-    ['encrypt', 'decrypt']
-  );
+  return key = getRandomString(16);
 };
 
-const getPublicServerKey = async (): Promise<CryptoKey> => {
+const getPublicServerKey = (): forge.pki.rsa.PublicKey => {
   if (publicServerKey) return publicServerKey;
 
-  return publicServerKey = crypto.subtle.importKey(
-    'spki',
-    stringToArrayBuffer(atob(publicKeyStr)),
-    {
-      name: 'RSA-OAEP',
-      hash: 'SHA-256',
-    },
-    false,
-    ['encrypt'],
-  );
-};
-
-const stringToArrayBuffer = (str: string): ArrayBuffer => {
-  const buf = new ArrayBuffer(str.length);
-  const bufView = new Uint8Array(buf);
-  for (let i = 0, strLen = str.length; i < strLen; i++) {
-    bufView[i] = str.charCodeAt(i);
-  }
-  return buf;
+  return publicServerKey = forge.pki.publicKeyFromPem(publicKeyStr) as any;
 };

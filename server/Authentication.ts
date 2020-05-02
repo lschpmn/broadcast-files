@@ -12,13 +12,13 @@ import {
 export const AuthenticationRouter = Router();
 
 AuthenticationRouter.use((req, res, next) => {
-  const encryptedCipher = parseEncryptedCipher(req.headers);
+  const encryptedCipher = Buffer.from(parseEncryptedCipher(req.headers), 'base64').toString('binary');
   const privateKey = db.get('crypto.privateKey').value();
   const cipher = encryptedCipher ? decryptString(privateKey, encryptedCipher) : '';
   const iv = generateIV();
 
   if (req.method === 'POST') {
-    const postIv = Buffer.from(parseIV(req.headers), 'base64');
+    const postIv = Buffer.from(parseIV(req.headers), 'base64').toString('binary');
     req.body = decryptCipherString(cipher, postIv, req.body);
   }
 
@@ -30,7 +30,7 @@ AuthenticationRouter.use((req, res, next) => {
 
       const bodyStr = typeof body === 'string' ? body : JSON.stringify(body);
       const encryptedString = encryptString(cipher, iv, bodyStr);
-      res.set('x-crypto-iv', iv.toString('base64'));
+      res.set('x-crypto-iv', Buffer.from(iv, 'binary').toString('base64'));
       send(encryptedString);
     } else send();
   };

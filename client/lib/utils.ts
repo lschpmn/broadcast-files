@@ -68,7 +68,7 @@ export const post = async (path, body: {}) => {
   console.log(`POST request ${path}`);
   console.log(body);
 
-  const iv = generateIV();
+  const iv = await generateIV();
   const secureKey = await getSecureKey();
   const encryptedBody = await encryptString(iv, JSON.stringify(body));
 
@@ -78,7 +78,7 @@ export const post = async (path, body: {}) => {
       body: encryptedBody,
       credentials: 'include',
       headers: {
-        'x-crypto-iv': btoa(arrayBufferToString(iv)),
+        'x-crypto-iv': btoa(iv),
         'x-crypto-key': btoa(secureKey),
       },
       method: 'POST',
