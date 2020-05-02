@@ -6,6 +6,10 @@ export const parseEncryptedCipher = (headers): string => headers['x-crypto-key']
 
 export const parseIV = (headers): string => headers['x-crypto-iv'];
 
+export const atob = (str: string) => Buffer.from(str, 'base64').toString('binary');
+
+export const btoa = (str: string) => Buffer.from(str, 'binary').toString('base64');
+
 export const encryptString = (cipherKey: string, iv: string, data: string): string => {
   const cipher = forge.cipher.createCipher('AES-GCM', cipherKey);
   cipher.start({ iv });

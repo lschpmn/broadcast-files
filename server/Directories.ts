@@ -73,11 +73,11 @@ DirectoriesRouter.get('/file/:base/:path(*)', async (req, res, next) => {
   return res.sendFile(path);
 });
 
-DirectoriesRouter.get('/thumbnails/:base/:path(*)', async (req, res) => {
+DirectoriesRouter.get(['/thumbnails/:base', '/thumbnails/:base/:path(*)'], async (req, res) => {
   const route = routes.find(r => r.urlPath === req.params.base);
   if (!route || !checkAccess(route, res.locals.user)) return res.status(404).end();
 
-  const path = join(route.filePath, req.params.path);
+  const path = join(route.filePath, req.params.path || '');
   log(`thumbnail path - ${path}`);
   res.set('Content-Type', 'text/event-stream');
 
