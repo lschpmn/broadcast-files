@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { MESSAGE_SEPARATOR } from '../constants';
 import { db } from './index';
 import {
   atob,
@@ -35,6 +36,24 @@ AuthenticationRouter.use((req, res, next) => {
       res.set('x-crypto-iv', btoa(iv));
       send(encryptedString);
     } else send();
+  };
+
+  let sentIv = false;
+  // @ts-ignore
+  res.encryptedWrite = (chunk: object | string) => {
+    if (!sentIv) {
+      res.write(btoa(iv) + MESSAGE_SEPARATOR);
+      sentIv = true;
+    }
+
+    let encryptedMessage;
+    if (typeof chunk === 'string') {
+      encryptedMessage = encryptString(cipher, iv, chunk);
+    } else {
+      encryptedMessage = encryptString(cipher, iv, JSON.stringify(chunk));
+    }
+
+    res.write((btoa(encryptedMessage)) + MESSAGE_SEPARATOR);
   };
 
   next();

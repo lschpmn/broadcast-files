@@ -4,8 +4,8 @@ forge.options.usePureJavaScript = true;
 
 const publicKeyStr = window.__PUBLIC_KEY__;
 let publicServerKey: forge.pki.rsa.PublicKey;
-let key: PromiseLike<string>;
-let secureKey: Promise<string>;
+let key: string;
+let secureKey: string;
 
 export const arrayBufferToString = (ab: ArrayBuffer): string => {
   const array8Bit = new Uint8Array(ab);
@@ -16,8 +16,8 @@ export const arrayBufferToString = (ab: ArrayBuffer): string => {
   return str;
 };
 
-export const decryptString = async (iv: string, encrypted: string) => {
-  const cipherKey = await getKey();
+export const decryptString = (iv: string, encrypted: string): string => {
+  const cipherKey = getKey();
   const decipher = forge.cipher.createDecipher('AES-GCM', cipherKey);
   decipher.start({ iv, tag: forge.util.createBuffer(encrypted.slice(-16)) });
   decipher.update(forge.util.createBuffer(encrypted.slice(0, -16)));
@@ -25,8 +25,8 @@ export const decryptString = async (iv: string, encrypted: string) => {
   return decipher.output.data;
 };
 
-export const encryptString = async (iv: string, str: string): Promise<string> => {
-  const cipherKey = await getKey();
+export const encryptString = (iv: string, str: string): string => {
+  const cipherKey = getKey();
   const cipher = forge.cipher.createCipher('AES-GCM', cipherKey);
   cipher.start({ iv });
   cipher.update(forge.util.createBuffer(str));
@@ -49,17 +49,12 @@ export const getRandomString = async (bytes: number): Promise<string> => {
   });
 }
 
-export const getSecureKey = async (): Promise<string> => {
+export const getSecureKey = (): string => {
   if (secureKey) return secureKey;
-  return secureKey = new Promise(async (res, rej) => {
-    try {
-      const cipher = await getKey();
-      res(encryptStringWithPublicKey(cipher));
-    } catch (err) {
-      console.log(err);
-      rej(err);
-    }
-  });
+
+  const cipher = getKey();
+  return encryptStringWithPublicKey(cipher);
+
 };
 
 const encryptStringWithPublicKey = (str: string): string => {
@@ -67,10 +62,10 @@ const encryptStringWithPublicKey = (str: string): string => {
   return publicKey.encrypt(str);
 };
 
-const getKey = async () => {
+const getKey = () => {
   if (key) return key;
 
-  return key = getRandomString(16);
+  return key = forge.random.getBytesSync(16);
 };
 
 const getPublicServerKey = (): forge.pki.rsa.PublicKey => {

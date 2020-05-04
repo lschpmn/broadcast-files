@@ -115,6 +115,7 @@ export const stream = async (path: string, listener: (message: any) => void) => 
 
   const reader = response.body.getReader();
   let done = false;
+  let iv;
 
   while (!done) {
     const read = await reader.read();
@@ -124,8 +125,12 @@ export const stream = async (path: string, listener: (message: any) => void) => 
         .split(MESSAGE_SEPARATOR)
         .map(message => {
           if (!message) return null;
+          if (!iv) return iv = atob(message);
+
           try {
-            return JSON.parse(message);
+            const decryptedMessage = decryptString(iv, atob(message));
+
+            return JSON.parse(decryptedMessage);
           } catch (err) {
             console.log('message parsing error');
             console.log(err);

@@ -81,7 +81,6 @@ DirectoriesRouter.get(['/thumbnails/:base', '/thumbnails/:base/:path(*)'], async
   log(`thumbnail path - ${path}`);
   res.set('Content-Type', 'text/event-stream');
 
-  const write = (obj: {}) => res.write(JSON.stringify(obj) + MESSAGE_SEPARATOR);
   const files = await list(path);
 
   const promises = files
@@ -90,13 +89,15 @@ DirectoriesRouter.get(['/thumbnails/:base', '/thumbnails/:base/:path(*)'], async
       return async () => {
         const filePath = join(path, file);
         const existing = db.get(['imageCache', filePath]).value();
-        if (existing) return write({
+        // @ts-ignore
+        if (existing) return res.encryptedWrite({
           image: existing,
           name: file,
           status: 'loaded',
         });
 
-        write({
+        // @ts-ignore
+        res.encryptedWrite({
           name: file,
           status: 'loading',
         });
@@ -104,7 +105,8 @@ DirectoriesRouter.get(['/thumbnails/:base', '/thumbnails/:base/:path(*)'], async
         try {
           const imagePath = await createThumbnail(filePath);
           await db.set(['imageCache', filePath], imagePath).write();
-          write({
+          // @ts-ignore
+          res.encryptedWrite({
             image: imagePath,
             name: file,
             status: 'loaded',
@@ -112,7 +114,8 @@ DirectoriesRouter.get(['/thumbnails/:base', '/thumbnails/:base/:path(*)'], async
         } catch (err) {
           console.log('creating thumbnail error');
           console.log(err);
-          write({
+          // @ts-ignore
+          res.encryptedWrite({
             name: file,
             status: 'error',
           });
