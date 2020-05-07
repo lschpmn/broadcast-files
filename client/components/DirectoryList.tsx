@@ -136,8 +136,12 @@ const useStyles = makeStyles({
     // height: '7.5rem',
     textAlign: 'center',
     margin: '0 0.5rem',
-    width: '360px',
+    width: '250px',
     wordBreak: 'break-word',
+
+    '& img': {
+      width: '250px',
+    },
 
     '& > span': {
       display: 'flex',
