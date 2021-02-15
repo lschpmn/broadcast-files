@@ -47,11 +47,18 @@ async function startServer() {
     .write();
 
   app.use((req, res, next) => {
-    log(`url - ${req.url}`);
+    const ip = req.header('x-real-ip'); // ip address from nginx
+    log(`ip - ${ip || req.ip} - url - ${req.url}`);
     next();
   });
 
-  !IS_PROD && app.use(cors({ credentials: true, origin: 'http://127.0.0.1:5000', exposedHeaders: 'x-crypto-iv' }));
+  !IS_PROD && app.use(cors({
+    allowedHeaders: ['x-crypto-iv', 'x-crypto-key'],
+    credentials: true,
+    exposedHeaders: 'x-crypto-iv',
+    origin: true,
+  }));
+
   app.use(cookieParser());
   app.use(express.text());
   app.use(express.static(join(__dirname, '..', 'public')));
