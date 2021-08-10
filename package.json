@@ -61,6 +61,7 @@
     "cors": "2.8.5",
     "express": "4.17.1",
     "fluent-ffmpeg": "2.1.2",
+    "fs-extra": "10.0.0",
     "fs-jetpack": "2.2.3",
     "get-incremental-port": "gist:5566749d5222db411f51c4414171b17d",
     "jsonwebtoken": "8.5.1",
