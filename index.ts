@@ -1,5 +1,4 @@
 import { join } from 'path';
-import { readFile } from 'fs-extra';
 import { spawn } from 'child_process';
 import * as nodemon from 'nodemon';
 const getIncrementalPort = require('get-incremental-port');
@@ -12,14 +11,16 @@ const START_PORT = 5000;
 const TS_NODE_PATH = join(__dirname, 'node_modules', '.bin', 'ts-node.cmd');
 
 (async function () {
-  const webpackPort = await getIncrementalPort(START_PORT);
-  const serverPort = await getIncrementalPort(START_PORT);
+  if (IS_PROD) {
+    const serverPort = await getIncrementalPort(START_PORT);
+    startServer(serverPort);
+  } else {
+    const webpackPort = await getIncrementalPort(START_PORT);
+    const serverPort = await getIncrementalPort(START_PORT);
 
-  IS_PROD
-    ? startServer()
-    : startNodemon(serverPort);
-
-  startWebpack(webpackPort, serverPort);
+    startNodemon(serverPort);
+    startWebpack(webpackPort, serverPort);
+  }
 })();
 
 function startNodemon(port: number) {
@@ -35,9 +36,9 @@ function startNodemon(port: number) {
   });
 }
 
-function startServer() {
+function startServer(serverPort: number) {
   console.log('Starting server in prod mode');
-  const serverProcess = spawn(TS_NODE_PATH, ['server/index.ts', '--prod']);
+  const serverProcess = spawn(TS_NODE_PATH, ['server/index.ts', '--port', serverPort.toString(), '--prod']);
 
   serverProcess.stdout.on('data', data => console.log(data.toString()));
   serverProcess.stderr.on('data', data => console.log(data.toString()));
@@ -47,13 +48,6 @@ function startWebpack(webpackPort, serverPort) {
   console.log('starting webpack');
   const compiler = webpack(config);
   const server = new webpackDevServer(compiler, {
-    before: app => {
-      app.get(['/index.html', '/'], (req, res) => {
-        getIndexHtml(serverPort)
-          .then(html => res.send(html))
-          .catch(err => res.status(500).send(err));
-      });
-    },
     contentBase: './public',
     historyApiFallback: {
       disableDotRule: true,
@@ -62,9 +56,4 @@ function startWebpack(webpackPort, serverPort) {
   });
 
   server.listen(webpackPort, () => console.log(`starting on ${webpackPort}`));
-}
-
-async function getIndexHtml(port: number): Promise<string> {
-  const html = await readFile(join(__dirname, 'client', 'index.html'), 'utf8');
-  return html.replace('__PORT__ = 0', `__PORT__ = ${port}`);
 }

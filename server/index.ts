@@ -15,21 +15,17 @@ import { initCrypto } from './lib/crypto';
 import { setupUsers, UsersRouter } from './Users';
 
 const IS_PROD = process.argv.includes('--prod');
-const START_PORT = 3000;
-let retries = 10;
+const START_PORT = process.argv[process.argv.indexOf('--port') + 1];
+// @ts-ignore
+if (isNaN(START_PORT)) {
+  console.log('port error');
+  console.log(START_PORT);
+  process.exit();
+}
+
 export let app: Express;
 export let db: LowdbAsync<DbSchema>;
 export let port;
-
-(function serverRestarter() {
-  startServer()
-    .catch(err => {
-      log('error');
-      console.log(err);
-      retries--;
-      if (retries > 0) serverRestarter();
-    });
-})();
 
 async function startServer() {
   port = await getIncrementalPort(START_PORT);
@@ -107,3 +103,5 @@ async function writePortToIndex() {
   await write(join(__dirname, '../public/index.html'), newIndex);
   log(`wrote index.html file with port ${port}`);
 }
+
+startServer().catch(console.log);
