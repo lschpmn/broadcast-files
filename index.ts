@@ -6,6 +6,7 @@ const config = require('./webpack.config.js');
 
 (async function () {
   const port = await getIncrementalPort(5000);
+
   const options = {
     contentBase: './public',
     historyApiFallback: {
