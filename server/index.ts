@@ -2,6 +2,7 @@ import * as cookieParser from 'cookie-parser';
 import * as cors from 'cors';
 import * as express from 'express';
 import { Express, Request, Response } from 'express';
+import * as ffmpeg from 'fluent-ffmpeg';
 import { readAsync as read, writeAsync as write } from 'fs-jetpack';
 import * as getIncrementalPort from 'get-incremental-port';
 import * as lowdb from 'lowdb';
@@ -22,6 +23,10 @@ if (isNaN(START_PORT)) {
   console.log(START_PORT);
   process.exit();
 }
+
+ffmpeg.setFfmpegPath(join(__dirname, '..', 'bin', 'ffmpeg.exe'));
+ffmpeg.setFfprobePath(join(__dirname, '..', 'bin', 'ffprobe.exe'));
+ffmpeg.setFlvtoolPath(join(__dirname, '..', 'bin', 'ffplay.exe'));
 
 export let app: Express;
 export let db: LowdbAsync<DbSchema>;
