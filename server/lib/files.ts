@@ -20,7 +20,7 @@ export const createThumbnail = async (path: string): Promise<string> => {
       .screenshots({
         filename: '1.png',
         folder: imageDirPath,
-        size: '360x?',
+        size: '854x480',
         timemarks: ['10%'],
       });
   });

@@ -154,7 +154,7 @@ DirectoriesRouter.post('/thumbnail', async (req, res) => {
     .screenshots({
       filename: '1.png',
       folder: imagePath,
-      size: '360x?',
+      size: '854x480',
       timemarks: ['10%'],
     });
 });

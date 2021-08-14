@@ -8,6 +8,7 @@ import React, { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { get, stream } from '../lib/utils';
 
+const RESIZE_FACTOR = 0.3;
 const domain = window.__DOMAIN__;
 
 const DirectoryList = () => {
@@ -45,7 +46,7 @@ const DirectoryList = () => {
       )}
     </div>
 
-    <div style={{ display: 'flex', marginLeft: '2rem', flexWrap: 'wrap' }}>
+    <div className={classes.contentContainer}>
       {showLabels && (
         <T color='textSecondary' component='span' style={{ margin: '0.5rem 0', width: '100%' }}>
           Directories <hr/>
@@ -77,7 +78,12 @@ const DirectoryList = () => {
           {file.status === 'loading' && <LoopIcon/> }
           {!!file.image && <img src={file.image} />}
           {(!file.status || file.status === 'error') && <InsertDriveFileIcon/>}
-          {file.name}
+          <div style={{
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+            width: 854 * RESIZE_FACTOR,
+          }}>{file.name}</div>
         </Button>
       ))}
     </div>
@@ -133,14 +139,14 @@ type Message = {
 
 const useStyles = makeStyles({
   button: {
-    // height: '7.5rem',
     textAlign: 'center',
-    margin: '0 0.5rem',
-    width: '250px',
+    margin: '0',
+    padding: '1rem',
     wordBreak: 'break-word',
 
     '& img': {
-      width: '250px',
+      height: 480 * RESIZE_FACTOR,
+      width: 854 * RESIZE_FACTOR,
     },
 
     '& > span': {
@@ -151,6 +157,12 @@ const useStyles = makeStyles({
     '& > span > svg': {
       fontSize: '4.5rem',
     },
+  },
+  contentContainer: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    justifyContent: 'left',
+    marginLeft: '2rem',
   },
   dirButton: {
     height: '7.5rem',
