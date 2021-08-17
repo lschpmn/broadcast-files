@@ -6,7 +6,7 @@ import LoopIcon from '@material-ui/icons/Loop';
 import { InspectResult } from 'fs-jetpack/types';
 import React, { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { get, stream } from '../lib/utils';
+import { get, stream } from '../../lib/utils';
 
 const RESIZE_FACTOR = 0.3;
 const domain = window.__DOMAIN__;
