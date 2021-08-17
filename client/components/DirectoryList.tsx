@@ -62,6 +62,7 @@ const DirectoryList = () => {
           </Button>
         </Link>
       ))}
+      {showLabels && <Filler/>}
 
       {showLabels && (
         <T color='textSecondary' component='span' style={{ margin: '0.5rem 0', width: '100%' }}>
@@ -86,6 +87,7 @@ const DirectoryList = () => {
           }}>{file.name}</div>
         </Button>
       ))}
+      <Filler/>
     </div>
   </div>;
 };
@@ -131,6 +133,15 @@ const useFilesAndDirectories = (
   return [files, directories, showLabels];
 };
 
+const Filler = () => {
+  const fills = new Array(10)
+    .fill(null)
+    .map((a, i) => <div key={i} style={{ padding: '1rem', width: 854 * RESIZE_FACTOR }} />)
+  return <>
+    {fills}
+  </>;
+};
+
 type Message = {
   image?: string
   name: string,
@@ -161,8 +172,7 @@ const useStyles = makeStyles({
   contentContainer: {
     display: 'flex',
     flexWrap: 'wrap',
-    justifyContent: 'left',
-    marginLeft: '2rem',
+    justifyContent: 'space-around',
   },
   dirButton: {
     height: '7.5rem',
