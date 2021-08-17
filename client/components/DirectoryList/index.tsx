@@ -7,6 +7,7 @@ import { InspectResult } from 'fs-jetpack/types';
 import React, { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { get, stream } from '../../lib/utils';
+import PathHeader from './PathHeader';
 
 const RESIZE_FACTOR = 0.3;
 const domain = window.__DOMAIN__;
@@ -14,7 +15,6 @@ const domain = window.__DOMAIN__;
 const DirectoryList = () => {
   const [list, setList] = useState([] as InspectResult[]);
   const { pathname } = useLocation();
-  const routes = pathname.split('/').slice(1);
 
   useEffect(() => {
     get(`/dir${pathname}`)
@@ -27,24 +27,7 @@ const DirectoryList = () => {
   const classes = useStyles({});
 
   return <div>
-    <div style={{ display: 'flex' }}>
-      <Link to="/">
-        <Button>
-          <h2>~</h2>
-        </Button>
-      </Link>
-
-      {routes.map((route, i) =>
-        <React.Fragment key={i}>
-          <h2 style={{ padding: '6px 8px' }}>/</h2>
-          <Link to={'/' + routes.slice(0, i + 1).join('/')}>
-            <Button>
-              <h2>{decodeURIComponent(route)}</h2>
-            </Button>
-          </Link>
-        </React.Fragment>
-      )}
-    </div>
+    <PathHeader setList={setList} />
 
     <div className={classes.contentContainer}>
       {showLabels && (
