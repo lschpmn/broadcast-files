@@ -1,7 +1,6 @@
 import Button from '@material-ui/core/Button';
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { get } from '../../lib/utils';
 
 type Props = {
   setList: (list: []) => void,
@@ -10,12 +9,6 @@ type Props = {
 const PathHeader = ({ setList }: Props) => {
   const { pathname } = useLocation();
   const routes = pathname.split('/').slice(1);
-
-  useEffect(() => {
-    get(`/dir${pathname}`)
-      .then(setList)
-      .catch(console.log);
-  }, [pathname]);
 
   return <div style={{ display: 'flex' }}>
     <Link to="/">

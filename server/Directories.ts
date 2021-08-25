@@ -39,22 +39,20 @@ DirectoriesRouter.get(['/dir/:base', '/dir/:base/:path(*)'], async (req, res, ne
         return { type: 'forbidden' } as any;
       }
     }));
-    inspections
+    const sortedInspections = inspections
       // @ts-ignore
       .filter(file => file.type !== 'forbidden')
       .sort((aItem, bItem) => {
-        if (aItem.type === 'file' && bItem.type === 'file') {
-          return aItem.name.localeCompare(bItem.name);
-        } else if (aItem.type === 'file' && bItem.type !== 'file') {
-          return -1;
-        } else if (aItem.type !== 'file' && bItem.type === 'file') {
+        if (aItem.type === 'file' && bItem.type !== 'file') {
           return 1;
+        } else if (aItem.type !== 'file' && bItem.type === 'file') {
+          return -1;
         }
 
         return aItem.name.localeCompare(bItem.name);
       });
 
-    res.send(inspections);
+    res.send(sortedInspections);
   } catch (err) {
     console.log(err);
     res.status(500).send(err.message);
