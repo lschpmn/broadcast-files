@@ -21,7 +21,7 @@ DirectoriesRouter.get('/config', (req, res) => {
   res.send(routesToShow);
 });
 
-DirectoriesRouter.get(['/dir/:base', '/dir/:base/:path(*)'], async (req, res, next) => {
+DirectoriesRouter.get(['/dir/:base', '/dir/:base/:path(*)'], async (req, res) => {
   const route = routes.find(r => r.urlPath === req.params.base);
   if (!route || !checkAccess(route, res.locals.user)) return res.status(404).end();
 
@@ -59,7 +59,7 @@ DirectoriesRouter.get(['/dir/:base', '/dir/:base/:path(*)'], async (req, res, ne
   }
 });
 
-DirectoriesRouter.get('/file/:base/:path(*)', async (req, res, next) => {
+DirectoriesRouter.get('/file/:base/:path(*)', async (req, res) => {
   const route = routes.find(r => r.urlPath === req.params.base);
   if (!route || !checkAccess(route, res.locals.user)) return res.status(404).end();
 
@@ -125,36 +125,6 @@ DirectoriesRouter.get(['/thumbnails/:base', '/thumbnails/:base/:path(*)'], async
   const streams = new Streams(promises, 2);
 
   streams.onDone = () => res.end();
-});
-
-DirectoriesRouter.post('/thumbnail', async (req, res) => {
-  const path = req.body.path;
-
-  if (db.has(['imageCache', path]).value()) {
-    res.send({ path: db.get(['imageCache', path]).value() });
-    return;
-  }
-
-  const id = Math.random().toString(36).slice(-8);
-  const imagePath = join(__dirname, '..', 'public', 'images', id);
-  await dirAsync(imagePath);
-
-  ffmpeg(path)
-    .on('error', (err) => {
-      console.log(err);
-      res.status(500).send({ error: err.message });
-    })
-    .on('end', async () => {
-      const imagePath = `/images/${id}/1.png`;
-      await db.set(['imageCache', path], imagePath).write();
-      res.send({ path: imagePath });
-    })
-    .screenshots({
-      filename: '1.png',
-      folder: imagePath,
-      size: '854x480',
-      timemarks: ['10%'],
-    });
 });
 
 const checkAccess = (route: DirectoryRoute, user?: JWT): boolean => {
