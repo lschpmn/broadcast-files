@@ -1,5 +1,5 @@
 .idea/
 node_modules/
 public/
-config.ts
+config.json
 db.json

@@ -5,7 +5,7 @@ import { InspectResult } from 'fs-jetpack/types';
 // @ts-ignore
 import * as intersection from 'lodash/intersection';
 import { extname, join } from 'path';
-import { routes } from '../config';
+import { routes } from '../config.json';
 import { VIDEO_EXTENSIONS } from '../constants';
 import { DirectoryRoute, JWT } from '../types';
 import { db, log } from './index';

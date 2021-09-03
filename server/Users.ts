@@ -3,7 +3,7 @@ import { Response, Router } from 'express';
 import { decode, sign, verify } from 'jsonwebtoken';
 // @ts-ignore
 import * as isEqual from 'lodash/isEqual';
-import { users } from '../config';
+import { users } from '../config.json';
 import { JWT, User } from '../types';
 import { db } from './index';
 
