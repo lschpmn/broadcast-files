@@ -5,14 +5,11 @@ import { Express, Request, Response } from 'express';
 import * as ffmpeg from 'fluent-ffmpeg';
 import { readAsync as read, writeAsync as write } from 'fs-jetpack';
 import * as getIncrementalPort from 'get-incremental-port';
-import * as lowdb from 'lowdb';
-import { LowdbAsync } from 'lowdb';
-import * as FileAsync from 'lowdb/adapters/FileAsync';
 import { join } from 'path';
-import { DbSchema } from '../types';
 import { AuthenticationRouter } from './Authentication';
 import { DirectoriesRouter } from './Directories';
 import { initCrypto } from './lib/crypto';
+import { getPublicKey, initDB } from './lib/db';
 import { setupUsers, UsersRouter } from './Users';
 
 const IS_PROD = process.argv.includes('--prod');
@@ -29,23 +26,12 @@ ffmpeg.setFfprobePath(join(__dirname, '..', 'bin', 'ffprobe.exe'));
 ffmpeg.setFlvtoolPath(join(__dirname, '..', 'bin', 'ffplay.exe'));
 
 export let app: Express;
-export let db: LowdbAsync<DbSchema>;
 export let port;
 
 async function startServer() {
+  await initDB();
   port = await getIncrementalPort(START_PORT);
-
-  const adapter = new FileAsync(join(__dirname, '..', 'db.json'));
   app = express();
-  db = await lowdb(adapter);
-
-  await db
-    .defaults({
-      crypto: {},
-      imageCache: {},
-      users: {},
-    })
-    .write();
 
   app.use((req, res, next) => {
     const ip = req.header('x-real-ip'); // ip address from nginx
@@ -64,7 +50,7 @@ async function startServer() {
   app.use(express.text());
   app.use(express.static(join(__dirname, '..', 'public')));
 
-  await initCrypto(db);
+  await initCrypto();
   await setupUsers();
 
   app.use('/api', AuthenticationRouter);
@@ -100,7 +86,7 @@ export const log = (message: string) => console.log(`${new Date().toLocaleString
 
 async function writePortToIndex() {
   const index = await read(join(__dirname, '../client/index.html'));
-  const publicKey = db.get('crypto.publicKey').value();
+  const publicKey = getPublicKey();
   const url = IS_PROD ? '' : `http://127.0.0.1:${port}`;
   const newIndex = index
     .replace('__DOMAIN__ = "";', `__DOMAIN__ = "${url}";`)

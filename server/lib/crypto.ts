@@ -1,6 +1,5 @@
-import { LowdbAsync } from 'lowdb';
 import * as forge from 'node-forge';
-import { DbSchema } from '../../types';
+import { getPrivateKey, getPublicKey, setPublicPrivateKey } from './db';
 
 export const parseEncryptedCipher = (headers): string => headers['x-crypto-key'];
 
@@ -33,17 +32,14 @@ export const decryptString = (privateKey: string, encrypted: string): string => 
   return privateKeyForge.decrypt(encrypted);
 };
 
-export const initCrypto = async (db: LowdbAsync<DbSchema>) => {
-  const crypto = db.get('crypto').value();
-
-  if (!crypto.publicKey || !crypto.privateKey) {
+export const initCrypto = async () => {
+  if (!getPublicKey() || !getPrivateKey()) {
     const keyPair = forge.pki.rsa.generateKeyPair({ bits: 2048 });
-    const publicPrivateKey = {
-      publicKey: forge.pki.publicKeyToPem(keyPair.publicKey),
-      privateKey: forge.pki.privateKeyToPem(keyPair.privateKey),
-    };
 
-    await db.set('crypto', publicPrivateKey).write();
+    await setPublicPrivateKey(
+      forge.pki.publicKeyToPem(keyPair.publicKey),
+      forge.pki.privateKeyToPem(keyPair.privateKey),
+    )
     console.log('Successfully generated public/private RSA key');
   }
 };

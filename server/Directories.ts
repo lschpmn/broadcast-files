@@ -1,6 +1,5 @@
 import { Router } from 'express';
-import * as ffmpeg from 'fluent-ffmpeg';
-import { dirAsync, inspectAsync as inspect, listAsync as list } from 'fs-jetpack';
+import { inspectAsync as inspect, listAsync as list } from 'fs-jetpack';
 import { InspectResult } from 'fs-jetpack/types';
 // @ts-ignore
 import * as intersection from 'lodash/intersection';
@@ -8,7 +7,8 @@ import { extname, join } from 'path';
 import { routes } from '../config.json';
 import { VIDEO_EXTENSIONS } from '../constants';
 import { DirectoryRoute, JWT } from '../types';
-import { db, log } from './index';
+import { log } from './index';
+import { getImageCachePath, setImageCachePath } from './lib/db';
 import { createThumbnail } from './lib/files';
 import Streams from './lib/Streams';
 
@@ -86,7 +86,7 @@ DirectoriesRouter.get(['/thumbnails/:base', '/thumbnails/:base/:path(*)'], async
     .map(file => {
       return async () => {
         const filePath = join(path, file);
-        const existing = db.get(['imageCache', filePath]).value();
+        const existing = getImageCachePath(filePath);
         // @ts-ignore
         if (existing) return res.encryptedWrite({
           image: existing,
@@ -102,7 +102,7 @@ DirectoriesRouter.get(['/thumbnails/:base', '/thumbnails/:base/:path(*)'], async
 
         try {
           const imagePath = await createThumbnail(filePath);
-          await db.set(['imageCache', filePath], imagePath).write();
+          await setImageCachePath(filePath, imagePath);
           // @ts-ignore
           res.encryptedWrite({
             image: imagePath,

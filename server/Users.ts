@@ -4,8 +4,8 @@ import { decode, sign, verify } from 'jsonwebtoken';
 // @ts-ignore
 import * as isEqual from 'lodash/isEqual';
 import { users } from '../config.json';
-import { JWT, User } from '../types';
-import { db } from './index';
+import { JWT } from '../types';
+import { getPrivateKey, getPublicKey, getUser, getUsers, setUser, setUsers } from './lib/db';
 
 const SESSION_TIMEOUT = 60 * 5;
 
@@ -14,9 +14,7 @@ export const UsersRouter = Router();
 UsersRouter.post('/users/login', async (req, res) => {
   try {
     const { username, password } = JSON.parse(req.body);
-    const user: User = db
-      .get(`users.${username}`)
-      .value();
+    const user = getUser(username);
 
     if (!user) {
       console.log(`user ${username} not found`);
@@ -32,7 +30,7 @@ UsersRouter.post('/users/login', async (req, res) => {
     if (!user.password) {
       console.log('First login, generating hashed and salted password');
       user.password = await bcrypt.hash(password, 10);
-      await db.write();
+      await setUser(user);
     }
 
     console.log(`Successful login by user ${username}`);
@@ -50,7 +48,7 @@ UsersRouter.post('/users/login', async (req, res) => {
 
 UsersRouter.use((req, res, next) => {
   if (!req.cookies.auth) return next();
-  const publicKey = db.get('crypto.publicKey').value();
+  const publicKey = getPublicKey();
 
   verify(
     req.cookies.auth,
@@ -73,7 +71,7 @@ UsersRouter.use((req, res, next) => {
 
 export const setupUsers = async () => {
   // cleanup
-  const dbUsers = db.get('users').value();
+  const dbUsers = getUsers();
   Object
     .keys(dbUsers)
     .filter(username => users.every(u => u.username !== username))
@@ -90,11 +88,11 @@ export const setupUsers = async () => {
       dbUser.permissions = user.permissions;
     }
   });
-  await db.write();
+  await setUsers(dbUsers);
 };
 
 const setJwtCookie = async (res: Response, payload) => {
-  const privateKey = db.get('crypto.privateKey').value();
+  const privateKey = getPrivateKey();
 
   return new Promise((resolve, reject) => {
     sign(

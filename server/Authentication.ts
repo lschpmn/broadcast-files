@@ -1,6 +1,5 @@
 import { Router } from 'express';
 import { MESSAGE_SEPARATOR } from '../constants';
-import { db } from './index';
 import {
   atob,
   btoa,
@@ -11,12 +10,13 @@ import {
   parseEncryptedCipher,
   parseIV,
 } from './lib/crypto';
+import { getPrivateKey } from './lib/db';
 
 export const AuthenticationRouter = Router();
 
 AuthenticationRouter.use((req, res, next) => {
   const encryptedCipher = parseEncryptedCipher(req.headers);
-  const privateKey = db.get('crypto.privateKey').value();
+  const privateKey = getPrivateKey();
   const cipher = encryptedCipher ? decryptString(privateKey, atob(encryptedCipher)) : '';
   const iv = generateIV();
 

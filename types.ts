@@ -15,7 +15,7 @@ export type DbSchema = {
     privateKey: string,
   },
   imageCache: {
-    [id: string]: string[],
+    [id: string]: string,
   },
   users: {
     [username: string]: User,
