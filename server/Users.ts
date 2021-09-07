@@ -1,15 +1,37 @@
 import * as bcrypt from 'bcrypt';
-import { Response, Router } from 'express';
-import { decode, sign, verify } from 'jsonwebtoken';
+import { Router } from 'express';
+import { decode, verify } from 'jsonwebtoken';
 // @ts-ignore
 import * as isEqual from 'lodash/isEqual';
 import { users } from '../config.json';
 import { JWT } from '../types';
-import { getPrivateKey, getPublicKey, getUser, getUsers, setUser, setUsers } from './lib/db';
-
-const SESSION_TIMEOUT = 60 * 5;
+import { setJwtCookie } from './lib/crypto';
+import { getPublicKey, getUser, getUsers, setUser, setUsers } from './lib/db';
 
 export const UsersRouter = Router();
+
+UsersRouter.use((req, res, next) => {
+  if (!req.cookies.auth) return next();
+  const publicKey = getPublicKey();
+
+  verify(
+    req.cookies.auth,
+    publicKey,
+    { algorithms: ['RS256'] },
+    (err, decoded: JWT) => {
+      if (err) {
+        const jwt: JWT = decode(req.cookies.auth) as any;
+        console.log(`failed to verify user ${jwt.username}`);
+        console.log(err);
+        return next();
+      }
+
+      console.log(`verified user ${decoded.username}`);
+      res.locals.user = getUser(decoded.username);
+      next();
+    },
+  );
+});
 
 UsersRouter.post('/users/login', async (req, res) => {
   try {
@@ -46,29 +68,6 @@ UsersRouter.post('/users/login', async (req, res) => {
   }
 });
 
-UsersRouter.use((req, res, next) => {
-  if (!req.cookies.auth) return next();
-  const publicKey = getPublicKey();
-
-  verify(
-    req.cookies.auth,
-    publicKey,
-    { algorithms: ['RS256'] },
-    (err, decoded: JWT) => {
-      if (err) {
-        const jwt: JWT = decode(req.cookies.auth) as any;
-        console.log(`failed to verify user ${jwt.username}`);
-        console.log(err);
-        return next();
-      }
-
-      console.log(`verified user ${decoded.username}`);
-      res.locals.user = decoded;
-      next();
-    },
-  );
-});
-
 export const setupUsers = async () => {
   // cleanup
   const dbUsers = getUsers();
@@ -89,27 +88,4 @@ export const setupUsers = async () => {
     }
   });
   await setUsers(dbUsers);
-};
-
-const setJwtCookie = async (res: Response, payload) => {
-  const privateKey = getPrivateKey();
-
-  return new Promise((resolve, reject) => {
-    sign(
-      payload,
-      privateKey,
-      { algorithm: 'RS256', expiresIn: SESSION_TIMEOUT },
-      (err, jwt) => {
-        if (err) {
-          console.log('error');
-          console.log(err);
-          return reject(err);
-        }
-
-        console.log('setting jwt');
-        res.cookie('auth', jwt, { maxAge: SESSION_TIMEOUT * 1000 });
-        resolve();
-      },
-    );
-  });
 };

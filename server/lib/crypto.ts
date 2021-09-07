@@ -1,13 +1,17 @@
+import { Response } from 'express';
+import { sign } from 'jsonwebtoken';
 import * as forge from 'node-forge';
 import { getPrivateKey, getPublicKey, setPublicPrivateKey } from './db';
 
-export const parseEncryptedCipher = (headers): string => headers['x-crypto-key'];
-
-export const parseIV = (headers): string => headers['x-crypto-iv'];
+const SESSION_TIMEOUT = 60 * 5;
 
 export const atob = (str: string) => Buffer.from(str, 'base64').toString('binary');
 
 export const btoa = (str: string) => Buffer.from(str, 'binary').toString('base64');
+
+export const parseEncryptedCipher = (headers): string => headers['x-crypto-key'];
+
+export const parseIV = (headers): string => headers['x-crypto-iv'];
 
 export const encryptString = (cipherKey: string, iv: string, data: string): string => {
   const cipher = forge.cipher.createCipher('AES-GCM', cipherKey);
@@ -45,3 +49,26 @@ export const initCrypto = async () => {
 };
 
 export const generateIV = () => forge.random.getBytes(12);
+
+export const setJwtCookie = async (res: Response, payload) => {
+  const privateKey = getPrivateKey();
+
+  return new Promise((resolve, reject) => {
+    sign(
+      payload,
+      privateKey,
+      { algorithm: 'RS256', expiresIn: SESSION_TIMEOUT },
+      (err, jwt) => {
+        if (err) {
+          console.log('error');
+          console.log(err);
+          return reject(err);
+        }
+
+        console.log('setting jwt');
+        res.cookie('auth', jwt, { maxAge: SESSION_TIMEOUT * 1000 });
+        resolve();
+      },
+    );
+  });
+};
