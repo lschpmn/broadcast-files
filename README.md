@@ -49,9 +49,11 @@ users, but instead is only available to the user lschpmn.
 
 ## Encryption
 
-The server creates a public/private keypair on initial startup. It embeds the public key into the html page for the client.
-The front end also generates its own public/private keypair on load. The public key is sent to the server in the `x-crypto-key`
-header. 
+The server and client both create a public/private keypair on initial startup. The server embeds its public key into the 
+html page that's served to the client. The client uses the header `x-crypto-key` to send its public key to the server. All
+communication back and forth is symmetrically (AES-GCM) encrypted, and the key is asymmetrically encrypted and sent along 
+with the message. The receiving party uses their private key to decrypt the symmetrical key, then use that to decrypt the 
+message. This was needed due to the size and performance limitations of asymmetrical encryption. 
 
 ##### Encryption Disclaimer
 
