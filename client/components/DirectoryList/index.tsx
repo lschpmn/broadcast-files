@@ -1,9 +1,9 @@
 import makeStyles from '@material-ui/core/styles/makeStyles';
 import { InspectResult } from 'fs-jetpack/types';
-import React, { Dispatch, SetStateAction, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import { get, stream } from '../../lib/utils';
-import { Message } from '../../types';
+import { ThumbnailMap, useThumbnails } from '../../lib/hooks';
+import { get } from '../../lib/utils';
 import DirectoryNode from './DirectoryNode';
 import FileNode from './FileNode';
 import PathHeader from './PathHeader';
@@ -38,29 +38,6 @@ const DirectoryList = () => {
   </div>;
 };
 
-const useThumbnails = (
-  list: InspectResult[],
-  setList: Dispatch<SetStateAction<InspectResult[]>>,
-  setThumbnailMap: Dispatch<SetStateAction<ThumbnailMap>>,
-  pathname: string,
-) => {
-  useEffect(() => {
-    const listener = (messages: Message[]) => {
-      const messageMap = {} as ThumbnailMap;
-      messages.forEach(message => messageMap[message.name] = message);
-
-      setThumbnailMap(thumbnailMap => ({
-        ...thumbnailMap,
-        ...messageMap,
-      }));
-    };
-
-    if (list.find(node => node.type === 'file')) {
-      stream(`/thumbnails${pathname}`, listener).catch(console.log);
-    }
-  }, [list]);
-};
-
 const Filler = () => {
   const fills = new Array(10)
     .fill(null)
@@ -77,9 +54,5 @@ const useStyles = makeStyles({
     justifyContent: 'space-around',
   },
 });
-
-type ThumbnailMap = {
-  [s: string]: Message,
-};
 
 export default DirectoryList;
