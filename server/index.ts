@@ -6,6 +6,7 @@ import * as ffmpeg from 'fluent-ffmpeg';
 import { readAsync as read, writeAsync as write } from 'fs-jetpack';
 import * as getIncrementalPort from 'get-incremental-port';
 import { join } from 'path';
+import * as process from 'process';
 import { AuthenticationRouter } from './Authentication';
 import { DirectoriesRouter } from './Directories';
 import { initCrypto } from './lib/crypto';
@@ -13,20 +14,13 @@ import { getPublicKey, initDB } from './lib/db';
 import { setupUsers, UsersRouter } from './Users';
 
 const IS_PROD = process.argv.includes('--prod');
-const START_PORT = process.argv[process.argv.indexOf('--port') + 1];
-// @ts-ignore
-if (isNaN(START_PORT)) {
-  console.log('port error');
-  console.log(START_PORT);
-  process.exit();
-}
+const START_PORT = process.argv.includes('--port') ? process.argv.indexOf('--port') + 1 : 5000;
 
 ffmpeg.setFfmpegPath(join(__dirname, '..', 'bin', 'ffmpeg.exe'));
 ffmpeg.setFfprobePath(join(__dirname, '..', 'bin', 'ffprobe.exe'));
-ffmpeg.setFlvtoolPath(join(__dirname, '..', 'bin', 'ffplay.exe'));
 
-export let app: Express;
-export let port;
+let app: Express;
+let port;
 
 async function startServer() {
   await initDB();
@@ -96,3 +90,9 @@ async function writePortToIndex() {
 }
 
 startServer().catch(console.log);
+
+function getPort(defaultPort: number): number {
+  const portIndex = process.argv.indexOf('--port');
+  if (portIndex > -1) return portIndex + 1;
+  else defaultPort;
+}
