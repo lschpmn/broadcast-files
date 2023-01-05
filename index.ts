@@ -1,59 +1,32 @@
+import getIncrementalPort from 'get-incremental-port';
+import nodemon from 'nodemon';
 import { join } from 'path';
-import { spawn } from 'child_process';
-import * as nodemon from 'nodemon';
-const getIncrementalPort = require('get-incremental-port');
-const webpackDevServer = require('webpack-dev-server');
-const webpack = require('webpack');
-const config = require('./webpack.config.js');
 
 const IS_PROD = process.argv.includes('--prod');
-const START_PORT = 5000;
-const TS_NODE_PATH = join(__dirname, 'node_modules', '.bin', 'ts-node.cmd');
+const PORT = 5000;
 
 (async function () {
-  if (IS_PROD) {
-    const serverPort = await getIncrementalPort(START_PORT);
-    startServer(serverPort);
-  } else {
-    const webpackPort = await getIncrementalPort(START_PORT);
-    const serverPort = await getIncrementalPort(START_PORT);
+  const port = await getIncrementalPort(PORT);
 
-    startNodemon(serverPort);
-    startWebpack(webpackPort, serverPort);
-  }
-})();
-
-function startNodemon(port: number) {
-  console.log('Starting server');
   nodemon({
-    args: ['--port', port.toString()],
-    ext: 'ts',
-    execMap: {
-      'ts': TS_NODE_PATH,
-    },
-    script: join(__dirname, 'server', 'index.ts'),
     watch: [join(__dirname, 'server')],
-  });
-}
-
-function startServer(serverPort: number) {
-  console.log('Starting server in prod mode');
-  const serverProcess = spawn(TS_NODE_PATH, ['server/index.ts', '--port', serverPort.toString(), '--prod']);
-
-  serverProcess.stdout.on('data', data => console.log(data.toString()));
-  serverProcess.stderr.on('data', data => console.log(data.toString()));
-}
-
-function startWebpack(webpackPort, serverPort) {
-  console.log('starting webpack');
-  const compiler = webpack(config);
-  const server = new webpackDevServer(compiler, {
-    contentBase: './public',
-    historyApiFallback: {
-      disableDotRule: true,
-    },
-    hot: true,
+    script: join(__dirname, 'server/index.ts'),
+    args: [
+      '--port', port.toString(),
+      '--max-old-space-size', '16384', //sets process memory limit to 16GB
+      IS_PROD && '--prod'],
   });
 
-  server.listen(webpackPort, () => console.log(`starting on ${webpackPort}`));
-}
+  nodemon.on('restart', (files) =>
+    files?.length > 0
+      ? console.log(`nodemon: restarting because of files ${files.join(', ')}`)
+      : console.log('nodemon: restarting because of user input'),
+  );
+
+  nodemon.on('crash', () => console.log('nodemon: app crash'));
+
+})().catch(err => {
+  console.log('Server Error');
+  console.log(err);
+  process.exit();
+});

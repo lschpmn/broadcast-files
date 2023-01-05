@@ -25,7 +25,7 @@ export type DbSchema = {
 export type JWT = User & {
   exp: number,
   iat: number,
-  password: undefined,
+  password: any,
 };
 
 export type User = {

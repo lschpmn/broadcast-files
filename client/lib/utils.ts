@@ -5,7 +5,6 @@ import { MESSAGE_SEPARATOR } from '../../constants';
 import { JWT } from '../../types';
 import { arrayBufferToString, decryptString, encryptString, generateIV, getSecureKey } from './crypto';
 
-const domain = window.__DOMAIN__;
 const jwtRegex = /auth=[^.]*\.([^.]*)\..*/;
 
 export const useAction = <T extends Function>(action: T, deps?): T => {
@@ -43,7 +42,7 @@ export const get = async (path) => {
   const secureKey = await getSecureKey();
 
   const response = await fetch(
-    `${domain}/api${path}`,
+    `/api${path}`,
     {
       credentials: 'include',
       headers: {
@@ -73,7 +72,7 @@ export const post = async (path, body: {}) => {
   const encryptedBody = await encryptString(iv, JSON.stringify(body));
 
   const response = await fetch(
-    `${domain}/api${path}`,
+    `/api${path}`,
     {
       body: encryptedBody,
       credentials: 'include',
@@ -102,7 +101,7 @@ export const stream = async (path: string, listener: (message: any) => void) => 
   const secureKey = await getSecureKey();
 
   const response = await fetch(
-    `${domain}/api${path}`,
+    `/api${path}`,
     {
       credentials: 'include',
       headers: {

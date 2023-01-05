@@ -1,6 +1,6 @@
 import { Response } from 'express';
 import { sign } from 'jsonwebtoken';
-import * as forge from 'node-forge';
+import forge from 'node-forge';
 import { getPrivateKey, getPublicKey, setPublicPrivateKey } from './db';
 
 const SESSION_TIMEOUT = 60 * 5;
@@ -50,7 +50,7 @@ export const initCrypto = async () => {
 
 export const generateIV = () => forge.random.getBytes(12);
 
-export const setJwtCookie = async (res: Response, payload) => {
+export const setJwtCookie = async (res: Response, payload): Promise<void> => {
   const privateKey = getPrivateKey();
 
   return new Promise((resolve, reject) => {

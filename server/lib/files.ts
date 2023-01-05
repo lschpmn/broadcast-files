@@ -1,4 +1,4 @@
-import * as ffmpeg from 'fluent-ffmpeg';
+import ffmpeg from 'fluent-ffmpeg';
 import { dirAsync } from 'fs-jetpack';
 import { join } from 'path';
 

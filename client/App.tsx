@@ -1,5 +1,5 @@
 import makeStyles from '@material-ui/core/styles/makeStyles';
-import * as React from 'react';
+import React from 'react';
 import { hot } from 'react-hot-loader/root';
 import { BrowserRouter, Route } from 'react-router-dom';
 import DirectoryList from './components/DirectoryList';

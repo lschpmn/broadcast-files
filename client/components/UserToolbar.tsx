@@ -9,7 +9,7 @@ import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import VisibilityOff from '@material-ui/icons/VisibilityOff';
-import * as React from 'react';
+import React from 'react';
 import { useCallback, useContext, useEffect, useState } from 'react';
 import { JWT } from '../../types';
 import { JwtContext, post } from '../lib/utils';

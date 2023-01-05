@@ -1,6 +1,6 @@
-import * as lowdb from 'lowdb';
+import lowdb from 'lowdb';
 import { LowdbAsync } from 'lowdb';
-import * as FileAsync from 'lowdb/adapters/FileAsync';
+import FileAsync from 'lowdb/adapters/FileAsync';
 import { join } from 'path';
 import { DbSchema, User } from '../../types';
 

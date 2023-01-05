@@ -1,10 +1,9 @@
 {
   "compilerOptions": {
-    "allowSyntheticDefaultImports": true,
-    "inlineSourceMap": true,
+    "esModuleInterop": true,
     "jsx": "react",
-    "moduleResolution": "node",
-    "target": "es6",
-    "resolveJsonModule": true
+    "moduleResolution": "Node",
+    "resolveJsonModule": true,
+    "target": "ES6"
   }
 }

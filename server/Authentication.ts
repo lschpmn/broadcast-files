@@ -18,7 +18,8 @@ AuthenticationRouter.use((req, res, next) => {
   const encryptedCipher = parseEncryptedCipher(req.headers);
   const privateKey = getPrivateKey();
   const cipher = encryptedCipher ? decryptString(privateKey, atob(encryptedCipher)) : '';
-  const iv = generateIV();
+  // @ts-ignore
+  const iv = generateIV() as string;
 
   if (req.method === 'POST') {
     const postIv = atob(parseIV(req.headers));

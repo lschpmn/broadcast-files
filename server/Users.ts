@@ -1,8 +1,8 @@
-import * as bcrypt from 'bcrypt';
+import bcrypt from 'bcrypt';
 import { Router } from 'express';
 import { decode, verify } from 'jsonwebtoken';
 // @ts-ignore
-import * as isEqual from 'lodash/isEqual';
+import isEqual from 'lodash/isEqual';
 import { users } from '../config.json';
 import { JWT } from '../types';
 import { setJwtCookie } from './lib/crypto';

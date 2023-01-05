@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { inspectAsync as inspect, listAsync as list } from 'fs-jetpack';
 import { InspectResult } from 'fs-jetpack/types';
 // @ts-ignore
-import * as intersection from 'lodash/intersection';
+import intersection from 'lodash/intersection';
 import { extname, join } from 'path';
 import { routes } from '../config.json';
 import { VIDEO_EXTENSIONS } from '../constants';
@@ -134,5 +134,6 @@ const checkAccess = (route: DirectoryRoute, user?: JWT): boolean => {
   }
   if (!user) return false;
 
+  // @ts-ignore
   return !!intersection(route.canDownload, user.permissions).length;
 };
