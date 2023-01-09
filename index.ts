@@ -1,9 +1,10 @@
 import getIncrementalPort from 'get-incremental-port';
 import nodemon from 'nodemon';
 import { join } from 'path';
+import process from 'process';
 
 const IS_PROD = process.argv.includes('--prod');
-const PORT = 5000;
+const PORT = process.argv.includes('--port') ? process.argv[process.argv.indexOf('--port') + 1] : 5000;
 
 (async function () {
   const port = await getIncrementalPort(PORT);

@@ -2,6 +2,8 @@ import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import express, { Express, Request, Response } from 'express';
 import ffmpeg from 'fluent-ffmpeg';
+import { read } from 'fs-jetpack';
+import { createServer } from 'https';
 import { join } from 'path';
 import process from 'process';
 import webpack from 'webpack';
@@ -21,10 +23,15 @@ ffmpeg.setFfmpegPath(join(__dirname, '..', 'bin', 'ffmpeg.exe'));
 ffmpeg.setFfprobePath(join(__dirname, '..', 'bin', 'ffprobe.exe'));
 
 let app: Express;
-
+// command to make ssl cert
+// openssl req -x509 -nodes -days 3650 -newkey rsa:2048 -keyout server.key -out server.cert
 async function startServer() {
-  await initDB();
   app = express();
+  const server = createServer({
+    key: read(join(__dirname, '../server.key')),
+    cert: read(join(__dirname, '../server.cert')),
+  }, app);
+  await initDB();
 
   // Webpack
   const compiler = webpack(config);
@@ -67,7 +74,7 @@ async function startServer() {
     res.sendFile(join(__dirname, '..', 'public', 'index.html'));
   });
 
-  app.listen(PORT, () => log(`started server on port ${PORT}`));
+  server.listen(PORT, () => log(`started server at https://localhost:${PORT}`));
 }
 
 // @ts-ignore
