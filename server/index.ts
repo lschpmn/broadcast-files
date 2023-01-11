@@ -6,6 +6,7 @@ import { read } from 'fs-jetpack';
 import { createServer } from 'https';
 import { join } from 'path';
 import process from 'process';
+import { Server, Socket } from 'socket.io';
 import webpack from 'webpack';
 import webpackDevMiddleware from 'webpack-dev-middleware';
 import webpackHotMiddleware from 'webpack-hot-middleware';
@@ -37,6 +38,11 @@ async function startServer() {
   const compiler = webpack(config);
   app.use(webpackDevMiddleware(compiler, {}));
   app.use(webpackHotMiddleware(compiler));
+
+  const io = new Server(server, { maxHttpBufferSize: 1024 * 1024 * 500 /*500MB*/ });
+  io.on('connection', (socket: Socket) => {
+    console.log('client connected');
+  });
 
   app.use((req, res, next) => {
     const ip = req.header('x-real-ip'); // ip address from nginx
