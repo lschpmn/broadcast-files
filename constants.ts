@@ -37,3 +37,7 @@ export const VIDEO_EXTENSIONS = [
   '.wmv',
   '.yuv',
 ];
+
+// Actions
+
+export const SERVER_MESSAGE = '@SERVER@';

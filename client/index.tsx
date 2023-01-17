@@ -4,10 +4,10 @@ import { render } from 'react-dom';
 import { Provider } from 'react-redux';
 import { applyMiddleware, createStore } from 'redux';
 import App from './App';
-import loggerMiddleware from './lib/middleware';
+import middlewares from './lib/middleware';
 import reducers from './lib/reducers';
 
-const store = createStore(reducers, applyMiddleware(loggerMiddleware));
+const store = createStore(reducers, applyMiddleware(...middlewares));
 const theme = createMuiTheme({
   palette: {
     type: 'dark',
