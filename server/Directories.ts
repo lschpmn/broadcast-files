@@ -88,35 +88,35 @@ DirectoriesRouter.get(['/thumbnails/:base', '/thumbnails/:base/:path(*)'], async
         const filePath = join(path, file);
         const existing = getImageCachePath(filePath);
         // @ts-ignore
-        if (existing) return res.encryptedWrite({
+        if (existing) return res.write(JSON.stringify({
           image: existing,
           name: file,
           status: 'loaded',
-        });
+        }));
 
         // @ts-ignore
-        res.encryptedWrite({
+        res.write(JSON.stringify({
           name: file,
           status: 'loading',
-        });
+        }));
 
         try {
           const imagePath = await createThumbnail(filePath);
           await setImageCachePath(filePath, imagePath);
           // @ts-ignore
-          res.encryptedWrite({
+          res.write(JSON.stringify({
             image: imagePath,
             name: file,
             status: 'loaded',
-          });
+          }));
         } catch (err) {
           console.log('creating thumbnail error');
           console.log(err);
           // @ts-ignore
-          res.encryptedWrite({
+          res.write(JSON.stringify({
             name: file,
             status: 'error',
-          });
+          }));
         }
       };
     });

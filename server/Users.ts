@@ -6,17 +6,16 @@ import isEqual from 'lodash/isEqual';
 import { users } from '../config.json';
 import { JWT } from '../types';
 import { setJwtCookie } from './lib/crypto';
-import { getPublicKey, getUser, getUsers, setUser, setUsers } from './lib/db';
+import { getUser, getUsers, setUser, setUsers } from './lib/db';
 
 export const UsersRouter = Router();
 
 UsersRouter.use((req, res, next) => {
   if (!req.cookies.auth) return next();
-  const publicKey = getPublicKey();
 
   verify(
     req.cookies.auth,
-    publicKey,
+    'publicKey',
     { algorithms: ['RS256'] },
     (err, decoded: JWT) => {
       if (err) {

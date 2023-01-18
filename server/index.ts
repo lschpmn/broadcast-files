@@ -11,9 +11,7 @@ import webpack from 'webpack';
 import webpackDevMiddleware from 'webpack-dev-middleware';
 import webpackHotMiddleware from 'webpack-hot-middleware';
 import config from '../webpack.config';
-import { AuthenticationRouter } from './Authentication';
 import { DirectoriesRouter } from './Directories';
-import { initCrypto } from './lib/crypto';
 import { initDB } from './lib/db';
 import { setupUsers, UsersRouter } from './Users';
 
@@ -42,6 +40,8 @@ async function startServer() {
   const io = new Server(server, { maxHttpBufferSize: 1024 * 1024 * 500 /*500MB*/ });
   io.on('connection', (socket: Socket) => {
     console.log('client connected');
+
+    socket.on('disconnect', () => console.log('client disconnected'));
   });
 
   app.use((req, res, next) => {
@@ -61,10 +61,8 @@ async function startServer() {
   app.use(express.text());
   app.use(express.static(join(__dirname, '..', 'public')));
 
-  await initCrypto();
   await setupUsers();
 
-  app.use('/api', AuthenticationRouter);
   app.use('/api', UsersRouter);
   app.use('/api', DirectoriesRouter);
   app.use('/api', (req, res) => res.status(404).end());

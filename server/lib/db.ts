@@ -21,23 +21,6 @@ export async function initDB() {
     .write();
 }
 
-// Crypto
-
-export function getPrivateKey(): string {
-  return db.get('crypto.privateKey').value();
-}
-
-export function getPublicKey(): string {
-  return db.get('crypto.publicKey').value();
-}
-
-export async function setPublicPrivateKey(publicKey: string, privateKey: string) {
-  await db.set(
-    'crypto',
-    { publicKey, privateKey },
-  ).write();
-}
-
 // Image Cache
 
 export function getImageCachePath(filePath: string): string {

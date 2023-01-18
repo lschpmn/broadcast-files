@@ -3,7 +3,7 @@ import { createContext, useCallback, useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { MESSAGE_SEPARATOR } from '../../constants';
 import { JWT } from '../../types';
-import { arrayBufferToString, decryptString, encryptString, generateIV, getSecureKey } from './crypto';
+import { arrayBufferToString, generateIV } from './crypto';
 
 const jwtRegex = /auth=[^.]*\.([^.]*)\..*/;
 
@@ -39,76 +39,39 @@ export const useJwt = () => {
 
 export const get = async (path) => {
   console.log(`GET ${path}`);
-  const secureKey = await getSecureKey();
 
   const response = await fetch(
     `/api${path}`,
     {
-      credentials: 'include',
-      headers: {
-        'x-crypto-key': btoa(secureKey),
-      },
       method: 'GET',
-      mode: 'cors',
     },
   );
 
-  const encrypted = await response.text();
-  if (encrypted) {
-    const iv = atob(response.headers.get('x-crypto-iv'));
-    const decrypted = await decryptString(iv, encrypted);
-    console.log(decrypted);
-
-    return JSON.parse(decrypted);
-  } else return null;
+  return response.json();
 };
 
 export const post = async (path, body: {}) => {
   console.log(`POST request ${path}`);
   console.log(body);
 
-  const iv = await generateIV();
-  const secureKey = await getSecureKey();
-  const encryptedBody = await encryptString(iv, JSON.stringify(body));
-
   const response = await fetch(
     `/api${path}`,
     {
-      body: encryptedBody,
-      credentials: 'include',
-      headers: {
-        'x-crypto-iv': btoa(iv),
-        'x-crypto-key': btoa(secureKey),
-      },
+      body: JSON.stringify(body),
       method: 'POST',
-      mode: 'cors',
     },
   );
 
-  const encrypted = await response.text();
-  if (encrypted) {
-    const responseIv = atob(response.headers['x-crypto-iv']);
-    const decrypted = await decryptString(responseIv, encrypted);
-    console.log('decrypted');
-    console.log(decrypted);
-
-    return JSON.parse(decrypted);
-  } else return null;
+  return response.json();
 };
 
 export const stream = async (path: string, listener: (message: any) => void) => {
   console.log(`stream ${path}`);
-  const secureKey = await getSecureKey();
 
   const response = await fetch(
     `/api${path}`,
     {
-      credentials: 'include',
-      headers: {
-        'x-crypto-key': btoa(secureKey),
-      },
       method: 'GET',
-      mode: 'cors',
     }
   );
 
@@ -123,13 +86,8 @@ export const stream = async (path: string, listener: (message: any) => void) => 
       const messages = arrayBufferToString(read.value)
         .split(MESSAGE_SEPARATOR)
         .map(message => {
-          if (!message) return null;
-          if (!iv) return iv = atob(message);
-
           try {
-            const decryptedMessage = decryptString(iv, atob(message));
-
-            return JSON.parse(decryptedMessage);
+            return JSON.parse(message);
           } catch (err) {
             console.log('message parsing error');
             console.log(err);
