@@ -14,6 +14,7 @@ import config from '../webpack.config';
 import { DirectoriesRouter } from './Directories';
 import { initDB } from './lib/db';
 import { setupUsers, UsersRouter } from './Users';
+import { log } from './lib/utils';
 
 const IS_PROD = process.argv.includes('--prod');
 const PORT = process.argv.includes('--port') ? process.argv[process.argv.indexOf('--port') + 1] : 5000;
@@ -23,12 +24,12 @@ ffmpeg.setFfprobePath(join(__dirname, '..', 'bin', 'ffprobe.exe'));
 
 let app: Express;
 // command to make ssl cert
-// openssl req -x509 -nodes -days 3650 -newkey rsa:2048 -keyout server.key -out server.cert
+// openssl req -x509 -nodes -days 3650 -newkey rsa:2048 -keyout ./bin/server.key -out ./bin/server.cert
 async function startServer() {
   app = express();
   const server = createServer({
-    key: read(join(__dirname, '../server.key')),
-    cert: read(join(__dirname, '../server.cert')),
+    key: read(join(__dirname, '../bin/server.key')),
+    cert: read(join(__dirname, '../bin/server.cert')),
   }, app);
   await initDB();
 
@@ -39,9 +40,9 @@ async function startServer() {
 
   const io = new Server(server, { maxHttpBufferSize: 1024 * 1024 * 500 /*500MB*/ });
   io.on('connection', (socket: Socket) => {
-    console.log('client connected');
+    log('client connected');
 
-    socket.on('disconnect', () => console.log('client disconnected'));
+    socket.on('disconnect', () => log('client disconnected'));
   });
 
   app.use((req, res, next) => {
@@ -81,15 +82,4 @@ async function startServer() {
   server.listen(PORT, () => log(`started server at https://localhost:${PORT}`));
 }
 
-// @ts-ignore
-export const log = (message: string) => console.log(`${new Date().toLocaleString(undefined, {
-  day: 'numeric',
-  hour: 'numeric',
-  minute: 'numeric',
-  month: 'short',
-  second: '2-digit',
-  weekday: 'short',
-  year: 'numeric',
-})} - ${message}`);
-
-startServer().catch(console.log);
+startServer().catch(log);

@@ -7,10 +7,10 @@ import { extname, join } from 'path';
 import { routes } from '../config.json';
 import { VIDEO_EXTENSIONS } from '../constants';
 import { DirectoryRoute, JWT } from '../types';
-import { log } from './index';
 import { getImageCachePath, setImageCachePath } from './lib/db';
 import { createThumbnail } from './lib/files';
 import Streams from './lib/Streams';
+import { log } from './lib/utils';
 
 export const DirectoriesRouter = Router();
 
@@ -35,7 +35,7 @@ DirectoriesRouter.get(['/dir/:base', '/dir/:base/:path(*)'], async (req, res) =>
       try {
         return await inspect(filePath);
       } catch (err) {
-        console.log(`error with ${filePath}`);
+        log(`error with ${filePath}`);
         return { type: 'forbidden' } as any;
       }
     }));
@@ -54,7 +54,7 @@ DirectoriesRouter.get(['/dir/:base', '/dir/:base/:path(*)'], async (req, res) =>
 
     res.send(sortedInspections);
   } catch (err) {
-    console.log(err);
+    log(err);
     res.status(500).send(err.message);
   }
 });
@@ -110,8 +110,8 @@ DirectoriesRouter.get(['/thumbnails/:base', '/thumbnails/:base/:path(*)'], async
             status: 'loaded',
           }));
         } catch (err) {
-          console.log('creating thumbnail error');
-          console.log(err);
+          log('creating thumbnail error');
+          log(err);
           // @ts-ignore
           res.write(JSON.stringify({
             name: file,
