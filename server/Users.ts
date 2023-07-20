@@ -6,7 +6,7 @@ import isEqual from 'lodash/isEqual';
 import { users } from '../config.json';
 import { JWT } from '../types';
 import { setJwtCookie } from './lib/crypto';
-import { getUser, getUsers, setUser, setUsers } from './lib/db';
+import db from './lib/db';
 import { log } from './lib/utils';
 
 export const UsersRouter = Router();
@@ -27,7 +27,7 @@ UsersRouter.use((req, res, next) => {
       }
 
       log(`verified user ${decoded.username}`);
-      res.locals.user = getUser(decoded.username);
+      res.locals.user = db.getUser(decoded.username);
       next();
     },
   );
@@ -36,7 +36,7 @@ UsersRouter.use((req, res, next) => {
 UsersRouter.post('/users/login', async (req, res) => {
   try {
     const { username, password } = JSON.parse(req.body);
-    const user = getUser(username);
+    const user = db.getUser(username);
 
     if (!user) {
       log(`user ${username} not found`);
@@ -52,7 +52,7 @@ UsersRouter.post('/users/login', async (req, res) => {
     if (!user.password) {
       log('First login, generating hashed and salted password');
       user.password = await bcrypt.hash(password, 10);
-      await setUser(user);
+      db.setUser(user);
     }
 
     log(`Successful login by user ${username}`);
@@ -68,9 +68,9 @@ UsersRouter.post('/users/login', async (req, res) => {
   }
 });
 
-export const setupUsers = async () => {
+export const setupUsers = () => {
   // cleanup
-  const dbUsers = getUsers();
+  const dbUsers = db.getUsers();
   Object
     .keys(dbUsers)
     .filter(username => users.every(u => u.username !== username))
@@ -87,5 +87,5 @@ export const setupUsers = async () => {
       dbUser.permissions = user.permissions;
     }
   });
-  await setUsers(dbUsers);
+  db.setUsers(dbUsers);
 };

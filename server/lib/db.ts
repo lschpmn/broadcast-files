@@ -1,50 +1,57 @@
-import lowdb from 'lowdb';
-import { LowdbAsync } from 'lowdb';
-import FileAsync from 'lowdb/adapters/FileAsync';
 import { join } from 'path';
 import { DbSchema, User } from '../../types';
+import { exists, read, writeAsync } from 'fs-jetpack';
+import { cloneDeep, throttle } from 'lodash';
 
-const DB_PATH = join(__dirname, '../..', 'db.json');
+const DB_PATH = join(__dirname, '../..', 'bin', 'db.json');
 
-let db: LowdbAsync<DbSchema>;
+class DB {
+  data: DbSchema;
 
-export async function initDB() {
-  const adapter = new FileAsync(DB_PATH);
-  db = await lowdb(adapter);
+  constructor() {
+    if (exists(DB_PATH)) {
+      this.data = read(DB_PATH, 'json');
+    } else {
+      this.data = {
+        imageCache: {},
+        users: {},
+      };
+    }
+  }
 
-  await db
-    .defaults({
-      crypto: {},
-      imageCache: {},
-      users: {},
-    })
-    .write();
+  getImageCachePath = (filePath: string): string => this.data.imageCache[filePath];
+
+  setImageCachePath(filePath: string, imagePath: string) {
+    this.data.imageCache[filePath] = imagePath;
+    this.save();
+  }
+
+  getUser = (username: string): User => cloneDeep(this.data.users[username]);
+
+  getUsers = () => cloneDeep(this.data.users);
+
+  setUser = (user: User) => {
+    this.data.users[user.username] = user;
+    this.save();
+  };
+
+  setUsers = (users: { [u: string]: User }) => {
+    this.data.users = {
+      ...this.data.users,
+      ...users,
+    };
+    this.save();
+  };
+
+
+  private save = throttle(() => {
+    writeAsync(DB_PATH, this.data, { atomic: true })
+      .catch(err => {
+        console.error('Error writing db!');
+        console.log(err);
+        this.save();
+      });
+  }, 2000);
 }
 
-// Image Cache
-
-export function getImageCachePath(filePath: string): string {
-  return db.get(['imageCache', filePath]).value();
-}
-
-export async function setImageCachePath(filePath: string, imagePath: string) {
-  await db.set(['imageCache', filePath], imagePath).write();
-}
-
-// Users
-
-export function getUser(username: string): User {
-  return db.get(['users', username]).value();
-}
-
-export function getUsers() {
-  return db.get('users').value();
-}
-
-export async function setUser(user: User) {
-  await db.set(['users', user.username], user).write();
-}
-
-export async function setUsers(users: { [username: string]: User }) {
-  await db.set('users', users).write();
-}
+export default new DB();

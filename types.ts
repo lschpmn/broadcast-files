@@ -10,10 +10,6 @@ export type DirectoryRoute = {
 };
 
 export type DbSchema = {
-  crypto: {
-    publicKey: string,
-    privateKey: string,
-  },
   imageCache: {
     [id: string]: string,
   },

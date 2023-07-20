@@ -7,7 +7,7 @@ import { extname, join } from 'path';
 import { routes } from '../config.json';
 import { VIDEO_EXTENSIONS } from '../constants';
 import { DirectoryRoute, JWT } from '../types';
-import { getImageCachePath, setImageCachePath } from './lib/db';
+import db from './lib/db';
 import { createThumbnail } from './lib/files';
 import Streams from './lib/Streams';
 import { log } from './lib/utils';
@@ -86,7 +86,7 @@ DirectoriesRouter.get(['/thumbnails/:base', '/thumbnails/:base/:path(*)'], async
     .map(file => {
       return async () => {
         const filePath = join(path, file);
-        const existing = getImageCachePath(filePath);
+        const existing = db.getImageCachePath(filePath);
         // @ts-ignore
         if (existing) return res.write(JSON.stringify({
           image: existing,
@@ -102,7 +102,7 @@ DirectoriesRouter.get(['/thumbnails/:base', '/thumbnails/:base/:path(*)'], async
 
         try {
           const imagePath = await createThumbnail(filePath);
-          await setImageCachePath(filePath, imagePath);
+          db.setImageCachePath(filePath, imagePath);
           // @ts-ignore
           res.write(JSON.stringify({
             image: imagePath,
