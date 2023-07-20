@@ -1,6 +1,6 @@
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
-import express, { Express, Request, Response } from 'express';
+import express, { Request, Response } from 'express';
 import ffmpeg from 'fluent-ffmpeg';
 import { read } from 'fs-jetpack';
 import { createServer } from 'https';
@@ -20,11 +20,10 @@ const { PORT, PROD } = getCommandLineArguments();
 ffmpeg.setFfmpegPath(join(__dirname, '..', 'bin', 'ffmpeg.exe'));
 ffmpeg.setFfprobePath(join(__dirname, '..', 'bin', 'ffprobe.exe'));
 
-let app: Express;
 // command to make ssl cert
 // openssl req -x509 -nodes -days 3650 -newkey rsa:2048 -keyout ./bin/server.key -out ./bin/server.cert
 async function startServer() {
-    app = express();
+    const app = express();
     const server = createServer({
         key: read(join(__dirname, '../bin/server.key')),
         cert: read(join(__dirname, '../bin/server.cert')),
@@ -74,7 +73,7 @@ async function startServer() {
 
     app.use((req: Request, res: Response) => {
         log(`404 - sending index.html - ${req.url}`);
-        res.sendFile(join(__dirname, '..', 'public', 'index.html'));
+        res.sendFile(join(__dirname, '..', 'client', 'index.html'));
     });
 
     server.listen(PORT, () => log(`started server at https://localhost:${PORT}`));

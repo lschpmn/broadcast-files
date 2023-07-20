@@ -8,6 +8,8 @@ import middlewares from './lib/middleware';
 import reducers from './lib/reducers';
 
 const store = createStore(reducers, applyMiddleware(...middlewares));
+// idea for app primary color: purple
+// base it off HboMax's old look before their change to blue
 const theme = createMuiTheme({
   palette: {
     type: 'dark',
