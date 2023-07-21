@@ -16,6 +16,7 @@ class DB {
         imageCache: {},
         users: {},
       };
+      this.save();
     }
   }
 
