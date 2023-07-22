@@ -1,7 +1,6 @@
 import makeStyles from '@material-ui/core/styles/makeStyles';
 import React from 'react';
-import { hot } from 'react-hot-loader/root';
-import { BrowserRouter, Route } from 'react-router-dom';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import DirectoryList from './components/DirectoryList';
 import Landing from './components/Landing';
 import UserToolbar from './components/UserToolbar';
@@ -16,8 +15,10 @@ const App = () => {
       <UserToolbar />
 
       <BrowserRouter>
-        <Route path="/*" render={props => props.location.pathname !== '/' &&  <DirectoryList />} />
-        <Route path="/" exact render={() => <Landing />} />
+        <Routes>
+          <Route path="/*" element={<DirectoryList />} />
+          <Route path="/" element={<Landing />} />
+        </Routes>
       </BrowserRouter>
     </div>
   </JwtContext.Provider>;
@@ -32,4 +33,4 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-export default hot(App);
+export default App;

@@ -4,13 +4,13 @@ const { join } = require('path');
 
 module.exports = {
   devServer: {
+    hot: true,
     port: 5000,
   },
 
   devtool: 'source-map',
 
   entry: [
-    'react-hot-loader/patch',
     './client/index.tsx',
   ],
 
@@ -33,7 +33,6 @@ module.exports = {
               '@babel/plugin-transform-runtime',
               '@babel/plugin-proposal-class-properties',
               '@babel/plugin-proposal-optional-chaining',
-              'react-hot-loader/babel',
             ],
           },
         },
@@ -48,9 +47,6 @@ module.exports = {
   },
 
   resolve: {
-    alias: {
-      'react-dom': '@hot-loader/react-dom',
-    },
     extensions: ['.ts', '.tsx', '.js', '.json'],
   },
 };

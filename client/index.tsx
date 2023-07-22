@@ -1,6 +1,6 @@
 import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
 import React from 'react';
-import { render } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { Provider } from 'react-redux';
 import { applyMiddleware, createStore } from 'redux';
 import App from './App';
@@ -16,10 +16,11 @@ const theme = createMuiTheme({
   },
 });
 
-render((
+const root = createRoot(document.getElementById('react'));
+root.render((
   <Provider store={store}>
     <ThemeProvider theme={theme}>
       <App/>
     </ThemeProvider>
   </Provider>
-), document.getElementById('react'));
+));

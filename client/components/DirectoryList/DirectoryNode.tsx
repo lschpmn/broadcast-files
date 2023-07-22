@@ -2,7 +2,7 @@ import Button from '@material-ui/core/Button';
 import makeStyles from '@material-ui/core/styles/makeStyles';
 import { InspectResult } from 'fs-jetpack/types';
 import React from 'react';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useNavigate , useLocation } from 'react-router-dom';
 
 const RESIZE_FACTOR = 0.3;
 
@@ -11,13 +11,13 @@ type Props = {
 };
 
 const DirectoryNode = ({ directory }: Props) => {
-  const history = useHistory();
+  const navigate = useNavigate ();
   const { pathname } = useLocation();
   const classes = useStyles({});
 
   return <Button
     className={classes.dirButton}
-    onClick={() => history.push(`${pathname}/${encodeURIComponent(directory.name)}`)}
+    onClick={() => navigate(`${pathname}/${encodeURIComponent(directory.name)}`)}
   >
     <span>{directory.name}</span>
   </Button>;
