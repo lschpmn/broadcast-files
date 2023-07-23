@@ -5,7 +5,7 @@ const configSlice = createSlice({
   name: 'config',
   initialState: {},
   reducers: {
-    set: (state, { payload }) => {
+    set: (state, { payload }: { type: string, payload: object }) => {
       return payload;
     },
   },

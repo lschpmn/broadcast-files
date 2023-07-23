@@ -27,7 +27,7 @@ export const initClient = (app: Express, server: ServerType) => {
   app.use(express.static(join(__dirname, '..', 'public')));
 
   app.use((req: Request, res: Response) => {
-    log(`404 - sending index.html - ${req.url}`);
+    log(`404 - ${req.url} - sending index.html`);
     res.sendFile(join(__dirname, '..', 'client', 'index.html'));
   });
 };

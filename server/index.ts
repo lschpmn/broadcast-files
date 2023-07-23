@@ -1,12 +1,10 @@
-import cookieParser from 'cookie-parser';
 import express from 'express';
 import { read } from 'fs-jetpack';
 import { createServer } from 'https';
 import { join } from 'path';
 import { initClient } from './client-connection';
-import { DirectoriesRouter } from './Directories';
 import { getCommandLineArguments, log } from './lib/utils';
-import { setupUsers, UsersRouter } from './Users';
+import { setupUsers } from './Users';
 
 const { PORT, PROD } = getCommandLineArguments();
 
@@ -24,15 +22,7 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use(cookieParser());
-app.use(express.text());
-
 setupUsers();
-
-app.use('/api', UsersRouter);
-app.use('/api', DirectoriesRouter);
-app.use('/api', (req, res) => res.status(404).end());
-
 initClient(app, server);
 
 app.use((err, req, res, next) => {

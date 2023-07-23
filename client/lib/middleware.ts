@@ -5,8 +5,8 @@ import { SERVER_MESSAGE } from '../../constants';
 const socket = io();
 
 export const loggingMiddleware: Middleware = ({ getState }) => (next) => (action) => {
-  console.log(`${(new Date()).toLocaleTimeString()} action`, action);
   console.log(`${(new Date()).toLocaleTimeString()} state`, getState());
+  console.log(`${(new Date()).toLocaleTimeString()} action`, action);
   next(action);
 };
 
@@ -22,4 +22,3 @@ export const socketMiddleware: Middleware = ({ dispatch }) => {
   };
 };
 
-export default [loggingMiddleware, socketMiddleware];

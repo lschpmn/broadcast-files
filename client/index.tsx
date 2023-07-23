@@ -5,9 +5,12 @@ import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { Provider } from 'react-redux';
 import App from './App';
+import { loggingMiddleware, socketMiddleware } from './lib/middleware';
 import { configReducer } from './lib/reducers';
 
 const store = configureStore({
+  middleware: getDefaultMiddleware =>
+    getDefaultMiddleware().concat([ loggingMiddleware, socketMiddleware ]),
   reducer: {
     config: configReducer,
   },
