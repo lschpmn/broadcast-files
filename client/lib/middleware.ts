@@ -1,13 +1,16 @@
+import dayjs from 'dayjs';
 import { Middleware } from 'redux';
 import { io } from 'socket.io-client';
 import { SERVER_MESSAGE } from '../../constants';
 
 const socket = io();
 
+const time = () => dayjs().format('hh:mm:ss.SSS A');
+
 export const loggingMiddleware: Middleware = ({ getState }) => (next) => (action) => {
-  console.log(`${(new Date()).toLocaleTimeString()} action`, action);
+  console.log(`${time()} action`, action);
   next(action);
-  setTimeout(() => console.log(`${(new Date()).toLocaleTimeString()} state`, getState()), 0);
+  setTimeout(() => console.log(`${time()} state`, getState()));
 };
 
 export const socketMiddleware: Middleware = ({ dispatch }) => {
@@ -21,4 +24,3 @@ export const socketMiddleware: Middleware = ({ dispatch }) => {
     next(action);
   };
 };
-

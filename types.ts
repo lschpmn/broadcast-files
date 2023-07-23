@@ -1,4 +1,9 @@
 
+export type Action<T> = {
+  payload?: T,
+  type: string
+};
+
 export type DirectoryRoute = {
   // can user access directories and download files, true for all access
   canDownload: boolean | string[],
@@ -6,7 +11,7 @@ export type DirectoryRoute = {
   canStream: boolean | string[],
   filePath: string,
   label: string,
-  urlPath: string,
+  url: string,
 };
 
 export type DbSchema = {

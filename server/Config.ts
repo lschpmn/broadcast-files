@@ -1,11 +1,28 @@
 import { Socket } from 'socket.io';
 import { set } from '../client/lib/reducers';
 import config from '../config.json';
+import BaseSocketConnection from './lib/BaseSocketConnection';
 
+class Config extends BaseSocketConnection {
 
-class Config {
   constructor(socket: Socket) {
-    socket.emit('action', set(config));
+    super(socket);
+
+    this.sendRoutes();
+  }
+
+  sendRoutes() {
+    const allowedRoutes = config.routes
+      .filter(route => {
+        if (typeof route.canDownload === 'boolean') return route.canDownload;
+        else return false;
+      })
+      .map(route => {
+        const { label, url } = route;
+        return { label, url };
+      });
+
+    this.emit(set(allowedRoutes));
   }
 }
 
