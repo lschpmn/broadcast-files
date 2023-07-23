@@ -5,13 +5,13 @@ import { SERVER_MESSAGE } from '../../constants';
 const socket = io();
 
 export const loggingMiddleware: Middleware = ({ getState }) => (next) => (action) => {
-  console.log(`${(new Date()).toLocaleTimeString()} state`, getState());
   console.log(`${(new Date()).toLocaleTimeString()} action`, action);
   next(action);
+  setTimeout(() => console.log(`${(new Date()).toLocaleTimeString()} state`, getState()), 0);
 };
 
 export const socketMiddleware: Middleware = ({ dispatch }) => {
-  socket.on('message', (action) => dispatch(action));
+  socket.on('action', (action) => dispatch(action));
 
   return (next) => (action) => {
     if (action.type.includes(SERVER_MESSAGE)) {

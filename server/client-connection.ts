@@ -5,13 +5,13 @@ import { Server, Socket } from 'socket.io';
 import webpack from 'webpack';
 import webpackDevMiddleware from 'webpack-dev-middleware';
 import webpackHotMiddleware from 'webpack-hot-middleware';
-import config from '../webpack.config';
+import webpackConfig from '../webpack.config';
 import { log } from './lib/utils';
 
 
-export const initClient = (app: Express, server: ServerType) => {
+export const initClient = (app: Express, server: ServerType, onConnect: (socket: Socket) => void) => {
   // Webpack
-  const compiler = webpack(config);
+  const compiler = webpack(webpackConfig);
   app.use(webpackDevMiddleware(compiler, {}));
   app.use(webpackHotMiddleware(compiler));
 
@@ -19,6 +19,7 @@ export const initClient = (app: Express, server: ServerType) => {
   const io = new Server(server, { maxHttpBufferSize: 1024 * 1024 * 500 /*500MB*/ });
   io.on('connection', (socket: Socket) => {
     log('client connected');
+    onConnect(socket);
 
     socket.on('disconnect', () => log('client disconnected'));
   });

@@ -1,18 +1,11 @@
-import { useTheme } from '@mui/material';
+import { styled } from '@mui/material';
 import React from 'react';
 import { BrowserRouter, Routes } from 'react-router-dom';
 import UserToolbar from './components/UserToolbar';
 
 const App = () => {
-  const theme = useTheme();
-
   return (
-    <div style={{
-      backgroundColor: theme.palette.background.default,
-      color: theme.palette.text.primary,
-      height: '100%',
-      overflow: 'auto',
-    }}>
+    <Container>
       <UserToolbar/>
 
       <BrowserRouter>
@@ -21,8 +14,14 @@ const App = () => {
           {/*<Route path="/" element={<Landing />} />*/}
         </Routes>
       </BrowserRouter>
-    </div>
+    </Container>
   );
 };
+
+const Container = styled('div')`
+  background-color: ${props => props.theme.palette.background.default};
+  height: 100%;
+  overflow: auto;
+`;
 
 export default App;

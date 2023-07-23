@@ -3,8 +3,9 @@ import { read } from 'fs-jetpack';
 import { createServer } from 'https';
 import { join } from 'path';
 import { initClient } from './client-connection';
+import Config from './Config';
 import { getCommandLineArguments, log } from './lib/utils';
-import { setupUsers } from './Users';
+import { setupUsers } from './users';
 
 const { PORT, PROD } = getCommandLineArguments();
 
@@ -23,7 +24,9 @@ app.use((req, res, next) => {
 });
 
 setupUsers();
-initClient(app, server);
+initClient(app, server, socket => {
+  new Config(socket);
+});
 
 app.use((err, req, res, next) => {
   log(err);
