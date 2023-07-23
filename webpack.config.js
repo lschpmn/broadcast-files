@@ -1,6 +1,8 @@
 'use strict';
 
 const { join } = require('path');
+const ReactRefreshWebpackPlugin = require('@pmmmwh/react-refresh-webpack-plugin');
+const webpack = require('webpack');
 
 module.exports = {
   devServer: {
@@ -11,6 +13,7 @@ module.exports = {
   devtool: 'source-map',
 
   entry: [
+    'webpack-hot-middleware/client',
     './client/index.tsx',
   ],
 
@@ -33,6 +36,7 @@ module.exports = {
               '@babel/plugin-transform-runtime',
               '@babel/plugin-proposal-class-properties',
               '@babel/plugin-proposal-optional-chaining',
+              require.resolve('react-refresh/babel')
             ],
           },
         },
@@ -45,6 +49,8 @@ module.exports = {
     path: join(__dirname, 'public/'),
     publicPath: '/',
   },
+
+  plugins: [new webpack.HotModuleReplacementPlugin(), new ReactRefreshWebpackPlugin()],
 
   resolve: {
     extensions: ['.ts', '.tsx', '.js', '.json'],

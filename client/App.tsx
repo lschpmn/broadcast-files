@@ -1,6 +1,7 @@
 import { useTheme } from '@mui/material';
 import React from 'react';
 import { BrowserRouter, Routes } from 'react-router-dom';
+import UserToolbar from './components/UserToolbar';
 
 const App = () => {
   const theme = useTheme();
@@ -12,7 +13,7 @@ const App = () => {
       height: '100%',
       overflow: 'auto',
     }}>
-      {/*<UserToolbar/>*/}
+      <UserToolbar/>
 
       <BrowserRouter>
         <Routes>

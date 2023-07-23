@@ -1,11 +1,11 @@
 import { createTheme, ThemeProvider } from '@mui/material';
-import { green, purple } from '@mui/material/colors';
+import { deepPurple, green } from '@mui/material/colors';
 import { configureStore } from '@reduxjs/toolkit';
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { Provider } from 'react-redux';
 import App from './App';
-import { configReducer, set } from './lib/reducers';
+import { configReducer } from './lib/reducers';
 
 const store = configureStore({
   reducer: {
@@ -18,7 +18,7 @@ const store = configureStore({
 const theme = createTheme({
   palette: {
     primary: {
-      main: purple['500'],
+      main: deepPurple['500'],
     },
     secondary: {
       main: green['500'],

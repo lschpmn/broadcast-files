@@ -1,40 +1,13 @@
-import isEqual from 'lodash/isEqual';
-import { createContext, useCallback, useEffect, useState } from 'react';
+import { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import { MESSAGE_SEPARATOR } from '../../constants';
-import { JWT } from '../../types';
-import { arrayBufferToString, generateIV } from './crypto';
-
-const jwtRegex = /auth=[^.]*\.([^.]*)\..*/;
+import { arrayBufferToString } from './crypto';
 
 export const useAction = <T extends Function>(action: T, deps?): T => {
   const dispatch = useDispatch();
 
   return useCallback((...args) =>
     dispatch(action(...args)), deps ? [dispatch, ...deps] : [dispatch]) as any;
-};
-
-export const JwtContext = createContext({});
-
-export const useJwt = () => {
-  const [jwt, setJwt] = useState({} as JWT);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      const cookies = document.cookie.split(';').map(c => c.trim());
-      const authCookie = cookies.find(cookie => cookie.startsWith('auth'));
-
-      if (authCookie) {
-        const [, base64Jwt] = jwtRegex.exec(authCookie);
-        const actualJwt = JSON.parse(atob(base64Jwt));
-        if (!isEqual(actualJwt, jwt)) setJwt(actualJwt);
-      } else if (jwt.username) setJwt({} as any);
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, [jwt]);
-
-  return jwt;
 };
 
 export const get = async (path) => {
@@ -50,21 +23,6 @@ export const get = async (path) => {
   return response.json();
 };
 
-export const post = async (path, body: {}) => {
-  console.log(`POST request ${path}`);
-  console.log(body);
-
-  const response = await fetch(
-    `/api${path}`,
-    {
-      body: JSON.stringify(body),
-      method: 'POST',
-    },
-  );
-
-  return response.json();
-};
-
 export const stream = async (path: string, listener: (message: any) => void) => {
   console.log(`stream ${path}`);
 
@@ -72,7 +30,7 @@ export const stream = async (path: string, listener: (message: any) => void) => 
     `/api${path}`,
     {
       method: 'GET',
-    }
+    },
   );
 
   const reader = response.body.getReader();
