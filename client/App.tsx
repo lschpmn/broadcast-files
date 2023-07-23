@@ -1,36 +1,27 @@
-import makeStyles from '@material-ui/core/styles/makeStyles';
+import { useTheme } from '@mui/material';
 import React from 'react';
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
-import DirectoryList from './components/DirectoryList';
-import Landing from './components/Landing';
-import UserToolbar from './components/UserToolbar';
-import { JwtContext, useJwt } from './lib/utils';
+import { BrowserRouter, Routes } from 'react-router-dom';
 
 const App = () => {
-  const classes = useStyles({});
-  const jwt = useJwt();
+  const theme = useTheme();
 
-  return <JwtContext.Provider value={jwt}>
-    <div className={classes.container}>
-      <UserToolbar />
+  return (
+    <div style={{
+      backgroundColor: theme.palette.background.default,
+      color: theme.palette.text.primary,
+      height: '100%',
+      overflow: 'auto',
+    }}>
+      {/*<UserToolbar/>*/}
 
       <BrowserRouter>
         <Routes>
-          <Route path="/*" element={<DirectoryList />} />
-          <Route path="/" element={<Landing />} />
+          {/*<Route path="/*" element={<DirectoryList />} />*/}
+          {/*<Route path="/" element={<Landing />} />*/}
         </Routes>
       </BrowserRouter>
     </div>
-  </JwtContext.Provider>;
+  );
 };
-
-const useStyles = makeStyles(theme => ({
-  container: {
-    backgroundColor: theme.palette.background.default,
-    color: theme.palette.text.primary,
-    height: '100%',
-    overflow: 'auto',
-  },
-}));
 
 export default App;
