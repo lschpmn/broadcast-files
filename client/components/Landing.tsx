@@ -1,43 +1,39 @@
-import Button from '@material-ui/core/Button';
-import makeStyles from '@material-ui/core/styles/makeStyles';
-import React, { useContext, useEffect, useState } from 'react';
+import { Button, styled } from '@mui/material';
+import { grey } from '@mui/material/colors';
+import React from 'react';
+import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { DirectoryRoute } from '../../types';
-import { get, JwtContext } from '../lib/utils';
+import { State } from '../types';
 
 const Landing = () => {
-  const [routes, setRoutes] = useState([]);
-  const classes = useStyles({});
-  const jwt = useContext(JwtContext);
+  const routes = useSelector((state: State) => state.config.routes);
 
-  useEffect(() => {
-    get('/config')
-      .then(res => setRoutes(res))
-      .catch(console.log);
-  }, [jwt]);
-
-  return <>
-    {routes.map((route: DirectoryRoute) =>
-      <Link key={route.label} to={route.urlPath}>
-        <Button
-          className={classes.button}
-          style={{ width: (100 / routes.length) + '%' }}
-        >
-          {route.label}
-        </Button>
-      </Link>
-    )}
-  </>
+  return <div style={{ height: '100%' }}>
+    {routes?.map((route: DirectoryRoute, i) => (
+      <MyButtonLink
+        component={Link}
+        key={route.label}
+        last={i === routes.length - 1 ? 'last' : ''}
+        to={route.url}
+        width={100 / routes.length}
+      >
+        {route.label}
+      </MyButtonLink>
+    ))}
+  </div>;
 };
 
-const useStyles = makeStyles(theme => ({
-  button: {
-    height: '100%',
-  },
-  link: {
-    color: theme.palette.text.primary,
-    textDecoration: 'none',
-  },
-}));
-
 export default Landing;
+
+const MyButtonLink = styled(Button)<{ component, last, to, width }>`
+  color: white;
+  border-right: ${props => props.last ? '0px' : '1px'} solid grey;
+  border-radius: 0;
+  height: 100%;
+  width: ${props => props.width}%;
+
+  :hover {
+    background-color: ${grey['800']};
+  }
+`;

@@ -22,7 +22,7 @@ class Config extends BaseSocketConnection {
         return { label, url };
       });
 
-    this.emit(set(allowedRoutes));
+    this.emit(set({ routes: allowedRoutes }));
   }
 }
 

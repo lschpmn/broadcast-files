@@ -1,6 +1,7 @@
 import { styled } from '@mui/material';
 import React from 'react';
-import { BrowserRouter, Routes } from 'react-router-dom';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import Landing from './components/Landing';
 import UserToolbar from './components/UserToolbar';
 
 const App = () => {
@@ -11,7 +12,7 @@ const App = () => {
       <BrowserRouter>
         <Routes>
           {/*<Route path="/*" element={<DirectoryList />} />*/}
-          {/*<Route path="/" element={<Landing />} />*/}
+          <Route path="/" element={<Landing />} />
         </Routes>
       </BrowserRouter>
     </Container>

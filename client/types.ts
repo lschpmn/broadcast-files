@@ -1,12 +1,19 @@
 
-export type ReducerState = {
 
-};
 
 export type Message = {
   image?: string
   name: string,
   status?: 'loading' | 'loaded' | 'error',
+};
+
+export type State = {
+  config: {
+    routes: [{
+      label: string,
+      url: string,
+    }],
+  },
 };
 
 declare global {
