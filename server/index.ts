@@ -4,6 +4,7 @@ import { createServer } from 'https';
 import { join } from 'path';
 import { initClient } from './client-connection';
 import Config from './Config';
+import Directory from './Directory';
 import { getCommandLineArguments, log } from './lib/utils';
 import { setupUsers } from './users';
 
@@ -26,6 +27,7 @@ app.use((req, res, next) => {
 setupUsers();
 initClient(app, server, socket => {
   new Config(socket);
+  new Directory(socket);
 });
 
 app.use((err, req, res, next) => {

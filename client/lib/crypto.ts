@@ -8,17 +8,3 @@ export const arrayBufferToString = (ab: ArrayBuffer): string => {
   }
   return str;
 };
-
-export const generateIV = (): Promise<string> => {
-  return getRandomString(12);
-};
-
-export const getRandomString = async (bytes: number): Promise<string> => {
-  return new Promise((res, rej) => {
-    // @ts-ignore
-    forge.random.getBytes(bytes, (err, bytes: string) => {
-      if (err) rej(err);
-      else res(bytes);
-    });
-  });
-}

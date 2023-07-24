@@ -1,7 +1,7 @@
 import dayjs from 'dayjs';
 import { Middleware } from 'redux';
 import { io } from 'socket.io-client';
-import { SERVER_MESSAGE } from '../../constants';
+import { Action } from '../../types';
 
 const socket = io();
 
@@ -16,9 +16,9 @@ export const loggingMiddleware: Middleware = ({ getState }) => (next) => (action
 export const socketMiddleware: Middleware = ({ dispatch }) => {
   socket.on('action', (action) => dispatch(action));
 
-  return (next) => (action) => {
-    if (action.type.includes(SERVER_MESSAGE)) {
-      socket.emit('message', action);
+  return (next) => (action: Action<any>) => {
+    if (action.type.includes('SendServer')) {
+      socket.emit(action.type, action.payload);
     }
 
     next(action);

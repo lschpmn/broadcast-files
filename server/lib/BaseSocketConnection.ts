@@ -11,7 +11,7 @@ class BaseSocketConnection {
   }
 
   protected emit = (action: Action<any>, reason?: string) => {
-    log(`Sending action ${action.type}` + (reason ? ` - Reason: ${reason}` : ''));
+    log(`Sending action ${action.type}` + (reason ? ` - ${reason}` : ''));
     this.socket.emit('action', action);
   };
 }

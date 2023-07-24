@@ -1,5 +1,5 @@
 import { Socket } from 'socket.io';
-import { set } from '../client/lib/reducers';
+import { setConfig } from '../client/lib/reducers';
 import config from '../config.json';
 import BaseSocketConnection from './lib/BaseSocketConnection';
 
@@ -22,7 +22,7 @@ class Config extends BaseSocketConnection {
         return { label, url };
       });
 
-    this.emit(set({ routes: allowedRoutes }));
+    this.emit(setConfig({ routes: allowedRoutes }));
   }
 }
 

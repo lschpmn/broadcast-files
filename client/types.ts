@@ -1,5 +1,4 @@
-
-
+import { InspectResult } from 'fs-jetpack/types';
 
 export type Message = {
   image?: string
@@ -13,6 +12,10 @@ export type State = {
       label: string,
       url: string,
     }],
+  },
+  directoryList: {
+    loading: boolean,
+    list: InspectResult[],
   },
 };
 
