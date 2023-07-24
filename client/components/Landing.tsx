@@ -30,6 +30,7 @@ const MyButtonLink = styled(Button)<{ component, last, to, width }>`
   color: white;
   border-right: ${props => props.last ? '0px' : '1px'} solid grey;
   border-radius: 0;
+  flex: 1;
   height: 100%;
   width: ${props => props.width}%;
 

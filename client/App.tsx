@@ -21,6 +21,8 @@ const App = () => {
 
 const Container = styled('div')`
   background-color: ${props => props.theme.palette.background.default};
+  display: flex;
+  flex-direction: column;
   height: 100%;
   overflow: auto;
 `;

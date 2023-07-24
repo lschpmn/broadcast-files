@@ -3,7 +3,7 @@ import React from 'react';
 
 const UserToolbar = () => {
 
-  return <div>
+  return (
     <AppBar position="relative">
       <MyToolbar>
         <Button
@@ -12,7 +12,7 @@ const UserToolbar = () => {
         >Login</Button>
       </MyToolbar>
     </AppBar>
-  </div>;
+  );
 };
 
 export default UserToolbar;
