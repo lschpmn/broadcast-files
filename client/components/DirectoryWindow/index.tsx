@@ -1,4 +1,4 @@
-import { Card, CardContent, Paper } from '@mui/material';
+import { Card, CardActionArea, CardContent } from '@mui/material';
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link, useLocation } from 'react-router-dom';
@@ -19,14 +19,16 @@ const NewDirectory = () => {
     <div>
       <PathHeader/>
 
-      <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'flex-start' }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', margin: '0 2rem' }}>
         {list.map(item => (
-          <Link style={{ flex: 1, maxWidth: '15rem', display: 'flex', justifyContent: 'center' }} key={item.name} to={`${pathname}/${encodeURIComponent(item['name'])}`}>
-            <Card style={{ margin: '1rem', width: '10rem', overflowWrap: 'anywhere' }}>
-              <CardContent>
-                Name: {item.name}<br/><br/>
-                Type: {item.type}
-              </CardContent>
+          <Link to={`${pathname}/${encodeURIComponent(item.name)}`}>
+            <Card raised style={{ margin: '1rem', width: '20rem', overflowWrap: 'anywhere' }}>
+              <CardActionArea style={{ fontSize: 16 }} >
+                <CardContent>
+                  {item.name}<br/><br/>
+                  Type: {item.type}
+                </CardContent>
+              </CardActionArea>
             </Card>
           </Link>
         ))}
