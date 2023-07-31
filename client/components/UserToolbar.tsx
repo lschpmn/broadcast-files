@@ -1,11 +1,14 @@
 import { AppBar, Button, styled, Toolbar } from '@mui/material';
 import React from 'react';
+import PathHeader from './PathHeader';
 
 const UserToolbar = () => {
 
   return (
     <AppBar position="relative">
       <MyToolbar>
+        <PathHeader/>
+
         <Button
           onMouseDown={() => console.log('login')}
           variant="contained"
@@ -18,5 +21,5 @@ const UserToolbar = () => {
 export default UserToolbar;
 
 const MyToolbar = styled(Toolbar)`
-  justify-content: end;
+  justify-content: space-between;
 `;

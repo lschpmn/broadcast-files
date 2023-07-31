@@ -8,9 +8,9 @@ import UserToolbar from './components/UserToolbar';
 const App = () => {
   return (
     <Container>
-      <UserToolbar/>
-
       <BrowserRouter>
+        <UserToolbar/>
+
         <Routes>
           <Route path="/*" element={<NewDirectory />} />
           <Route path="/" element={<Landing />} />

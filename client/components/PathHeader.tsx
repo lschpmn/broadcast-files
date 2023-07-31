@@ -17,7 +17,7 @@ const PathHeader = () => {
 
     {routes.map((route, i) =>
       <ItemContainer key={i}>
-        <h2>/</h2>.
+        <h2>/</h2>
         <Button onClick={() => navigate('/' + routes.slice(0, i + 1).join('/'))}>
           <h2>{decodeURIComponent(route)}</h2>
         </Button>
