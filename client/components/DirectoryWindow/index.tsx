@@ -1,10 +1,10 @@
-import { Card, CardActionArea, CardContent } from '@mui/material';
 import isEqual from 'lodash/isEqual';
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Link, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { getDirectoryListSendServer } from '../../lib/reducers';
 import { State } from '../../types';
+import DirFileNode from './DirFileNode';
 
 const NewDirectory = () => {
   const { pathname } = useLocation();
@@ -19,16 +19,11 @@ const NewDirectory = () => {
     <div>
       <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', margin: '0 2rem' }}>
         {list.map(item => (
-          <Link key={item.name} to={`${pathname}/${encodeURIComponent(item.name)}`}>
-            <Card raised style={{ margin: '1rem', width: '20rem', overflowWrap: 'anywhere' }}>
-              <CardActionArea style={{ fontSize: 16 }}>
-                <CardContent>
-                  {item.name}<br/><br/>
-                  Type: {item.type}
-                </CardContent>
-              </CardActionArea>
-            </Card>
-          </Link>
+          <DirFileNode
+            key={item.name}
+            name={item.name}
+            pathname={pathname}
+          />
         ))}
       </div>
     </div>

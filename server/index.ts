@@ -3,8 +3,7 @@ import { read } from 'fs-jetpack';
 import { createServer } from 'https';
 import { join } from 'path';
 import { initClient } from './client-connection';
-import Config from './Config';
-import Directory from './Directory';
+import { fileRouter } from './file-control';
 import { getCommandLineArguments, log } from './lib/utils';
 import { setupUsers } from './users';
 
@@ -24,11 +23,10 @@ app.use((req, res, next) => {
   next();
 });
 
+app.use('/f', fileRouter);
+
 setupUsers();
-initClient(app, server, socket => {
-  new Config(socket);
-  new Directory(socket);
-});
+initClient(app, server);
 
 app.use((err, req, res, next) => {
   log(err);
