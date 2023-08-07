@@ -5,6 +5,7 @@ const configSlice = createSlice({
   name: 'config',
   initialState: {},
   reducers: {
+    getConfigSendServer: () => {},
     setConfig: (state, { payload }: Action<object>) => {
       return payload;
     },
@@ -30,6 +31,6 @@ const directoryListSlice = createSlice({
 });
 
 export const configReducer = configSlice.reducer;
-export const { setConfig } = configSlice.actions;
+export const { getConfigSendServer, setConfig } = configSlice.actions;
 export const directoryListReducer = directoryListSlice.reducer;
 export const { getDirectoryListSendServer, setDirectoryList } = directoryListSlice.actions;

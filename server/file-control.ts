@@ -1,7 +1,55 @@
 import { Router } from 'express';
+import { inspectAsync, listAsync } from 'fs-jetpack';
+import { InspectResult } from 'fs-jetpack/types';
+import { join } from 'path';
+import { getConfigSendServer, getDirectoryListSendServer, setConfig, setDirectoryList } from '../client/lib/reducers';
 import config from '../config.json';
-import { log } from './lib/utils';
+import { log, socketFunctions } from './lib/utils';
 
+// WEB SOCKET
+
+socketFunctions[getDirectoryListSendServer.toString()] = (emit) => async (pathName: string) => {
+  log(`Request for path ${pathName}`);
+  const route = config.routes.find(route => {
+    return pathName.startsWith(route.url);
+  });
+
+  if (!route) {
+    log('Route doesn\'t exist');
+    emit(setDirectoryList([]));
+  }
+
+  try {
+    const truePath = join(route.filePath, pathName.replace(route.url, ''));
+    const directoryList = await listAsync(truePath);
+    const inspectPromises = directoryList
+      .map(item => inspectAsync(join(truePath, item)).catch(() => false as any as InspectResult));
+    const inspections = (await Promise.all(inspectPromises))
+      .filter(item => item);
+
+    emit(setDirectoryList(inspections), `Returning directory list with ${directoryList.length} items`);
+  } catch (err) {
+    console.error(`Error reading directory - ${decodeURIComponent(pathName)}`);
+    console.error(err);
+    emit(setDirectoryList([]), 'Failed inspecting path');
+  }
+};
+
+socketFunctions[getConfigSendServer.toString()] = (emit) => () => {
+  const allowedRoutes = config.routes
+    .filter(route => {
+      if (typeof route.canDownload === 'boolean') return route.canDownload;
+      else return false;
+    })
+    .map(route => {
+      const { label, url } = route;
+      return { label, url };
+    });
+
+  emit(setConfig({ routes: allowedRoutes }));
+};
+
+// FILE ROUTER
 
 export const fileRouter = Router();
 

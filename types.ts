@@ -25,10 +25,16 @@ export type DbSchema = {
   },
 };
 
+export type EmitAction = (action: Action<any>, reason?: string) => void
+
 export type JWT = User & {
   exp: number,
   iat: number,
   password: any,
+};
+
+export type SocketFunction = {
+  [actionType: string]: (emit: EmitAction) => (p?: any) => void
 };
 
 export type User = {

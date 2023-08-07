@@ -1,13 +1,19 @@
 import { Button, styled } from '@mui/material';
 import { grey } from '@mui/material/colors';
-import React from 'react';
-import { useSelector } from 'react-redux';
+import React, { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { DirectoryRoute } from '../../types';
+import { getConfigSendServer } from '../lib/reducers';
 import { State } from '../types';
 
 const Landing = () => {
+  const dispatch = useDispatch();
   const routes = useSelector((state: State) => state.config.routes);
+
+  useEffect(() => {
+    dispatch(getConfigSendServer());
+  }, []);
 
   return <div style={{ height: '100%' }}>
     {routes?.map((route: DirectoryRoute, i) => (

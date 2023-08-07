@@ -1,8 +1,8 @@
 import { styled } from '@mui/material';
 import React from 'react';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
-import Landing from './components/Landing';
 import NewDirectory from './components/DirectoryWindow';
+import Landing from './components/Landing';
 import UserToolbar from './components/UserToolbar';
 
 const App = () => {
@@ -12,8 +12,8 @@ const App = () => {
         <UserToolbar/>
 
         <Routes>
-          <Route path="/*" element={<NewDirectory />} />
-          <Route path="/" element={<Landing />} />
+          <Route path="/*" element={<NewDirectory/>}/>
+          <Route path="/" element={<Landing/>}/>
         </Routes>
       </BrowserRouter>
     </Container>
