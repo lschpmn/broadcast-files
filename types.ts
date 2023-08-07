@@ -20,6 +20,7 @@ export type DbSchema = {
   imageCache: {
     [id: string]: string,
   },
+  routes: Route[],
   users: {
     [username: string]: User,
   },
@@ -31,6 +32,14 @@ export type JWT = User & {
   exp: number,
   iat: number,
   password: any,
+};
+
+export type Route = {
+  canDownload: boolean,
+  canStream: boolean,
+  filePath: string,
+  label: string,
+  url: string,
 };
 
 export type SocketFunction = {

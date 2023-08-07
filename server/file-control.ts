@@ -3,16 +3,16 @@ import { inspectAsync, listAsync } from 'fs-jetpack';
 import { InspectResult } from 'fs-jetpack/types';
 import { join } from 'path';
 import { getConfigSendServer, getDirectoryListSendServer, setConfig, setDirectoryList } from '../client/lib/reducers';
-import config from '../config.json';
+import db from './lib/db';
 import { log, socketFunctions } from './lib/utils';
 
 // WEB SOCKET
 
 socketFunctions[getDirectoryListSendServer.toString()] = (emit) => async (pathName: string) => {
   log(`Request for path ${pathName}`);
-  const route = config.routes.find(route => {
-    return pathName.startsWith(route.url);
-  });
+  const route = db
+    .getRoutes()
+    .find(route => pathName.startsWith(route.url));
 
   if (!route) {
     log('Route doesn\'t exist');
@@ -36,15 +36,15 @@ socketFunctions[getDirectoryListSendServer.toString()] = (emit) => async (pathNa
 };
 
 socketFunctions[getConfigSendServer.toString()] = (emit) => () => {
-  const allowedRoutes = config.routes
+  const allowedRoutes = db.getRoutes()
     .filter(route => {
       if (typeof route.canDownload === 'boolean') return route.canDownload;
       else return false;
     })
-    .map(route => {
-      const { label, url } = route;
-      return { label, url };
-    });
+    .map(route => ({
+      label: route.label,
+      url: route.url,
+    }));
 
   emit(setConfig({ routes: allowedRoutes }));
 };
@@ -54,7 +54,7 @@ socketFunctions[getConfigSendServer.toString()] = (emit) => () => {
 export const fileRouter = Router();
 
 fileRouter.get('/*', (req, res) => {
-  const route = config.routes
+  const route = db.getRoutes()
     .find(r => req.path.startsWith(r.url));
 
   if (!route) {

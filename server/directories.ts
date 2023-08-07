@@ -12,7 +12,7 @@ import { createThumbnail } from './lib/files';
 import Streams from './lib/Streams';
 import { log } from './lib/utils';
 
-export const DirectoriesRouter = Router();
+const DirectoriesRouter = Router();
 
 DirectoriesRouter.get('/config', (req, res) => {
   const routesToShow = routes

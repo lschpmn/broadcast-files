@@ -9,7 +9,7 @@ import { setJwtCookie } from './lib/crypto';
 import db from './lib/db';
 import { log } from './lib/utils';
 
-export const UsersRouter = Router();
+const UsersRouter = Router();
 
 UsersRouter.use((req, res, next) => {
   if (!req.cookies.auth) return next();
@@ -68,7 +68,7 @@ UsersRouter.post('/users/login', async (req, res) => {
   }
 });
 
-export const setupUsers = () => {
+const setupUsers = () => {
   // cleanup
   const dbUsers = db.getUsers();
   Object

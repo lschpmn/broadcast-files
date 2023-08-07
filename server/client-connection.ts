@@ -11,14 +11,7 @@ import { getCommandLineArguments, log, socketFunctions } from './lib/utils';
 
 const { PROD } = getCommandLineArguments();
 
-export const initClient = (app: Express, server: ServerType) => {
-  // Webpack
-  if (!PROD) {
-    const compiler = webpack(webpackConfig);
-    app.use(webpackDevMiddleware(compiler, {}));
-    app.use(webpackHotMiddleware(compiler));
-  }
-
+export const connectSocket = (server: ServerType) => {
   // Socket.IO
   const io = new Server(server, { maxHttpBufferSize: 1024 * 1024 * 500 /*500MB*/ });
   io.on('connection', (socket: Socket) => {
@@ -31,6 +24,15 @@ export const initClient = (app: Express, server: ServerType) => {
 
     socket.on('disconnect', () => log('client disconnected'));
   });
+};
+
+export const connectWeb = (app: Express) => {
+  // Webpack
+  if (!PROD) {
+    const compiler = webpack(webpackConfig);
+    app.use(webpackDevMiddleware(compiler, {}));
+    app.use(webpackHotMiddleware(compiler));
+  }
 
   // App Routes
   app.use(express.static(join(__dirname, '..', 'public')));
