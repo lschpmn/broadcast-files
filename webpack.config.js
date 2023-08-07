@@ -4,6 +4,8 @@ const { join } = require('path');
 const ReactRefreshWebpackPlugin = require('@pmmmwh/react-refresh-webpack-plugin');
 const webpack = require('webpack');
 
+const isDevelopment = process.env.NODE_ENV !== 'production';
+
 module.exports = {
   devServer: {
     hot: true,
@@ -36,8 +38,8 @@ module.exports = {
               '@babel/plugin-transform-runtime',
               '@babel/plugin-proposal-class-properties',
               '@babel/plugin-proposal-optional-chaining',
-              require.resolve('react-refresh/babel')
-            ],
+              isDevelopment && require.resolve('react-refresh/babel')
+            ].filter(Boolean),
           },
         },
       },
@@ -50,7 +52,7 @@ module.exports = {
     publicPath: '/',
   },
 
-  plugins: [new webpack.HotModuleReplacementPlugin(), new ReactRefreshWebpackPlugin()],
+  plugins: [new webpack.HotModuleReplacementPlugin(), isDevelopment && new ReactRefreshWebpackPlugin()].filter(Boolean),
 
   resolve: {
     extensions: ['.ts', '.tsx', '.js', '.json'],

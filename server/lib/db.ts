@@ -20,12 +20,16 @@ class DB {
     }
   }
 
+  // IMAGE CACHE
+
   getImageCachePath = (filePath: string): string => this.data.imageCache[filePath];
 
   setImageCachePath(filePath: string, imagePath: string) {
     this.data.imageCache[filePath] = imagePath;
     this.save();
   }
+
+  // USERS
 
   getUser = (username: string): User => cloneDeep(this.data.users[username]);
 

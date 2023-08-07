@@ -7,14 +7,17 @@ import webpackDevMiddleware from 'webpack-dev-middleware';
 import webpackHotMiddleware from 'webpack-hot-middleware';
 import { Action, EmitAction } from '../types';
 import webpackConfig from '../webpack.config';
-import { log, socketFunctions } from './lib/utils';
+import { getCommandLineArguments, log, socketFunctions } from './lib/utils';
 
+const { PROD } = getCommandLineArguments();
 
 export const initClient = (app: Express, server: ServerType) => {
   // Webpack
-  const compiler = webpack(webpackConfig);
-  app.use(webpackDevMiddleware(compiler, {}));
-  app.use(webpackHotMiddleware(compiler));
+  if (!PROD) {
+    const compiler = webpack(webpackConfig);
+    app.use(webpackDevMiddleware(compiler, {}));
+    app.use(webpackHotMiddleware(compiler));
+  }
 
   // Socket.IO
   const io = new Server(server, { maxHttpBufferSize: 1024 * 1024 * 500 /*500MB*/ });
