@@ -3,7 +3,6 @@ import { read } from 'fs-jetpack';
 import { createServer } from 'https';
 import { join } from 'path';
 import { connectSocket, connectWeb } from './client-connection';
-import { fileRouter } from './file-control';
 import { getCommandLineArguments, log } from './lib/utils';
 
 const { PORT } = getCommandLineArguments();
@@ -21,8 +20,6 @@ app.use((req, res, next) => {
   log(`ip - ${ip || req.ip} - url - ${req.url}`);
   next();
 });
-
-app.use('/f', fileRouter);
 
 connectSocket(server);
 connectWeb(app);

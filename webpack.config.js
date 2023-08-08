@@ -15,9 +15,9 @@ module.exports = {
   devtool: 'source-map',
 
   entry: [
-    'webpack-hot-middleware/client',
+    isDevelopment && 'webpack-hot-middleware/client',
     './client/index.tsx',
-  ],
+  ].filter(Boolean),
 
   mode: 'development',
 

@@ -7,6 +7,7 @@ import webpackDevMiddleware from 'webpack-dev-middleware';
 import webpackHotMiddleware from 'webpack-hot-middleware';
 import { Action, EmitAction } from '../types';
 import webpackConfig from '../webpack.config';
+import { fileRouter } from './file-control';
 import { getCommandLineArguments, log, socketFunctions } from './lib/utils';
 
 const { PROD } = getCommandLineArguments();
@@ -33,6 +34,8 @@ export const connectWeb = (app: Express) => {
     app.use(webpackDevMiddleware(compiler, {}));
     app.use(webpackHotMiddleware(compiler));
   }
+
+  app.use(fileRouter);
 
   // App Routes
   app.use(express.static(join(__dirname, '..', 'public')));

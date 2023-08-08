@@ -3,6 +3,7 @@ import { inspectAsync, listAsync } from 'fs-jetpack';
 import { InspectResult } from 'fs-jetpack/types';
 import { join } from 'path';
 import { getConfigSendServer, getDirectoryListSendServer, setConfig, setDirectoryList } from '../client/lib/reducers';
+import { DOWNLOAD_PREFIX } from '../constants';
 import db from './lib/db';
 import { log, socketFunctions } from './lib/utils';
 
@@ -53,16 +54,18 @@ socketFunctions[getConfigSendServer.toString()] = (emit) => () => {
 
 export const fileRouter = Router();
 
-fileRouter.get('/*', (req, res) => {
+fileRouter.get(DOWNLOAD_PREFIX + '/*', (req, res) => {
+  const path = req.path.replace(DOWNLOAD_PREFIX, '');
+
   const route = db.getRoutes()
-    .find(r => req.path.startsWith(r.url));
+    .find(r => path.startsWith(r.url));
 
   if (!route) {
     log(`route not found`);
     return res.sendStatus(404);
   }
 
-  const filePath = decodeURIComponent(req.path)
+  const filePath = decodeURIComponent(path)
     .replace(route.url, route.filePath)
     .replace(/\//g, '\\');
 
