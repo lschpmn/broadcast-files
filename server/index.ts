@@ -16,8 +16,9 @@ const server = createServer({
 }, app);
 
 app.use((req, res, next) => {
-  const ip = req.header('x-real-ip'); // ip address from nginx
-  log(`ip - ${ip || req.ip} - url - ${req.url}`);
+  // x-real-ip = ip address from nginx
+  const ip = (req.header('x-real-ip') || req.ip).replace('::ffff:', '');
+  log(`ip - ${ip} - url - ${req.url}`);
   next();
 });
 
