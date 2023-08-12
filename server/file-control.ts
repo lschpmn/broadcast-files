@@ -11,22 +11,18 @@ import { log, socketFunctions } from './lib/utils';
 
 socketFunctions[getDirectoryListSendServer.toString()] = (emit) => async (pathName: string) => {
   log(`Request for path ${pathName}`);
-  const route = db
-    .getRoutes()
-    .find(route => pathName.startsWith(route.url));
+  const filePath = getFilePath(pathName);
 
-  if (!route) {
-    log('Route doesn\'t exist');
+  if (!filePath) {
+    log(`Route not found`);
     emit(setDirectoryList([]));
   }
 
   try {
-    const truePath = join(route.filePath, pathName.replace(route.url, ''));
-    const directoryList = await listAsync(truePath);
+    const directoryList = await listAsync(filePath);
     const inspectPromises = directoryList
-      .map(item => inspectAsync(join(truePath, item)).catch(() => false as any as InspectResult));
-    const inspections = (await Promise.all(inspectPromises))
-      .filter(item => item);
+      .map(item => inspectAsync(join(filePath, item)).catch(() => false as any as InspectResult));
+    const inspections = (await Promise.all(inspectPromises)).filter(Boolean);
 
     emit(setDirectoryList(inspections), `Returning directory list with ${directoryList.length} items`);
   } catch (err) {
@@ -55,19 +51,12 @@ socketFunctions[getConfigSendServer.toString()] = (emit) => () => {
 export const fileRouter = Router();
 
 fileRouter.get(DOWNLOAD_PREFIX + '/*', (req, res) => {
-  const path = req.path.replace(DOWNLOAD_PREFIX, '');
+  const filePath = getFilePath(req.path.replace(DOWNLOAD_PREFIX, ''));
 
-  const route = db.getRoutes()
-    .find(r => path.startsWith(r.url));
-
-  if (!route) {
-    log(`route not found`);
+  if (!filePath) {
+    log(`Route not found`);
     return res.sendStatus(404);
   }
-
-  const filePath = decodeURIComponent(path)
-    .replace(route.url, route.filePath)
-    .replace(/\//g, '\\');
 
   log(`start stream for - ${filePath}`);
 
@@ -75,3 +64,14 @@ fileRouter.get(DOWNLOAD_PREFIX + '/*', (req, res) => {
 
   res.sendFile(filePath);
 });
+
+const getFilePath = (path: string): string | null => {
+  const route = db.getRoutes()
+    .find(r => path.startsWith(r.url));
+
+  if (!route) return null;
+
+  return decodeURIComponent(path)
+    .replace(route.url, route.filePath)
+    .replace(/\//g, '\\');
+};
