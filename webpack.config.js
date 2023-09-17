@@ -4,7 +4,7 @@ const { join } = require('path');
 const ReactRefreshWebpackPlugin = require('@pmmmwh/react-refresh-webpack-plugin');
 const webpack = require('webpack');
 
-const isDevelopment = process.env.NODE_ENV !== 'production';
+const isDevelopment = process.env.NODE_ENV?.trim() !== 'production';
 
 module.exports = {
   devServer: {
