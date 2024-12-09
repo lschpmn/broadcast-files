@@ -3,7 +3,7 @@ import { inspectAsync, listAsync } from 'fs-jetpack';
 import { InspectResult } from 'fs-jetpack/types';
 import { join } from 'path';
 import { getConfigSendServer, getDirectoryListSendServer, setConfig, setDirectoryList } from '../client/lib/reducers';
-import { DOWNLOAD_PREFIX } from '../constants';
+import { DOWNLOAD_PREFIX, STREAM_PREFIX } from '../constants';
 import db from './lib/db';
 import { log, socketFunctions } from './lib/utils';
 
@@ -52,17 +52,25 @@ export const fileRouter = Router();
 
 fileRouter.get(DOWNLOAD_PREFIX + '/*', (req, res) => {
   const filePath = getFilePath(req.path.replace(DOWNLOAD_PREFIX, ''));
-
   if (!filePath) {
     log(`Route not found`);
     return res.sendStatus(404);
   }
 
   log(`start stream for - ${filePath}`);
-
   res.on('close', () => log(`stream ended for - ${filePath}`));
 
   res.sendFile(filePath);
+});
+
+fileRouter.get(STREAM_PREFIX + ' /*', (req, res) => {
+  const filePath = getFilePath(req.path.replace(STREAM_PREFIX, ''));
+  if (!filePath) {
+    log(`Route not found`);
+    return res.sendStatus(404);
+  }
+
+  res.send('hi!');
 });
 
 const getFilePath = (path: string): string | null => {
