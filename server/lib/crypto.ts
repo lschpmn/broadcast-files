@@ -4,10 +4,6 @@ import {  } from './db';
 
 const SESSION_TIMEOUT = 60 * 5;
 
-export const atob = (str: string) => Buffer.from(str, 'base64').toString('binary');
-
-export const btoa = (str: string) => Buffer.from(str, 'binary').toString('base64');
-
 export const setJwtCookie = async (res: Response, payload): Promise<void> => {
   return new Promise((resolve, reject) => {
     sign(

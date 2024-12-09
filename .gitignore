@@ -3,6 +3,4 @@ node_modules/
 public/
 config.json
 db.json
-bin/server.cert
-bin/server.key
-bin/*.exe
+bin/
