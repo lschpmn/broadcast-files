@@ -34,7 +34,7 @@ socketFunctions[getDirectoryListSendServer.toString()] = (emit) => async (pathNa
 
 socketFunctions[getConfigSendServer.toString()] = (emit) => () => {
   const allowedRoutes = db.getRoutes()
-    .filter(route => route.canDownload.includes('guests'))
+    .filter(route => [...route.canDownload, ...route.canStream].includes('guests'))
     .map(route => ({
       label: route.label,
       url: route.url,
@@ -76,6 +76,7 @@ const getFilePath = (path: string): string | null => {
 
   if (!route) return null;
 
+  // TODO: Make sure bad actor can't access parent directories
   return decodeURIComponent(path)
     .replace(route.url, route.filePath)
     .replace(/\//g, '\\');

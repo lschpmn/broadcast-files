@@ -5,7 +5,7 @@ import { Action } from '../../types';
 
 const socket = io();
 
-const time = () => dayjs().format('hh:mm:ss.SSS A');
+const time = () => dayjs().format('hh:mm:ss.SSSA');
 
 export const loggingMiddleware: Middleware = ({ getState }) => (next) => (action) => {
   console.log(`${time()} action`, action);

@@ -3,7 +3,7 @@ import { grey } from '@mui/material/colors';
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
-import { DirectoryRoute } from '../../types';
+import { Route } from '../../types';
 import { getConfigSendServer } from '../lib/reducers';
 import { State } from '../types';
 
@@ -16,7 +16,7 @@ const Landing = () => {
   }, []);
 
   return <div style={{ height: '100%' }}>
-    {routes?.map((route: DirectoryRoute, i) => (
+    {routes?.map((route: Route, i) => (
       <MyButtonLink
         component={Link}
         key={route.label}
