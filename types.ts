@@ -35,8 +35,8 @@ export type JWT = User & {
 };
 
 export type Route = {
-  canDownload: boolean,
-  canStream: boolean,
+  canDownload: string[],
+  canStream: string[],
   filePath: string,
   label: string,
   url: string,
@@ -49,5 +49,5 @@ export type SocketFunction = {
 export type User = {
   username: string,
   password?: string,
-  permissions: string[],
+  roles: string[],
 };

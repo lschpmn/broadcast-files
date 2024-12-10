@@ -34,10 +34,7 @@ socketFunctions[getDirectoryListSendServer.toString()] = (emit) => async (pathNa
 
 socketFunctions[getConfigSendServer.toString()] = (emit) => () => {
   const allowedRoutes = db.getRoutes()
-    .filter(route => {
-      if (typeof route.canDownload === 'boolean') return route.canDownload;
-      else return false;
-    })
+    .filter(route => route.canDownload.includes('guests'))
     .map(route => ({
       label: route.label,
       url: route.url,
