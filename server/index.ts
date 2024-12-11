@@ -4,8 +4,12 @@ import { createServer } from 'https';
 import { join } from 'path';
 import { connectSocket, connectWeb } from './client-connection';
 import { getCommandLineArguments, log } from './lib/utils';
+import ffmpeg from "fluent-ffmpeg";
 
 const { PORT } = getCommandLineArguments();
+
+ffmpeg.setFfmpegPath(join(__dirname, '..', 'bin', 'ffmpeg.exe'));
+ffmpeg.setFfprobePath(join(__dirname, '..', 'bin', 'ffprobe.exe'));
 
 // command to make ssl cert
 // openssl req -x509 -nodes -days 3650 -newkey rsa:2048 -keyout ./bin/server.key -out ./bin/server.cert

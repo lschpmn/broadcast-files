@@ -2,7 +2,7 @@ import { Card, CardActionArea, CardContent } from '@mui/material';
 import React from 'react';
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
-import { DOWNLOAD_PREFIX } from '../../../constants';
+import { STREAM_PREFIX } from '../../../constants';
 import { State } from '../../types';
 
 type Props = {
@@ -16,7 +16,7 @@ const DirFileNode = ({ name, pathname }: Props) => {
 
   const WrapperLink = item.type === 'dir'
     ? (props) => <Link to={targetPath}>{props.children}</Link>
-    : (props) => <a href={DOWNLOAD_PREFIX + targetPath} target="_blank">{props.children}</a>;
+    : (props) => <a href={STREAM_PREFIX + targetPath} target="_blank">{props.children}</a>;
 
   return (
     <WrapperLink>

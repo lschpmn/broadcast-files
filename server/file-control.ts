@@ -6,6 +6,7 @@ import { getConfigSendServer, getDirectoryListSendServer, setConfig, setDirector
 import { DOWNLOAD_PREFIX, STREAM_PREFIX } from '../constants';
 import db from './lib/db';
 import { log, socketFunctions } from './lib/utils';
+import ffmpeg from 'fluent-ffmpeg';
 
 // WEB SOCKET
 
@@ -60,14 +61,36 @@ fileRouter.get(DOWNLOAD_PREFIX + '/*', (req, res) => {
   res.sendFile(filePath);
 });
 
-fileRouter.get(STREAM_PREFIX + ' /*', (req, res) => {
+fileRouter.get(STREAM_PREFIX + '/*', (req, res) => {
   const filePath = getFilePath(req.path.replace(STREAM_PREFIX, ''));
+
   if (!filePath) {
     log(`Route not found`);
     return res.sendStatus(404);
   }
 
-  res.send('hi!');
+  res.setHeader('Content-Type', 'video/mp4');
+  res.setHeader('Content-Disposition', 'inline');
+
+  console.log(`filePath: ${filePath}`);
+  console.log(`range: ${JSON.stringify(req.headers.range)}`);
+  // return res.send('test');
+  ffmpeg(filePath)
+    .format('mp4')
+    .duration(5 * 60)
+    // .videoCodec('libx264')
+    .audioCodec('libmp3lame')
+    .outputOptions([
+      '-movflags frag_keyframe+empty_moov', // Optimize for streaming
+      '-preset ultrafast',                 // Low latency encoding
+      '-tune zerolatency'                  // Reduce latency for streaming
+    ])
+    // .duration('15s')
+    .on('error', error => {
+      console.log('will you stop crashing??');
+      console.log(error);
+    })
+    .pipe(res, { end: true });
 });
 
 const getFilePath = (path: string): string | null => {
