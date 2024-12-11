@@ -1,18 +1,18 @@
 import isEqual from 'lodash/isEqual';
 import React, { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { useLocation } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import { getDirectoryListSendServer } from '../../lib/reducers';
 import { State } from '../../types';
 import DirFileNode from './DirFileNode';
+import { useAction, useMyPath } from '../../lib/utils';
 
 const NewDirectory = () => {
-  const { pathname } = useLocation();
-  const dispatch = useDispatch();
+  const [pathname] = useMyPath();
+  const getDirectoryListAction = useAction(getDirectoryListSendServer);
   const list: { name: string, type: 'file' | 'dir' }[] = useSelector(listGrabber, isEqual);
 
   useEffect(() => {
-    dispatch(getDirectoryListSendServer(decodeURIComponent(pathname)));
+    getDirectoryListAction(pathname);
   }, [pathname]);
 
   return (

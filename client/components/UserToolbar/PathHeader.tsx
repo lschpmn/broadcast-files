@@ -1,12 +1,11 @@
 import HomeIcon from '@mui/icons-material/Home';
-import { Button, styled } from '@mui/material';
+import { Breadcrumbs, Button } from '@mui/material';
 import React from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
+import { useMyPath } from '../../lib/utils';
 
 const PathHeader = () => {
-  const { pathname } = useLocation();
-  const navigate = useNavigate();
-  const routes = pathname.split('/').slice(1);
+  const [, paths] = useMyPath();
 
   return <div style={{ display: 'flex' }}>
     <Link to="/" style={{ display: 'flex' }}>
@@ -15,28 +14,20 @@ const PathHeader = () => {
       </Button>
     </Link>
 
-    {routes.map((route, i) =>
-      <ItemContainer key={i}>
-        <h2>/</h2>
-        <Button onClick={() => navigate('/' + routes.slice(0, i + 1).join('/'))}>
-          <h2>{decodeURIComponent(route)}</h2>
-        </Button>
-      </ItemContainer>,
-    )}
+    <Breadcrumbs style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>
+      {paths.map((path, i) => (
+        <Link to={createPathString(paths, i)}>
+          <Button style={{ color: 'white' }}>
+            {path}
+          </Button>
+        </Link>
+      ))}
+    </Breadcrumbs>
   </div>;
 };
 
-const ItemContainer = styled('div')`
-  display: flex;
-  align-items: center;
-
-  h2 {
-    color: white;
-  }
-
-  a > button {
-    color: white;
-  }
-`;
+const createPathString = (paths: string[], i: number): string => {
+  return '/' + paths.slice(0, i + 1).map(encodeURIComponent).join('/');
+};
 
 export default PathHeader;

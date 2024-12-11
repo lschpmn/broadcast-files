@@ -12,7 +12,7 @@ type Props = {
 
 const DirFileNode = ({ name, pathname }: Props) => {
   const item = useSelector((state: State) => state.directoryList.list.find(n => n.name === name));
-  const targetPath = `${pathname}/${encodeURIComponent(item.name)}`;
+  const targetPath = `${pathname}/${encodeURIComponent(name)}`;
 
   const WrapperLink = item.type === 'dir'
     ? (props) => <Link to={targetPath}>{props.children}</Link>

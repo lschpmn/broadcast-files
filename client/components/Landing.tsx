@@ -1,19 +1,14 @@
 import { Button, styled } from '@mui/material';
 import { grey } from '@mui/material/colors';
-import React, { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import React from 'react';
+import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { Route } from '../../types';
-import { getConfigSendServer } from '../lib/reducers';
 import { State } from '../types';
+import isEqual from 'lodash/isEqual';
 
 const Landing = () => {
-  const dispatch = useDispatch();
-  const routes = useSelector((state: State) => state.config.routes);
-
-  useEffect(() => {
-    dispatch(getConfigSendServer());
-  }, []);
+  const routes = useSelector((state: State) => state.config.routes, isEqual);
 
   return <div style={{ height: '100%' }}>
     {routes?.map((route: Route, i) => (
