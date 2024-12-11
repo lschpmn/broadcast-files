@@ -74,11 +74,9 @@ fileRouter.get(STREAM_PREFIX + '/*', (req, res) => {
 
   console.log(`filePath: ${filePath}`);
   console.log(`range: ${JSON.stringify(req.headers.range)}`);
-  // return res.send('test');
   ffmpeg(filePath)
     .format('mp4')
-    .duration(5 * 60)
-    // .videoCodec('libx264')
+    .videoCodec('libx264')
     .audioCodec('libmp3lame')
     .outputOptions([
       '-movflags frag_keyframe+empty_moov', // Optimize for streaming
@@ -87,7 +85,7 @@ fileRouter.get(STREAM_PREFIX + '/*', (req, res) => {
     ])
     // .duration('15s')
     .on('error', error => {
-      console.log('will you stop crashing??');
+      log('Streaming error');
       console.log(error);
     })
     .pipe(res, { end: true });

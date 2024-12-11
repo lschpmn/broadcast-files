@@ -39,7 +39,7 @@ export type Route = {
   canStream: string[],
   filePath: string,
   label: string,
-  url: string,
+  url: string, //should be longer than 3 characters
 };
 
 export type SocketFunction = {

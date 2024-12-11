@@ -2,7 +2,7 @@ import { AppBar, Button, styled, Toolbar } from '@mui/material';
 import React from 'react';
 import PathHeader from './PathHeader';
 
-const UserToolbar = () => {
+const Index = () => {
 
   return (
     <AppBar position="relative">
@@ -18,7 +18,7 @@ const UserToolbar = () => {
   );
 };
 
-export default UserToolbar;
+export default Index;
 
 const MyToolbar = styled(Toolbar)`
   justify-content: space-between;
