@@ -73,8 +73,10 @@ fileRouter.get(STREAM_PREFIX + '/*', (req, res) => {
   res.setHeader('Content-Disposition', 'inline');
 
   console.log(`filePath: ${filePath}`);
-  console.log(`range: ${JSON.stringify(req.headers.range)}`);
+  console.log(`headers: ${JSON.stringify(req.headers, null, 1)}`);
+
   ffmpeg(filePath)
+    .seekInput((+req.query.t || 0))
     .format('mp4')
     .videoCodec('libx264')
     .audioCodec('libmp3lame')
@@ -83,7 +85,6 @@ fileRouter.get(STREAM_PREFIX + '/*', (req, res) => {
       '-preset ultrafast',                 // Low latency encoding
       '-tune zerolatency'                  // Reduce latency for streaming
     ])
-    // .duration('15s')
     .on('error', error => {
       log('Streaming error');
       console.log(error);

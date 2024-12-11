@@ -4,7 +4,7 @@ import { join } from 'path';
 import process from 'process';
 
 const IS_PROD = process.argv.includes('--prod');
-const PORT = process.argv.includes('--port') ? process.argv[process.argv.indexOf('--port') + 1] : 5000;
+const PORT = process.argv.includes('--port') ? process.argv[process.argv.indexOf('--port') + 1] : 5001;
 
 (async function () {
   const port = await getIncrementalPort(PORT);
