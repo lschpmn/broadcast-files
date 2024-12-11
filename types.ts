@@ -6,16 +6,6 @@ export type Action<T> = {
   type: string,
 };
 
-export type DirectoryRoute = {
-  // can user access directories and download files, true for all access
-  canDownload: boolean | string[],
-  // can user convert video file to chromecast compatible stream, true for all access
-  canStream: boolean | string[],
-  filePath: string,
-  label: string,
-  url: string,
-};
-
 export type DbSchema = {
   imageCache: {
     [id: string]: string,
@@ -27,12 +17,6 @@ export type DbSchema = {
 };
 
 export type EmitAction = (action: Action<any>, reason?: string) => void
-
-export type JWT = User & {
-  exp: number,
-  iat: number,
-  password: any,
-};
 
 export type Route = {
   canDownload: string[],

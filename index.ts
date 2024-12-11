@@ -12,13 +12,15 @@ const PORT = process.argv.includes('--port') ? process.argv[process.argv.indexOf
   nodemon({
     watch: [join(__dirname, 'server')],
     script: join(__dirname, 'server/index.ts'),
+    // @ts-ignore It is args, bad type maintainer
     args: [
       '--port', port.toString(),
       '--max-old-space-size', '16384', //sets process memory limit to 16GB
       IS_PROD && '--prod'],
   });
 
-  nodemon.on('restart', (files) =>
+  // @ts-ignore Files is an array, type maintainer sucks
+  nodemon.on('restart', (files: []) =>
     files?.length > 0
       ? console.log(`nodemon: restarting because of files ${files.join(', ')}`)
       : console.log('nodemon: restarting because of user input'),
