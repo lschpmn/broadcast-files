@@ -2,7 +2,7 @@ import { Card, CardActionArea, CardContent } from '@mui/material';
 import React from 'react';
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
-import { STREAM_PREFIX } from '../../../constants';
+import { VIDEO_PREFIX } from '../../../constants';
 import { State } from '../../types';
 
 type Props = {
@@ -12,14 +12,11 @@ type Props = {
 
 const DirFileNode = ({ name, pathname }: Props) => {
   const item = useSelector((state: State) => state.directoryList.list.find(n => n.name === name));
+
   const targetPath = `${pathname}/${encodeURIComponent(name)}`;
 
-  const WrapperLink = item.type === 'dir'
-    ? (props) => <Link to={targetPath}>{props.children}</Link>
-    : (props) => <a href={STREAM_PREFIX + targetPath} target="_blank">{props.children}</a>;
-
   return (
-    <WrapperLink>
+    <Link to={item.type === 'dir' ? targetPath : VIDEO_PREFIX + targetPath}>
       <Card raised style={{ margin: '1rem', width: '20rem', overflowWrap: 'anywhere' }}>
         <CardActionArea style={{ fontSize: 16 }}>
           <CardContent>
@@ -28,7 +25,7 @@ const DirFileNode = ({ name, pathname }: Props) => {
           </CardContent>
         </CardActionArea>
       </Card>
-    </WrapperLink>
+    </Link>
   );
 };
 

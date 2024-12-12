@@ -25,6 +25,9 @@ const NewDirectory = () => {
             pathname={pathname}
           />
         ))}
+        {Array(4).fill((
+          <div style={{ width: '22rem' }}/>
+        ))}
       </div>
     </div>
   );

@@ -16,6 +16,8 @@ export const useMyPath = (): [pathname: string, paths: string[]] => {
     const decodedPathName = decodeURIComponent(pathname);
     const paths = decodedPathName.split('/').slice(1);
 
+    if (paths[0].length === 1) paths.shift();
+
     return [decodedPathName, paths];
   }, [pathname]);
 };

@@ -1,11 +1,11 @@
 import { Button, styled } from '@mui/material';
 import { grey } from '@mui/material/colors';
+import isEqual from 'lodash/isEqual';
 import React from 'react';
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { Route } from '../../types';
 import { State } from '../types';
-import isEqual from 'lodash/isEqual';
 
 const Landing = () => {
   const routes = useSelector((state: State) => state.config.routes, isEqual);
