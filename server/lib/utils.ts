@@ -13,11 +13,11 @@ export const getCommandLineArguments = (): { PORT: number, PROD: boolean } => {
 
   return {
     PORT: port,
-    PROD: argv.includes('--prod'),
+    PROD: argv.includes('--prod') || argv.includes('--production'),
   };
 };
 
 export const log = (message: string) =>
-  console.log(`${dayjs().format('hh:mm:ss.SSSA ddd MMM DD YYYY')} - ${message}`);
+  console.log(`${dayjs().format('hh:mm:ss.SSSA ddd MM/DD/YY')} - ${message}`);
 
 export const socketFunctions: SocketFunction = {};

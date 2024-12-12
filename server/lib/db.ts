@@ -13,21 +13,13 @@ class DB {
       this.data = read(DB_PATH, 'json');
     } else {
       this.data = {
+        fileDetails: {},
         routes: [],
-        imageCache: {},
         users: {},
       };
+
       this.save();
     }
-  }
-
-  // IMAGE CACHE
-
-  getImageCachePath = (filePath: string): string => this.data.imageCache[filePath];
-
-  setImageCachePath(filePath: string, imagePath: string) {
-    this.data.imageCache[filePath] = imagePath;
-    this.save();
   }
 
   // ROUTES

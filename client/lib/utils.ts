@@ -13,11 +13,9 @@ export const useMyPath = (): [pathname: string, paths: string[]] => {
   const { pathname } = useLocation();
 
   return useMemo(() => {
-    const decodedPathName = decodeURIComponent(pathname);
-    const paths = decodedPathName.split('/').slice(1);
+    const decodedPathname = decodeURIComponent(pathname.replace(/^\/\w\//, '/'));
+    const paths = decodedPathname.split('/').slice(1);
 
-    if (paths[0].length === 1) paths.shift();
-
-    return [decodedPathName, paths];
+    return [decodedPathname, paths];
   }, [pathname]);
 };

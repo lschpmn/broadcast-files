@@ -1,18 +1,25 @@
 import { Router } from 'express';
+import ffmpeg from 'fluent-ffmpeg';
 import { inspectAsync, listAsync } from 'fs-jetpack';
-import { InspectResult } from 'fs-jetpack/types';
 import { join } from 'path';
-import { getConfigSendServer, getDirectoryListSendServer, setConfig, setDirectoryList } from '../client/lib/reducers';
+import {
+  getConfigSendServer,
+  getDirectoryListSendServer,
+  getFileDetailsSendServer,
+  setConfig,
+  setDirectoryList,
+  setFileDetails,
+} from '../client/lib/reducers';
 import { DOWNLOAD_PREFIX, STREAM_PREFIX } from '../constants';
+import { NodeDetail } from '../types';
 import db from './lib/db';
 import { log, socketFunctions } from './lib/utils';
-import ffmpeg from 'fluent-ffmpeg';
 
 // WEB SOCKET
 
-socketFunctions[getDirectoryListSendServer.toString()] = (emit) => async (pathName: string) => {
-  log(`Request for path ${pathName}`);
-  const filePath = getFilePath(pathName);
+socketFunctions[getDirectoryListSendServer.toString()] = (emit) => async (pathname: string) => {
+  log(`Request for path ${pathname}`);
+  const filePath = getFilePath(pathname);
 
   if (!filePath) {
     log(`Route not found`);
@@ -22,15 +29,48 @@ socketFunctions[getDirectoryListSendServer.toString()] = (emit) => async (pathNa
   try {
     const directoryList = await listAsync(filePath);
     const inspectPromises = directoryList
-      .map(item => inspectAsync(join(filePath, item)).catch(() => false as any as InspectResult));
+      .map(item => inspectAsync(join(filePath, item))
+        .then(n => n.type === 'symlink' ? null : n) // filter out symlinks
+        .catch(() => false as any) as Promise<NodeDetail>
+      );
+
     const inspections = (await Promise.all(inspectPromises)).filter(Boolean);
 
     emit(setDirectoryList(inspections), `Returning directory list with ${directoryList.length} items`);
   } catch (err) {
-    console.error(`Error reading directory - ${decodeURIComponent(pathName)}`);
+    console.error(`Error reading directory - ${decodeURIComponent(pathname)}`);
     console.error(err);
     emit(setDirectoryList([]), 'Failed inspecting path');
   }
+};
+
+socketFunctions[getFileDetailsSendServer.toString()] = (emit) => async (pathname: string) => {
+  log(`Request for file details: ${pathname}`);
+  const filePath = getFilePath(pathname);
+
+  if (!filePath) {
+    log(`File not found`);
+    emit(setFileDetails(null));
+    return;
+  }
+
+  const metadata = await new Promise((res, rej) =>
+    ffmpeg.ffprobe(filePath, (err, metadata) => err ? rej(err) : res(metadata))) as any;
+
+  const videoStream = metadata.streams.find(stream => stream.codec_type === 'video');
+
+  const fileDetail: NodeDetail = {
+    name: pathname.split('/').slice(-1)[0],
+    type: 'file',
+    size: metadata.format.size,
+    videoDetail: {
+      duration: metadata.format.duration,
+      height: videoStream?.height,
+      width: videoStream?.width,
+    },
+  };
+
+  emit(setFileDetails(fileDetail));
 };
 
 socketFunctions[getConfigSendServer.toString()] = (emit) => () => {
@@ -72,8 +112,8 @@ fileRouter.get(STREAM_PREFIX + '/*', (req, res) => {
   res.setHeader('Content-Type', 'video/mp4');
   res.setHeader('Content-Disposition', 'inline');
 
-  console.log(`filePath: ${filePath}`);
-  console.log(`headers: ${JSON.stringify(req.headers, null, 1)}`);
+  log(`FilePath: ${filePath}`);
+  console.log(`Range Header: ${req.headers.range}`);
 
   ffmpeg(filePath)
     .seekInput((+req.query.t || 0))

@@ -7,8 +7,8 @@ export type Action<T> = {
 };
 
 export type DbSchema = {
-  imageCache: {
-    [id: string]: string,
+  fileDetails: {
+    [path: string]: NodeDetail,
   },
   routes: Route[],
   users: {
@@ -17,6 +17,17 @@ export type DbSchema = {
 };
 
 export type EmitAction = (action: Action<any>, reason?: string) => void
+
+export type NodeDetail = {
+  name: string,
+  size: number,
+  type: 'dir' | 'file',
+  videoDetail?: {
+    duration: number,
+    height: number,
+    width: number,
+  },
+};
 
 export type Route = {
   canDownload: string[],
