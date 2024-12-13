@@ -3,7 +3,6 @@ import nodemon from 'nodemon';
 import { join } from 'path';
 import process from 'process';
 
-const IS_PROD = process.argv.includes('--prod');
 const PORT = process.argv.includes('--port') ? process.argv[process.argv.indexOf('--port') + 1] : 5001;
 
 (async function () {
@@ -15,8 +14,9 @@ const PORT = process.argv.includes('--port') ? process.argv[process.argv.indexOf
     // @ts-ignore It is args, bad type maintainer
     args: [
       '--port', port.toString(),
+      '--development',
       '--max-old-space-size', '16384', //sets process memory limit to 16GB
-      IS_PROD && '--prod'],
+    ],
   });
 
   // @ts-ignore Files is an array, type maintainer sucks

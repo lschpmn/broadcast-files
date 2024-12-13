@@ -1,7 +1,7 @@
 import dayjs from 'dayjs';
 import { SocketFunction } from '../../types';
 
-export const getCommandLineArguments = (): { PORT: number, PROD: boolean } => {
+export const getCommandLineArguments = (): { PORT: number, DEVELOP: boolean } => {
   const { argv } = process;
   const portIndex = argv.indexOf('--port');
   const port = portIndex > -1 ? +argv[portIndex + 1] : 0;
@@ -13,7 +13,7 @@ export const getCommandLineArguments = (): { PORT: number, PROD: boolean } => {
 
   return {
     PORT: port,
-    PROD: argv.includes('--prod') || argv.includes('--production'),
+    DEVELOP: argv.includes('--development'),
   };
 };
 

@@ -1,10 +1,10 @@
 import express from 'express';
+import ffmpeg from 'fluent-ffmpeg';
 import { read } from 'fs-jetpack';
 import { createServer } from 'https';
 import { join } from 'path';
 import { connectSocket, connectWeb } from './client-connection';
 import { getCommandLineArguments, log } from './lib/utils';
-import ffmpeg from "fluent-ffmpeg";
 
 const { PORT } = getCommandLineArguments();
 
@@ -22,7 +22,7 @@ const server = createServer({
 app.use((req, res, next) => {
   // x-real-ip = ip address from nginx
   const ip = (req.header('x-real-ip') || req.ip).replace('::ffff:', '');
-  log(`ip: ${ip} - url:${req.url}`);
+  log(`ip:${ip} - url:${req.url}`);
   next();
 });
 

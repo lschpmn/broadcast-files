@@ -10,7 +10,7 @@ import webpackConfig from '../webpack.config';
 import { fileRouter } from './file-control';
 import { getCommandLineArguments, log, socketFunctions } from './lib/utils';
 
-const { PROD } = getCommandLineArguments();
+const { DEVELOP } = getCommandLineArguments();
 
 export const connectSocket = (server: ServerType) => {
   // Socket.IO
@@ -29,7 +29,7 @@ export const connectSocket = (server: ServerType) => {
 
 export const connectWeb = (app: Express) => {
   // Webpack
-  if (!PROD) {
+  if (DEVELOP) {
     const compiler = webpack(webpackConfig);
     app.use(webpackDevMiddleware(compiler, {}));
     app.use(webpackHotMiddleware(compiler));
