@@ -4,6 +4,6 @@
     "jsx": "react",
     "moduleResolution": "Node",
     "resolveJsonModule": true,
-    "target": "ES6"
+    "target": "ES2023"
   }
 }

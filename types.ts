@@ -20,7 +20,7 @@ export type EmitAction = (action: Action<any>, reason?: string) => void
 
 export type NodeDetail = {
   name: string,
-  size: number,
+  size?: number,
   type: 'dir' | 'file',
   videoDetail?: {
     duration: number,
