@@ -23,7 +23,7 @@ const VideoView = () => {
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'center' }}>
-        <video controls src={videoPath}/>
+        <video controls style={{ height: '100vh', width: '100vw' }} src={videoPath}/>
       </div>
     </div>
   );
