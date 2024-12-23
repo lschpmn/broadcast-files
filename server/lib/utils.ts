@@ -1,5 +1,4 @@
 import dayjs from 'dayjs';
-import { SocketFunction } from '../../types';
 
 export const getCommandLineArguments = (): { PORT: number, DEVELOP: boolean } => {
   const { argv } = process;
@@ -19,5 +18,3 @@ export const getCommandLineArguments = (): { PORT: number, DEVELOP: boolean } =>
 
 export const log = (message: string) =>
   console.log(`${dayjs().format('hh:mm:ss.SSSA ddd MM/DD/YY')} - ${message}`);
-
-export const socketFunctions: SocketFunction = {};

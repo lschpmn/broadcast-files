@@ -16,7 +16,7 @@ const PathHeader = () => {
 
     <Breadcrumbs style={{ fontSize: '1.5rem', fontWeight: 'bold' }}>
       {paths.map((path, i) => (
-        <Link to={createPathString(paths, i)}>
+        <Link key={path} to={createPathString(paths, i)}>
           <Button style={{ color: 'white' }}>
             {path}
           </Button>

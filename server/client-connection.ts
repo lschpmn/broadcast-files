@@ -5,10 +5,11 @@ import { Server, Socket } from 'socket.io';
 import webpack from 'webpack';
 import webpackDevMiddleware from 'webpack-dev-middleware';
 import webpackHotMiddleware from 'webpack-hot-middleware';
+import { setConfig } from '../client/lib/reducers';
 import { Action, EmitAction } from '../types';
 import webpackConfig from '../webpack.config';
-import { fileRouter } from './file-control';
-import { getCommandLineArguments, log, socketFunctions } from './lib/utils';
+import { fileRouter, getAllowedRoutes, methods as fileMethods } from './file-control';
+import { getCommandLineArguments, log } from './lib/utils';
 
 const { DEVELOP } = getCommandLineArguments();
 
@@ -19,9 +20,15 @@ export const connectSocket = (server: ServerType) => {
     log('client connected');
     const emitAction: EmitAction = createEmitActionFunc(socket);
 
-    Object
-      .entries(socketFunctions)
-      .forEach(([actionType, func]) => socket.on(actionType, func(emitAction)));
+    for (let actionType in fileMethods) {
+      const func = fileMethods[actionType];
+      socket.on(actionType, (p?: any) => {
+        log(`Incoming - ${actionType}`);
+        func(emitAction)(p);
+      });
+    }
+
+    emitAction(setConfig({ routes: getAllowedRoutes() }), 'Client Init');
 
     socket.on('disconnect', () => log('client disconnected'));
   });
@@ -47,6 +54,6 @@ export const connectWeb = (app: Express) => {
 };
 
 const createEmitActionFunc = (socket: Socket): EmitAction => (action: Action<any>, reason?: string) => {
-  log(`Sending action ${action.type}` + (reason ? ` - ${reason}` : ''));
+  log(`Outgoing - ${action.type}` + (reason ? ` - ${reason}` : ''));
   socket.emit('action', action);
 };

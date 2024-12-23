@@ -3,21 +3,21 @@ import ffmpeg from 'fluent-ffmpeg';
 import { inspectAsync, listAsync } from 'fs-jetpack';
 import { join } from 'path';
 import {
-  getConfigSendServer,
   getDirectoryListSendServer,
   getFileDetailsSendServer,
-  setConfig,
   setDirectoryList,
   setFileDetails,
 } from '../client/lib/reducers';
 import { DOWNLOAD_PREFIX, STREAM_PREFIX } from '../constants';
-import { NodeDetail } from '../types';
+import { NodeDetail, SocketFunctions } from '../types';
 import db from './lib/db';
-import { log, socketFunctions } from './lib/utils';
+import { log } from './lib/utils';
 
 // WEB SOCKET
 
-socketFunctions[getDirectoryListSendServer.toString()] = (emit) => async (pathname: string) => {
+export const methods: SocketFunctions = {};
+
+methods[getDirectoryListSendServer.toString()] = (emit) => async (pathname: string) => {
   log(`Request for path ${pathname}`);
   const filePath = getFilePath(pathname);
 
@@ -44,7 +44,7 @@ socketFunctions[getDirectoryListSendServer.toString()] = (emit) => async (pathna
   }
 };
 
-socketFunctions[getFileDetailsSendServer.toString()] = (emit) => async (pathname: string) => {
+methods[getFileDetailsSendServer.toString()] = (emit) => async (pathname: string) => {
   log(`Request for file details: ${pathname}`);
   const filePath = getFilePath(pathname);
 
@@ -73,15 +73,13 @@ socketFunctions[getFileDetailsSendServer.toString()] = (emit) => async (pathname
   emit(setFileDetails(fileDetail));
 };
 
-socketFunctions[getConfigSendServer.toString()] = (emit) => () => {
-  const allowedRoutes = db.getRoutes()
+export const getAllowedRoutes = () => {
+  return db.getRoutes()
     .filter(route => [...route.canDownload, ...route.canStream].includes('guests'))
     .map(route => ({
       label: route.label,
       url: route.url,
     }));
-
-  emit(setConfig({ routes: allowedRoutes }));
 };
 
 // FILE ROUTER
@@ -123,7 +121,7 @@ fileRouter.get(STREAM_PREFIX + '/*', (req, res) => {
     .outputOptions([
       '-movflags frag_keyframe+empty_moov', // Optimize for streaming
       '-preset ultrafast',                 // Low latency encoding
-      '-tune zerolatency'                  // Reduce latency for streaming
+      '-tune zerolatency',                  // Reduce latency for streaming
     ])
     .on('error', error => {
       log('Streaming error');

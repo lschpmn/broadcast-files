@@ -37,7 +37,7 @@ export type Route = {
   url: string, //should be longer than 3 characters
 };
 
-export type SocketFunction = {
+export type SocketFunctions = {
   [actionType: string]: (emit: EmitAction) => (p?: any) => void
 };
 
