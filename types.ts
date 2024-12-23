@@ -21,7 +21,7 @@ export type EmitAction = (action: Action<any>, reason?: string) => void
 export type NodeDetail = FileDetail | DirDetail;
 
 export type FileDetail = {
-  name: string,
+  pathname: string,
   size: number,
   type: 'file',
   videoDetail?: {
@@ -32,9 +32,9 @@ export type FileDetail = {
 };
 
 export type DirDetail = {
-  name: string,
+  pathname: string,
   type: 'dir',
-  files?: string[],
+  nodePaths?: string[],
 };
 
 export type Route = {

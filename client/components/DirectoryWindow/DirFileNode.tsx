@@ -6,21 +6,20 @@ import { VIDEO_PREFIX } from '../../../constants';
 import { State } from '../../types';
 
 type Props = {
-  name: string,
   pathname: string,
 };
 
-const DirFileNode = ({ name, pathname }: Props) => {
-  const item = useSelector((state: State) => state.directoryList.list.find(n => n.name === name));
+const DirFileNode = ({ pathname }: Props) => {
+  const item = useSelector((state: State) => state.nodeShrub[pathname]);
 
-  const targetPath = `${pathname}/${encodeURIComponent(name)}`;
+  const targetPath = item.pathname.split('/').map(encodeURIComponent).join('/');
 
   return (
     <Link to={item.type === 'dir' ? targetPath : VIDEO_PREFIX + targetPath}>
       <Card raised style={{ margin: '1rem', width: '20rem', overflowWrap: 'anywhere' }}>
         <CardActionArea style={{ fontSize: 16 }}>
           <CardContent>
-            {item.name}<br/><br/>
+            {item.pathname.split('/').slice(-1)}<br/><br/>
             Type: {item.type}
           </CardContent>
         </CardActionArea>

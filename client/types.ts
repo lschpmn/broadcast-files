@@ -2,7 +2,7 @@ import { NodeDetail } from '../types';
 
 export type State = {
   config: ConfigState,
-  directoryList: DirectoryListState,
+  nodeShrub: NodeShrub,
 };
 
 export type ConfigState = {
@@ -12,7 +12,6 @@ export type ConfigState = {
   }[],
 };
 
-export type DirectoryListState = {
-  loading: boolean,
-  list: NodeDetail[],
+export type NodeShrub = {
+  [path: string]: NodeDetail,
 };

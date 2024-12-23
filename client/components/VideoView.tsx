@@ -1,11 +1,9 @@
 import React, { useEffect } from 'react';
 import { STREAM_PREFIX } from '../../constants';
-import { getFileDetailsSendServer } from '../lib/reducers';
-import { useAction, useMyPath } from '../lib/utils';
+import { useMyPath } from '../lib/utils';
 
 const VideoView = () => {
   const [pathname, paths] = useMyPath();
-  const getFileDetailsAction = useAction(getFileDetailsSendServer);
 
   const videoPath = STREAM_PREFIX + '/' + paths.join('/');
 
@@ -15,10 +13,6 @@ const VideoView = () => {
     videoElem.addEventListener('pause', () => console.log('video paused'));
     console.log(videoElem);
   }, []);
-
-  useEffect(() => {
-    getFileDetailsAction(pathname);
-  }, [pathname]);
 
   return (
     <div>

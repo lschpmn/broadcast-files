@@ -1,6 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit';
-import { Action, NodeDetail } from '../../types';
-import { ConfigState, DirectoryListState } from '../types';
+import { Action } from '../../types';
+import { ConfigState, NodeShrub } from '../types';
 
 const configSlice = createSlice({
   name: 'config',
@@ -12,34 +12,22 @@ const configSlice = createSlice({
   },
 });
 
-const directoryListSlice = createSlice({
-  name: 'directoryList',
-  initialState: {
-    loading: false,
-    list: [],
-  } as DirectoryListState,
+const nodeShrubSlice = createSlice({
+  name: 'nodeShrub',
+  initialState: {} as NodeShrub,
   reducers: {
-    getDirectoryListSendServer: (state, action: Action<string>) => {
-      state.list = [];
-      state.loading = true;
-    },
-    setDirectoryList: (state, { payload }: Action<NodeDetail[]>) => {
-      state.list = payload;
-      state.loading = false;
-    },
-    getFileDetailsSendServer: (state, action: Action<string>) => {
-      state.loading = true;
-    },
-    setFileDetails: (state, { payload }: Action<NodeDetail>) => {
-      state.loading = false;
-      const i = state.list.findIndex(n => n.name === payload.name);
-      if (i >= 0) state.list[i] = payload;
-      else state.list.push(payload);
+    inspectNodeSendServer: (state: NodeShrub, action: Action<string>) => {},
+    setNode: (state: NodeShrub, action: Action<NodeShrub>) => {
+      const nodeShrub = action.payload;
+      for (let pathname in nodeShrub) {
+        const node = nodeShrub[pathname];
+        state[pathname] = { ...state[pathname], ...node };
+      }
     },
   },
 });
 
 export const configReducer = configSlice.reducer;
 export const { setConfig } = configSlice.actions;
-export const directoryListReducer = directoryListSlice.reducer;
-export const { getDirectoryListSendServer, setDirectoryList, getFileDetailsSendServer, setFileDetails } = directoryListSlice.actions;
+export const nodeShrubReducer = nodeShrubSlice.reducer;
+export const { inspectNodeSendServer, setNode } = nodeShrubSlice.actions;

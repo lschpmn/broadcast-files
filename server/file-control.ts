@@ -1,15 +1,11 @@
 import { Router } from 'express';
-import ffmpeg from 'fluent-ffmpeg';
+import ffmpeg, { FfprobeData } from 'fluent-ffmpeg';
 import { inspectAsync, listAsync } from 'fs-jetpack';
-import { join } from 'path';
-import {
-  getDirectoryListSendServer,
-  getFileDetailsSendServer,
-  setDirectoryList,
-  setFileDetails,
-} from '../client/lib/reducers';
+import { InspectResult } from 'fs-jetpack/types';
+import { inspectNodeSendServer, setNode } from '../client/lib/reducers';
+import { NodeShrub } from '../client/types';
 import { DOWNLOAD_PREFIX, STREAM_PREFIX } from '../constants';
-import { NodeDetail, SocketFunctions } from '../types';
+import { DirDetail, FileDetail, SocketFunctions } from '../types';
 import db from './lib/db';
 import { log } from './lib/utils';
 
@@ -17,60 +13,49 @@ import { log } from './lib/utils';
 
 export const methods: SocketFunctions = {};
 
-methods[getDirectoryListSendServer.toString()] = (emit) => async (pathname: string) => {
-  log(`Request for path ${pathname}`);
-  const filePath = getFilePath(pathname);
+methods[inspectNodeSendServer.toString()] = (emit) => async (pathname: string) => {
+  log(`Inspecting pathname ${pathname}`);
 
-  if (!filePath) {
-    log(`Route not found`);
-    emit(setDirectoryList([]));
-  }
-
-  try {
-    const directoryList = await listAsync(filePath);
-    const inspectPromises = directoryList
-      .map(item => inspectAsync(join(filePath, item))
-        .then(n => n.type === 'symlink' ? null : n) // filter out symlinks
-        .catch(() => false as any) as Promise<NodeDetail>
-      );
-
-    const inspections = (await Promise.all(inspectPromises)).filter(Boolean);
-
-    emit(setDirectoryList(inspections), `Returning directory list with ${directoryList.length} items`);
-  } catch (err) {
-    console.error(`Error reading directory - ${decodeURIComponent(pathname)}`);
-    console.error(err);
-    emit(setDirectoryList([]), 'Failed inspecting path');
-  }
-};
-
-methods[getFileDetailsSendServer.toString()] = (emit) => async (pathname: string) => {
-  log(`Request for file details: ${pathname}`);
-  const filePath = getFilePath(pathname);
-
-  if (!filePath) {
-    log(`File not found`);
-    emit(setFileDetails(null));
+  const node = await inspectAsync(getFilePath(pathname));
+  if (node.type === 'symlink') return;
+  else if (node.type === 'file') {
+    const file: FileDetail = {
+      pathname,
+      type: node.type,
+      size: node.size,
+    };
+    emit(setNode({ [pathname]: file }), 'Found file');
     return;
   }
-
-  const metadata = await new Promise((res, rej) =>
-    ffmpeg.ffprobe(filePath, (err, metadata) => err ? rej(err) : res(metadata))) as any;
-
-  const videoStream = metadata.streams.find(stream => stream.codec_type === 'video');
-
-  const fileDetail: NodeDetail = {
-    name: pathname.split('/').slice(-1)[0],
-    type: 'file',
-    size: metadata.format.size,
-    videoDetail: {
-      duration: metadata.format.duration,
-      height: videoStream?.height,
-      width: videoStream?.width,
-    },
+  const directory: DirDetail = {
+    pathname,
+    type: 'dir',
+    nodePaths: [],
+  };
+  const nodeShrub: NodeShrub = {
+    [pathname]: directory,
   };
 
-  emit(setFileDetails(fileDetail));
+  const nodeList = await listAsync(getFilePath(pathname));
+  const inspectPromises = nodeList
+    .map(name => inspectAsync(getFilePath(`${pathname}/${name}`))
+      .then(n => n.type === 'symlink' ? null : n) // filter out symlinks
+      .catch(() => false as any) as Promise<InspectResult>);
+
+  (await Promise.all(inspectPromises))
+    .filter(Boolean)
+    .forEach(node => {
+      const newPathname = `${pathname}/${node.name}`;
+
+      directory.nodePaths.push(newPathname);
+      nodeShrub[newPathname] = {
+        pathname: newPathname,
+        type: node.type as any,
+        size: node.type === 'file' ? node.size : undefined,
+      }
+    });
+
+  emit(setNode(nodeShrub));
 };
 
 export const getAllowedRoutes = () => {
@@ -140,4 +125,13 @@ const getFilePath = (path: string): string | null => {
   return decodeURIComponent(path)
     .replace(route.url, route.filePath)
     .replace(/\//g, '\\');
+};
+
+const getVideoMetadata = (pathname: string): Promise<FfprobeData> => {
+  return new Promise((res, rej) => {
+    ffmpeg.ffprobe(pathname, (err, metadata) => {
+      if (err) rej(err);
+      else res(metadata);
+    })
+  });
 };
