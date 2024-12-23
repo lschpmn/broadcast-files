@@ -7,7 +7,7 @@ export type Action<T> = {
 };
 
 export type DbSchema = {
-  fileDetails: {
+  nodeDetails: {
     [path: string]: NodeDetail,
   },
   routes: Route[],
@@ -18,15 +18,23 @@ export type DbSchema = {
 
 export type EmitAction = (action: Action<any>, reason?: string) => void
 
-export type NodeDetail = {
+export type NodeDetail = FileDetail | DirDetail;
+
+export type FileDetail = {
   name: string,
-  size?: number,
-  type: 'dir' | 'file',
+  size: number,
+  type: 'file',
   videoDetail?: {
     duration: number,
     height: number,
     width: number,
   },
+};
+
+export type DirDetail = {
+  name: string,
+  type: 'dir',
+  files?: string[],
 };
 
 export type Route = {

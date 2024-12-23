@@ -13,7 +13,7 @@ class DB {
       this.data = read(DB_PATH, 'json');
     } else {
       this.data = {
-        fileDetails: {},
+        nodeDetails: {},
         routes: [],
         users: {},
       };
