@@ -3,7 +3,7 @@ import nodemon from 'nodemon';
 import { join } from 'path';
 import process from 'process';
 
-const PORT = process.argv.includes('--port') ? process.argv[process.argv.indexOf('--port') + 1] : 5001;
+const PORT = process.argv.includes('--port') ? process.argv[process.argv.indexOf('--port') + 1] : 50500;
 
 (async function () {
   const port = await getIncrementalPort(PORT);

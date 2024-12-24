@@ -2,11 +2,13 @@ import express from 'express';
 import ffmpeg from 'fluent-ffmpeg';
 import { read } from 'fs-jetpack';
 import { createServer } from 'https';
+import { createServer as createHttpServer } from 'http';
 import { join } from 'path';
 import { connectSocket, connectWeb } from './client-connection';
 import { getCommandLineArguments, log } from './lib/utils';
 
 const { PORT } = getCommandLineArguments();
+const SECURE_PORT = PORT + 1;
 
 ffmpeg.setFfmpegPath(join(__dirname, '..', 'bin', 'ffmpeg.exe'));
 ffmpeg.setFfprobePath(join(__dirname, '..', 'bin', 'ffprobe.exe'));
@@ -35,4 +37,14 @@ app.use((err, req, res, next) => {
   res.status(500).send(err);
 });
 
-server.listen(PORT, () => log(`started server at https://localhost:${PORT}`));
+server.listen(SECURE_PORT, () => log(`started server at https://localhost:${SECURE_PORT}`));
+
+// Redirect Functionality
+const redirectApp = express();
+const redirectServer = createHttpServer(redirectApp);
+
+redirectApp.use((req, res) => {
+  res.redirect(`https://${req.hostname}:${SECURE_PORT}${req.url}`);
+});
+
+redirectServer.listen(PORT, () => log(`started redirect server at http://localhost:${PORT}`));

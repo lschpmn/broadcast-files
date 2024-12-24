@@ -1,17 +1,14 @@
 import dayjs from 'dayjs';
 
+const DEFAULT_PORT = 50100;
+
 export const getCommandLineArguments = (): { PORT: number, DEVELOP: boolean } => {
   const { argv } = process;
   const portIndex = argv.indexOf('--port');
   const port = portIndex > -1 ? +argv[portIndex + 1] : 0;
 
-  if (!port) {
-    console.error('--port must be defined!');
-    process.exit();
-  }
-
   return {
-    PORT: port,
+    PORT: port || DEFAULT_PORT,
     DEVELOP: argv.includes('--development'),
   };
 };
