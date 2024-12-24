@@ -17,6 +17,7 @@ methods[inspectNodeSendServer.toString()] = (emit) => async (pathname: string) =
   log(`Inspecting pathname ${pathname}`);
 
   const node = await inspectAsync(getFilePath(pathname));
+  if (!node) return;
   if (node.type === 'symlink') return;
   else if (node.type === 'file') {
     const file: FileDetail = {

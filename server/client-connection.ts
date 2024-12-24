@@ -8,7 +8,7 @@ import webpackHotMiddleware from 'webpack-hot-middleware';
 import { setConfig } from '../client/lib/reducers';
 import { Action, EmitAction } from '../types';
 import webpackConfig from '../webpack.config';
-import { fileRouter, getAllowedRoutes, methods as fileMethods } from './file-control';
+import { fileRouter, getAllowedRoutes, methods as fileMethods } from './file-service';
 import { getCommandLineArguments, log } from './lib/utils';
 
 const { DEVELOP } = getCommandLineArguments();
