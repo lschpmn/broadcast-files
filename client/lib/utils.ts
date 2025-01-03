@@ -1,6 +1,29 @@
 import { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { useLocation } from 'react-router-dom';
+import { VIDEO_EXTENSIONS } from '../../constants';
+import { State } from '../types';
+
+export const isVideoFile = (file: string) =>
+  VIDEO_EXTENSIONS.some(v => file.endsWith(v));
+
+export const selectSortedNodeList = (pathname: string) => (state: State) => {
+  const dir = state.nodeShrub[pathname];
+
+  if (!dir) return [];
+  if (dir.type === 'file') return [dir];
+  if (!dir.nodePaths) return [];
+
+  return dir.nodePaths
+    .toSorted((a, b) => {
+      const nA = state.nodeShrub[a];
+      const nB = state.nodeShrub[b];
+
+      if (nA.type === 'dir' && nB.type === 'file') return -1;
+      if (nA.type === 'file' && nB.type === 'dir') return 1;
+      else return a.localeCompare(b);
+    });
+};
 
 export const useAction = <T extends Function>(action: T, deps?): T => {
   const dispatch = useDispatch();
