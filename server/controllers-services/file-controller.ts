@@ -2,12 +2,12 @@ import { Router } from 'express';
 import ffmpeg, { FfprobeData } from 'fluent-ffmpeg';
 import { inspectAsync, listAsync } from 'fs-jetpack';
 import { InspectResult } from 'fs-jetpack/types';
-import { inspectNodeSendServer, setNode } from '../client/lib/reducers';
-import { NodeShrub } from '../client/types';
-import { DOWNLOAD_PREFIX, STREAM_PREFIX } from '../constants';
-import { DirDetail, FileDetail, SocketFunctions } from '../types';
-import db from './lib/db';
-import { log } from './lib/utils';
+import { inspectNodeSendServer, setNode } from '../../client/lib/reducers';
+import { NodeShrub } from '../../client/types';
+import { DOWNLOAD_PREFIX, STREAM_PREFIX } from '../../constants';
+import { DirDetail, FileDetail, SocketFunctions } from '../../types';
+import db from '../lib/db';
+import { log } from '../lib/utils';
 
 // WEB SOCKET
 
