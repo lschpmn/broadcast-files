@@ -30,7 +30,7 @@ const VideoView = () => {
     videoElem.addEventListener('play', () => setIsPlaying(true));
     videoElem.addEventListener('pause', () => setIsPlaying(false));
 
-    inspectNodeAction(parentPath);
+    inspectNodeAction(pathname);
   }, []);
 
   useEffect(() => {
