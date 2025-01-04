@@ -15,6 +15,7 @@ const VideoView = () => {
   const [currentTime, setCurrentTime] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isAutoplaying, setIsAutoplaying] = useState(false);
+  const [offsetTime, setOffsetTime] = useState(0);
   const inspectNodeAction = useAction(inspectNodeSendServer);
   const navigate = useNavigate();
   const videoFile: FileDetail = useSelector((state: State) => state.nodeShrub[pathname], isEqual);
@@ -25,8 +26,13 @@ const VideoView = () => {
 
   const changeCurrentTime = (v: number) => {
     const newCurrentTime = v * 0.01 * videoFile?.videoDetail?.duration;
-    console.log(newCurrentTime);
+    setCurrentTime(newCurrentTime);
   };
+
+  const commitTime = () => {
+    setOffsetTime(currentTime);
+    setCurrentTime(currentTime);
+  }
 
   const playPauseFunc = () => {
     const videoElem = videoRef.current;
@@ -53,7 +59,7 @@ const VideoView = () => {
     if (isPlaying) {
       const getCurrTime = () => {
         const video = videoRef.current;
-        setCurrentTime(Math.round(video.currentTime));
+        setCurrentTime(offsetTime + Math.round(video.currentTime));
       };
       getCurrTime();
       const intervalId = setInterval(getCurrTime, 1000);
@@ -65,7 +71,7 @@ const VideoView = () => {
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'center' }}>
-        <video controls style={{ height: '100vh', width: '100vw' }} src={videoPath}/>
+        <video controls style={{ height: '100vh', width: '100vw' }} src={videoPath + '?t=' + offsetTime}/>
       </div>
       <div>
         <AppBar position="relative">
@@ -76,10 +82,15 @@ const VideoView = () => {
 
             <div style={{ flex: 1, margin: '0 1rem', display: 'flex' }}>
               <Slider
-                onChange={(_, v) => changeCurrentTime(v as number)}
-                style={{ margin: '0 0.5rem' }}
+                onChange={(e, v) => changeCurrentTime(v as number)}
+                onChangeCommitted={commitTime}
+                step={0.01}
+                style={{ flex: 1, margin: '0 0.5rem' }}
                 value={((currentTime / videoFile?.videoDetail?.duration) || 0) * 100}
+                valueLabelDisplay='auto'
+                valueLabelFormat={v => getTimeStr(v * 0.01 * videoFile?.videoDetail?.duration)}
               />
+
               <div style={{ margin: '0 0.5rem' }}>{getTimeStr(currentTime)}</div>
               <div style={{ margin: '0 0.5rem' }}>/</div>
               <div style={{ margin: '0 0.5rem' }}>{getTimeStr(videoFile?.videoDetail?.duration)}</div>
@@ -99,13 +110,16 @@ const getTimeStr = (duration: number) => {
   let returnStr = '';
 
   if (duration > 3600) {
-    returnStr += `${Math.floor(duration / 3600)}:`;
+    const num = Math.floor(duration / 3600);
+    returnStr += `${num > 10 ? num : '0' + num}:`;
   }
   if (duration > 60) {
-    returnStr += `${Math.floor(duration / 60) % 60}:`;
+    const num = Math.floor(duration / 60) % 60;
+    returnStr += `${num > 10 ? num : '0' + num}:`;
   }
 
-  returnStr += `${Math.floor(duration % 60)}`;
+  const num = Math.floor(duration % 60);
+  returnStr += `${num > 10 ? num : '0' + num}`;
 
   return returnStr;
 };
