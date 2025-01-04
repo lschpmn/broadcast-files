@@ -7,7 +7,7 @@ import { Link } from 'react-router-dom';
 import { Route } from '../../types';
 import { State } from '../types';
 
-const Landing = () => {
+const LandingView = () => {
   const routes = useSelector((state: State) => state.config.routes, isEqual);
 
   return <div style={{ height: '100%' }}>
@@ -25,7 +25,7 @@ const Landing = () => {
   </div>;
 };
 
-export default Landing;
+export default LandingView;
 
 const MyButtonLink = styled(Button)<{ component, last, to, width }>`
   color: white;

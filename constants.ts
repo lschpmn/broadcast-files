@@ -5,8 +5,6 @@ export const DOWNLOAD_PREFIX = '/d';
 
 export const STREAM_PREFIX = '/s';
 
-export const VIDEO_PREFIX = '/v';
-
 export const VIDEO_EXTENSIONS = [
   '.3g2',
   '.3gp',

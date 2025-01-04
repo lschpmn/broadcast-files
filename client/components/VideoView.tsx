@@ -4,7 +4,7 @@ import isEqual from 'lodash/isEqual';
 import React, { useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router';
-import { STREAM_PREFIX, VIDEO_PREFIX } from '../../constants';
+import { STREAM_PREFIX } from '../../constants';
 import { inspectNodeSendServer } from '../lib/reducers';
 import { isVideoFile, selectSortedNodeList, useAction, useMyPath } from '../lib/utils';
 
@@ -38,7 +38,7 @@ const VideoView = () => {
     if (!isPlaying && videoElem.currentTime === videoElem.duration && isAutoplaying) {
       const currentIndex = videoList.indexOf(pathname);
       const next = videoList[currentIndex + 1];
-      if (currentIndex !== -1 && next) navigate(VIDEO_PREFIX + next);
+      if (currentIndex !== -1 && next) navigate(next);
     }
   }, [isPlaying]);
 

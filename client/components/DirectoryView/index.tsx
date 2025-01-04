@@ -5,7 +5,7 @@ import { inspectNodeSendServer } from '../../lib/reducers';
 import { selectSortedNodeList, useAction, useMyPath } from '../../lib/utils';
 import NodeItem from './NodeItem';
 
-const DirectoryWindow = () => {
+const DirectoryView = () => {
   const [pathname] = useMyPath();
   const inspectNodeAction = useAction(inspectNodeSendServer);
   const nodeList: string[] = useSelector(selectSortedNodeList(pathname), isEqual);
@@ -31,4 +31,4 @@ const DirectoryWindow = () => {
   );
 };
 
-export default DirectoryWindow;
+export default DirectoryView;

@@ -4,7 +4,6 @@ import { Card, CardActionArea, CardContent, CardMedia, styled, Typography } from
 import React from 'react';
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
-import { VIDEO_PREFIX } from '../../../constants';
 import { State } from '../../types';
 
 type Props = {
@@ -18,7 +17,7 @@ const NodeItem = ({ pathname }: Props) => {
   const targetPath = '/' + paths.map(encodeURIComponent).join('/');
 
   return (
-    <Link to={item.type === 'dir' ? targetPath : VIDEO_PREFIX + targetPath}>
+    <Link to={item.type === 'dir' ? targetPath : targetPath}>
       <Card raised style={{ margin: '1rem', width: 300, overflowWrap: 'anywhere' }}>
         <CardActionArea>
           <CardMedia style={{ height: 168, width: '100%' }}>
