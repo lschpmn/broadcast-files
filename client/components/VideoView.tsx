@@ -46,24 +46,26 @@ const VideoView = () => {
     videoElem.addEventListener('pause', () => setIsPlaying(false));
 
     inspectNodeAction(pathname);
+    inspectNodeAction(parentPath);
   }, []);
 
   useEffect(() => {
     const videoElem = videoRef.current;
-    if (!isPlaying && videoElem.currentTime === videoElem.duration && isAutoplaying) {
+    if (!isPlaying && isAutoplaying && videoElem.ended) {
       const currentIndex = videoList.indexOf(pathname);
       const next = videoList[currentIndex + 1];
-      if (currentIndex !== -1 && next) navigate(next);
+      if (currentIndex !== -1 && next) {
+        navigate(next);
+        setCurrentTime(0);
+        setOffsetTime(0);
+      }
     }
 
     if (isPlaying) {
-      const getCurrTime = () => {
-        const video = videoRef.current;
-        setCurrentTime(offsetTime + Math.round(video.currentTime));
-      };
-      getCurrTime();
+      const getCurrTime = () => setCurrentTime(offsetTime + Math.round(videoRef.current.currentTime));
       const intervalId = setInterval(getCurrTime, 1000);
 
+      getCurrTime();
       return () => clearInterval(intervalId);
     }
   }, [isPlaying]);
@@ -111,15 +113,15 @@ const getTimeStr = (duration: number) => {
 
   if (duration > 3600) {
     const num = Math.floor(duration / 3600);
-    returnStr += `${num > 10 ? num : '0' + num}:`;
+    returnStr += `${num > 9 ? num : '0' + num}:`;
   }
   if (duration > 60) {
     const num = Math.floor(duration / 60) % 60;
-    returnStr += `${num > 10 ? num : '0' + num}:`;
+    returnStr += `${num > 9 ? num : '0' + num}:`;
   }
 
   const num = Math.floor(duration % 60);
-  returnStr += `${num > 10 ? num : '0' + num}`;
+  returnStr += `${num > 9 ? num : '0' + num}`;
 
   return returnStr;
 };
