@@ -1,6 +1,6 @@
 import dayjs from 'dayjs';
 
-const DEFAULT_PORT = 50100;
+const PROD_PORT = 50105;
 
 export const getCommandLineArguments = (): { PORT: number, DEVELOP: boolean } => {
   const { argv } = process;
@@ -8,7 +8,7 @@ export const getCommandLineArguments = (): { PORT: number, DEVELOP: boolean } =>
   const port = portIndex > -1 ? +argv[portIndex + 1] : 0;
 
   return {
-    PORT: port || DEFAULT_PORT,
+    PORT: port || PROD_PORT,
     DEVELOP: argv.includes('--development'),
   };
 };
