@@ -4,8 +4,8 @@ import isEqual from 'lodash/isEqual';
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router';
-import { inspectNodeSendServer } from '../../lib/reducers';
-import { isVideoFile, selectSortedNodeList, useAction, useMyPath } from '../../lib/utils';
+import { inspectNodeSendServer } from '../../../lib/reducers';
+import { isVideoFile, selectSortedNodeList, useAction, useMyPath } from '../../../lib/utils';
 
 type Props = {
   ended: boolean,

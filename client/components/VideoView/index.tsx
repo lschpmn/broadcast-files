@@ -1,15 +1,12 @@
-import { AppBar, Toolbar, Typography } from '@mui/material';
 import isEqual from 'lodash/isEqual';
 import React, { useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { STREAM_PREFIX } from '../../../constants';
 import { FileDetail } from '../../../types';
 import { inspectNodeSendServer } from '../../lib/reducers';
-import { getTimeStr, useAction, useMyPath } from '../../lib/utils';
+import { useAction, useMyPath } from '../../lib/utils';
 import { State } from '../../types';
-import AutoplayComponent from './AutoplayComponent';
-import PlayComponent from './PlayComponent';
-import SliderComponent from './SliderComponent';
+import ControlsComponent from './ControlsComponent';
 
 const VideoView = () => {
   const [pathname, paths] = useMyPath();
@@ -53,28 +50,17 @@ const VideoView = () => {
   }, [isPlaying, offsetTime]);
 
   return (
-    <div>
+    <div style={{ position: 'relative' }}>
       <div style={{ display: 'flex', justifyContent: 'center' }}>
-        <video controls style={{ height: '100vh', width: '100vw' }} src={videoPath + '?t=' + offsetTime}/>
+        <video style={{ height: '100vh', width: '100vw' }} src={videoPath + '?t=' + offsetTime}/>
       </div>
-      <div>
-        <AppBar position="relative">
-          <Toolbar style={{ display: 'flex', flexDirection: 'column' }}>
-            <SliderComponent currentTime={currentTime} duration={duration} setTime={setTime}/>
-            <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
-              <PlayComponent isPlaying={isPlaying} video={videoRef.current}/>
-              <Typography style={{ margin: '0 1rem', display: 'flex', alignItems: 'center' }}>
-                <span style={{ margin: '0 0.5rem' }}>{getTimeStr(currentTime)}</span>
-                <span style={{ margin: '0 0.5rem' }}>/</span>
-                <span style={{ margin: '0 0.5rem' }}>{getTimeStr(duration)}</span>
-              </Typography>
-
-              <div style={{ flex: 1 }}/>
-              <AutoplayComponent ended={videoRef.current?.ended} isPlaying={isPlaying}/>
-            </div>
-          </Toolbar>
-        </AppBar>
-      </div>
+      <ControlsComponent
+        currentTime={currentTime}
+        duration={duration}
+        isPlaying={isPlaying}
+        setTime={setTime}
+        video={videoRef.current}
+      />
     </div>
   );
 };
