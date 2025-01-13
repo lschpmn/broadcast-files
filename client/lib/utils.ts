@@ -4,6 +4,26 @@ import { useLocation } from 'react-router-dom';
 import { VIDEO_EXTENSIONS } from '../../constants';
 import { State } from '../types';
 
+export const getTimeStr = (duration: number) => {
+  let returnStr = '';
+
+  if (duration > 3600) {
+    const num = Math.floor(duration / 3600);
+    returnStr += `${num > 9 ? num : '0' + num}:`;
+  }
+  if (duration > 60) {
+    const num = Math.floor(duration / 60) % 60;
+    returnStr += `${num > 9 ? num : '0' + num}:`;
+  } else {
+    returnStr += '00:';
+  }
+
+  const num = Math.floor(duration % 60);
+  returnStr += `${num > 9 ? num : '0' + num}`;
+
+  return returnStr;
+};
+
 export const isVideoFile = (file: string) =>
   VIDEO_EXTENSIONS.some(v => file.endsWith(v));
 

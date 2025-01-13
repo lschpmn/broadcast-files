@@ -10,8 +10,8 @@ type Props = {
 const PlayComponent = ({ isPlaying, video }: Props) => {
 
   const playPauseFunc = () => {
-    if (!isPlaying && video.paused) video.play();
-    else if (isPlaying && !video.paused) video.pause();
+    if (!isPlaying && video?.paused) video.play();
+    else if (isPlaying && !video?.paused) video?.pause();
   };
 
   return (

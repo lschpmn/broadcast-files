@@ -1,11 +1,11 @@
-import { AppBar, Toolbar } from '@mui/material';
+import { AppBar, Toolbar, Typography } from '@mui/material';
 import isEqual from 'lodash/isEqual';
 import React, { useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { STREAM_PREFIX } from '../../../constants';
 import { FileDetail } from '../../../types';
 import { inspectNodeSendServer } from '../../lib/reducers';
-import { useAction, useMyPath } from '../../lib/utils';
+import { getTimeStr, useAction, useMyPath } from '../../lib/utils';
 import { State } from '../../types';
 import AutoplayComponent from './AutoplayComponent';
 import PlayComponent from './PlayComponent';
@@ -59,41 +59,24 @@ const VideoView = () => {
       </div>
       <div>
         <AppBar position="relative">
-          <Toolbar style={{ display: 'flex', justifyContent: 'space-between' }}>
-            <PlayComponent isPlaying={isPlaying} video={videoRef.current}/>
+          <Toolbar style={{ display: 'flex', flexDirection: 'column' }}>
+            <SliderComponent currentTime={currentTime} duration={duration} setTime={setTime}/>
+            <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
+              <PlayComponent isPlaying={isPlaying} video={videoRef.current}/>
+              <Typography style={{ margin: '0 1rem', display: 'flex', alignItems: 'center' }}>
+                <span style={{ margin: '0 0.5rem' }}>{getTimeStr(currentTime)}</span>
+                <span style={{ margin: '0 0.5rem' }}>/</span>
+                <span style={{ margin: '0 0.5rem' }}>{getTimeStr(duration)}</span>
+              </Typography>
 
-            <div style={{ flex: 1, margin: '0 1rem', display: 'flex' }}>
-              <SliderComponent currentTime={currentTime} duration={duration} setTime={setTime}/>
-
-              <div style={{ margin: '0 0.5rem' }}>{getTimeStr(currentTime)}</div>
-              <div style={{ margin: '0 0.5rem' }}>/</div>
-              <div style={{ margin: '0 0.5rem' }}>{getTimeStr(duration)}</div>
+              <div style={{ flex: 1 }}/>
+              <AutoplayComponent ended={videoRef.current?.ended} isPlaying={isPlaying}/>
             </div>
-
-            <AutoplayComponent ended={videoRef.current?.ended} isPlaying={isPlaying}/>
           </Toolbar>
         </AppBar>
       </div>
     </div>
   );
-};
-
-export const getTimeStr = (duration: number) => {
-  let returnStr = '';
-
-  if (duration > 3600) {
-    const num = Math.floor(duration / 3600);
-    returnStr += `${num > 9 ? num : '0' + num}:`;
-  }
-  if (duration > 60) {
-    const num = Math.floor(duration / 60) % 60;
-    returnStr += `${num > 9 ? num : '0' + num}:`;
-  }
-
-  const num = Math.floor(duration % 60);
-  returnStr += `${num > 9 ? num : '0' + num}`;
-
-  return returnStr;
 };
 
 export default VideoView;

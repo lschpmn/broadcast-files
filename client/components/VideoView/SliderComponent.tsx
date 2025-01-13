@@ -1,6 +1,6 @@
 import { Slider } from '@mui/material';
 import React, { useState } from 'react';
-import { getTimeStr } from './index';
+import { getTimeStr } from '../../lib/utils';
 
 type Props = {
   currentTime: number,
