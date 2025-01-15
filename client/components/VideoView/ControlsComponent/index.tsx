@@ -1,15 +1,9 @@
 import { AppBar, Toolbar, Typography } from '@mui/material';
-import { debounce } from 'lodash';
-import React, { useEffect, useState } from 'react';
-import { getTimeStr } from '../../../lib/utils';
+import React, { useEffect } from 'react';
+import { getTimeStr, useOpacity } from '../../../lib/utils';
 import AutoplayComponent from './AutoplayComponent';
 import PlayComponent from './PlayComponent';
 import SliderComponent from './SliderComponent';
-
-const OPACITY = 0.95;
-const FRAMES = 33;
-const TIMEOUT = 2000;
-const RATE = OPACITY / FRAMES / TIMEOUT * 1000;
 
 type Props = {
   currentTime: number,
@@ -20,37 +14,12 @@ type Props = {
 };
 
 const ControlsComponent = ({ currentTime, duration, isPlaying, setTime, video }: Props) => {
-  const [isMouseMoving, setIsMouseMoving] = useState(false);
-  const [opacity, setOpacity] = useState(OPACITY);
+  const [opacity] = useOpacity(isPlaying);
 
   useEffect(() => {
-    if (isPlaying && !isMouseMoving) {
-      const intervalId = setInterval(() => {
-        setOpacity(p => {
-          if (p < 0) {
-            clearInterval(intervalId);
-            video && (video.style.cursor = 'none');
-          }
-          return p - RATE;
-        });
-      }, FRAMES);
-
-      return () => clearInterval(intervalId);
-    } else {
-      setOpacity(OPACITY);
-      video && (video.style.cursor = 'auto');
-    }
-  }, [isPlaying, isMouseMoving]);
-
-  useEffect(() => {
-    const start = debounce(() => setIsMouseMoving(true), TIMEOUT, { leading: true, trailing: false });
-    const end = debounce(() => setIsMouseMoving(false), TIMEOUT, { leading: false, trailing: true });
-
-    const lisenter = () => { start(); end(); }
-
-    document.addEventListener('mousemove', lisenter);
-    return () => document.removeEventListener('mousemove', lisenter);
-  }, []);
+    if (opacity < 0) video && (video.style.cursor = 'none');
+    else video && (video.style.cursor = 'auto');
+  }, [opacity]);
 
   return (
     <AppBar position="absolute" style={{ bottom: 0, opacity: opacity, top: 'auto', zIndex: opacity > 0 ? 100 : -100 }}>
@@ -65,7 +34,7 @@ const ControlsComponent = ({ currentTime, duration, isPlaying, setTime, video }:
           </Typography>
 
           <div style={{ flex: 1 }}/>
-          <AutoplayComponent ended={video?.ended} isPlaying={isPlaying}/>
+          <AutoplayComponent isPlaying={isPlaying} video={video}/>
         </div>
       </Toolbar>
     </AppBar>

@@ -8,11 +8,11 @@ import { inspectNodeSendServer } from '../../../lib/reducers';
 import { isVideoFile, selectSortedNodeList, useAction, useMyPath } from '../../../lib/utils';
 
 type Props = {
-  ended: boolean,
   isPlaying: boolean,
+  video: HTMLVideoElement,
 };
 
-const AutoplayComponent = ({ ended, isPlaying }: Props) => {
+const AutoplayComponent = ({ isPlaying, video }: Props) => {
   const [pathname, paths] = useMyPath();
   const [isAutoplaying, setIsAutoplaying] = useState(false);
   const inspectNodeAction = useAction(inspectNodeSendServer);
@@ -22,10 +22,18 @@ const AutoplayComponent = ({ ended, isPlaying }: Props) => {
 
   useEffect(() => {
     inspectNodeAction(parentPath);
-  }, []);
+
+    if (isAutoplaying && video?.paused) {
+      const playIt = () => {
+        video.removeEventListener('loadeddata', playIt);
+        video.play().catch(console.error);
+      };
+      video.addEventListener('loadeddata', playIt);
+    }
+  }, [pathname]);
 
   useEffect(() => {
-    if (!isPlaying && isAutoplaying && ended) {
+    if (!isPlaying && isAutoplaying && video.ended) {
       const currentIndex = videoList.indexOf(pathname);
       const next = videoList[currentIndex + 1];
       if (currentIndex !== -1 && next) navigate(next);

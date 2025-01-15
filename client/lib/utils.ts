@@ -1,8 +1,14 @@
-import { useCallback, useMemo } from 'react';
+import { debounce } from 'lodash';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useLocation } from 'react-router-dom';
 import { VIDEO_EXTENSIONS } from '../../constants';
 import { State } from '../types';
+
+const OPACITY = 0.95;
+const FRAMES = 33;
+const TIMEOUT = 2000;
+const RATE = OPACITY / FRAMES / TIMEOUT * 1000;
 
 export const getTimeStr = (duration: number) => {
   let returnStr = '';
@@ -61,4 +67,41 @@ export const useMyPath = (): [pathname: string, paths: string[]] => {
 
     return [decodedPathname, paths];
   }, [pathname]);
+};
+
+export const useOpacity = (isPlaying: boolean): [opacity: number] => {
+  const [isMouseMoving, setIsMouseMoving] = useState(false);
+  const [opacity, setOpacity] = useState(OPACITY);
+
+  useEffect(() => {
+    if (isPlaying && !isMouseMoving) {
+      const intervalId = setInterval(() => {
+        setOpacity(p => {
+          if (p < 0) {
+            clearInterval(intervalId);
+          }
+          return p - RATE;
+        });
+      }, FRAMES);
+
+      return () => clearInterval(intervalId);
+    } else {
+      setOpacity(OPACITY);
+    }
+  }, [isPlaying, isMouseMoving]);
+
+  useEffect(() => {
+    const start = debounce(() => setIsMouseMoving(true), TIMEOUT, { leading: true, trailing: false });
+    const end = debounce(() => setIsMouseMoving(false), TIMEOUT, { leading: false, trailing: true });
+
+    const lisenter = () => {
+      start();
+      end();
+    }
+
+    document.addEventListener('mousemove', lisenter);
+    return () => document.removeEventListener('mousemove', lisenter);
+  }, []);
+
+  return [opacity];
 };
