@@ -77,9 +77,8 @@ export const useOpacity = (isPlaying: boolean): [opacity: number] => {
     if (isPlaying && !isMouseMoving) {
       const intervalId = setInterval(() => {
         setOpacity(p => {
-          if (p < 0) {
-            clearInterval(intervalId);
-          }
+          if (p < 0) clearInterval(intervalId);
+
           return p - RATE;
         });
       }, FRAMES);
@@ -94,13 +93,13 @@ export const useOpacity = (isPlaying: boolean): [opacity: number] => {
     const start = debounce(() => setIsMouseMoving(true), TIMEOUT, { leading: true, trailing: false });
     const end = debounce(() => setIsMouseMoving(false), TIMEOUT, { leading: false, trailing: true });
 
-    const lisenter = () => {
+    const moveListener = () => {
       start();
       end();
     }
 
-    document.addEventListener('mousemove', lisenter);
-    return () => document.removeEventListener('mousemove', lisenter);
+    document.addEventListener('mousemove', moveListener);
+    return () => document.removeEventListener('mousemove', moveListener);
   }, []);
 
   return [opacity];

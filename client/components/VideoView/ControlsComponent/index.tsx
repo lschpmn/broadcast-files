@@ -1,23 +1,50 @@
 import { AppBar, Toolbar, Typography } from '@mui/material';
-import React, { useEffect } from 'react';
+import { noop } from 'lodash';
+import React, { useEffect, useState } from 'react';
 import { getTimeStr, useOpacity } from '../../../lib/utils';
 import AutoplayComponent from './AutoplayComponent';
 import PlayComponent from './PlayComponent';
 import SliderComponent from './SliderComponent';
 
 type Props = {
-  currentTime: number,
   duration: number,
   isPlaying: boolean,
-  setTime: (time: number) => void,
+  offsetTime: number,
+  setOffsetTime: (time: number) => void,
   video: HTMLVideoElement,
 };
 
-const ControlsComponent = ({ currentTime, duration, isPlaying, setTime, video }: Props) => {
+const ControlsComponent = ({ duration, isPlaying, offsetTime, setOffsetTime, video }: Props) => {
+  const [currentTime, setCurrentTime] = useState(0);
   const [opacity] = useOpacity(isPlaying);
 
+  const setTime = (time: number) => {
+    if (time < 0) return setTime(0);
+    if (time > duration) return setTime(duration - 1);
+
+    if (time >= offsetTime && time <= offsetTime + video.duration) {
+      video.currentTime = time - offsetTime;
+      setCurrentTime(time);
+    } else {
+      setOffsetTime(time);
+      setCurrentTime(time);
+    }
+  };
+
   useEffect(() => {
-    if (opacity < 0) video && (video.style.cursor = 'none');
+    const getCurrTime = () => setCurrentTime(offsetTime + Math.round(video?.currentTime || 0));
+    if (isPlaying) {
+      const intervalId = setInterval(getCurrTime, 1000);
+
+      if (video?.paused) video.play().catch(noop);
+
+      return () => clearInterval(intervalId);
+    }
+    getCurrTime();
+  }, [isPlaying, offsetTime]);
+
+  useEffect(() => {
+    if (opacity <= 0) video && (video.style.cursor = 'none');
     else video && (video.style.cursor = 'auto');
   }, [opacity]);
 
@@ -26,7 +53,8 @@ const ControlsComponent = ({ currentTime, duration, isPlaying, setTime, video }:
       <Toolbar style={{ display: 'flex', flexDirection: 'column' }}>
         <SliderComponent currentTime={currentTime} duration={duration} setTime={setTime}/>
         <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
-          <PlayComponent isPlaying={isPlaying} video={video}/>
+          <PlayComponent currentTime={currentTime} isPlaying={isPlaying} setTime={setTime} video={video}/>
+
           <Typography style={{ margin: '0 1rem', display: 'flex', alignItems: 'center' }}>
             <span style={{ margin: '0 0.5rem' }}>{getTimeStr(currentTime)}</span>
             <span style={{ margin: '0 0.5rem' }}>/</span>
