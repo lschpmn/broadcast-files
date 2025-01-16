@@ -1,18 +1,12 @@
 import isEqual from 'lodash/isEqual';
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useSelector } from 'react-redux';
-import { inspectNodeSendServer } from '../../lib/reducers';
-import { selectSortedNodeList, useAction, useMyPath } from '../../lib/utils';
+import { selectSortedNodeList, useMyPath } from '../../lib/utils';
 import NodeItem from './NodeItem';
 
 const DirectoryView = () => {
   const [pathname] = useMyPath();
-  const inspectNodeAction = useAction(inspectNodeSendServer);
   const nodeList: string[] = useSelector(selectSortedNodeList(pathname), isEqual);
-
-  useEffect(() => {
-    inspectNodeAction(pathname);
-  }, [pathname]);
 
   return (
     <div>
