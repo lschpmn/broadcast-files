@@ -1,6 +1,6 @@
 import { AppBar, Toolbar, Typography } from '@mui/material';
 import { noop } from 'lodash';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { getTimeStr, useOpacity } from '../../../lib/utils';
 import AutoplayComponent from './AutoplayComponent';
 import PlayComponent from './PlayComponent';
@@ -18,7 +18,7 @@ const ControlsComponent = ({ duration, isPlaying, offsetTime, setOffsetTime, vid
   const [currentTime, setCurrentTime] = useState(0);
   const [opacity] = useOpacity(isPlaying);
 
-  const setTime = (time: number) => {
+  const setTime = useCallback((time: number) => {
     if (time < 0) return setTime(0);
     if (time > duration) return setTime(duration - 1);
 
@@ -29,7 +29,7 @@ const ControlsComponent = ({ duration, isPlaying, offsetTime, setOffsetTime, vid
       setOffsetTime(time);
       setCurrentTime(time);
     }
-  };
+  }, [duration, offsetTime, setCurrentTime, setOffsetTime, video]);
 
   useEffect(() => {
     const getCurrTime = () => setCurrentTime(offsetTime + Math.round(video?.currentTime || 0));
