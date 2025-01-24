@@ -18,17 +18,24 @@ const ControlsComponent = ({ duration, isPlaying, offsetTime, setOffsetTime, vid
   const [currentTime, setCurrentTime] = useState(0);
   const [opacity] = useOpacity(isPlaying);
 
-  const setTime = useCallback((time: number) => {
-    if (time < 0) return setTime(0);
-    if (time > duration) return setTime(duration - 1);
-
-    if (time >= offsetTime && time <= offsetTime + video.duration) {
-      video.currentTime = time - offsetTime;
-      setCurrentTime(time);
-    } else {
-      setOffsetTime(time);
-      setCurrentTime(time);
-    }
+  const setTime = useCallback((relativeTime: number) => {
+    setCurrentTime(prevTime => {
+      const newTime = prevTime + relativeTime;
+      if (newTime < 0) {
+        video.currentTime = 0
+        setOffsetTime(0);
+        return 0;
+      } else if (newTime > duration) {
+        setOffsetTime(duration - 1);
+        return duration - 1;
+      } else if (newTime >= offsetTime && newTime <= offsetTime + video.duration) {
+        video.currentTime = newTime - offsetTime;
+        return newTime;
+      } else {
+        setOffsetTime(newTime);
+        return newTime;
+      }
+    });
   }, [duration, offsetTime, setCurrentTime, setOffsetTime, video]);
 
   useEffect(() => {

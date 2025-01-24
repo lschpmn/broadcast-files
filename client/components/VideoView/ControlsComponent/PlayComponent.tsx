@@ -24,10 +24,10 @@ const PlayComponent = ({ currentTime, isPlaying, setTime, video }: Props) => {
           playPauseFunc();
           break;
         case 'ArrowRight':
-          setTime(currentTime + 10);
+          setTime(10);
           break;
         case 'ArrowLeft':
-          setTime(currentTime - 10);
+          setTime(-10);
           break;
       }
     }
@@ -35,7 +35,7 @@ const PlayComponent = ({ currentTime, isPlaying, setTime, video }: Props) => {
     document.addEventListener('keydown', spaceListener);
 
     return () => document.removeEventListener('keydown', spaceListener);
-  }, [currentTime, setTime, video]);
+  }, [setTime, video]);
 
   return (
     <IconButton onClick={() => playPauseFunc()}>
