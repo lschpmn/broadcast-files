@@ -5,7 +5,7 @@ import { getTimeStr } from '../../../lib/utils';
 type Props = {
   currentTime: number,
   duration: number,
-  setTime: (time: number) => void,
+  setTime: (i: number, time: number) => void,
 };
 
 const SliderComponent = ({ currentTime, duration, setTime }: Props) => {
@@ -20,7 +20,7 @@ const SliderComponent = ({ currentTime, duration, setTime }: Props) => {
 
   const commitTime = () => {
     setIsHovering(false);
-    setTime(internalTime);
+    setTime(0, internalTime);
   }
 
   const val = isHovering ? internalTime : currentTime;

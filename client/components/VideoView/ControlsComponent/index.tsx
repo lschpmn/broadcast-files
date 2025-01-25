@@ -18,9 +18,9 @@ const ControlsComponent = ({ duration, isPlaying, offsetTime, setOffsetTime, vid
   const [currentTime, setCurrentTime] = useState(0);
   const [opacity] = useOpacity(isPlaying);
 
-  const setTime = useCallback((relativeTime: number) => {
+  const setTime = useCallback((relativeTime: number=0, absoluteTime: number=0) => {
     setCurrentTime(prevTime => {
-      const newTime = prevTime + relativeTime;
+      const newTime = relativeTime ? prevTime + relativeTime : absoluteTime;
       if (newTime < 0) {
         video.currentTime = 0
         setOffsetTime(0);
