@@ -1,16 +1,16 @@
 import { Pause, PlayArrow } from '@mui/icons-material';
 import { IconButton } from '@mui/material';
 import { noop } from 'lodash';
-import React, { useEffect } from 'react';
+import React, { RefObject, useEffect, useRef } from 'react';
 
 type Props = {
-  currentTime: number,
   isPlaying: boolean,
   setTime: (time: number) => void,
   video: HTMLVideoElement,
 };
 
-const PlayComponent = ({ currentTime, isPlaying, setTime, video }: Props) => {
+const PlayComponent = ({ isPlaying, setTime, video }: Props) => {
+  const onButtonRef: RefObject<(e: KeyboardEvent) => void> = useRef(null);
 
   const playPauseFunc = () => {
     if (video?.paused) video.play().catch(noop);
@@ -18,7 +18,7 @@ const PlayComponent = ({ currentTime, isPlaying, setTime, video }: Props) => {
   };
 
   useEffect(() => {
-    const spaceListener = (e: KeyboardEvent) => {
+    onButtonRef.current = (e: KeyboardEvent) => {
       switch (e.key) {
         case ' ':
           playPauseFunc();
@@ -31,11 +31,17 @@ const PlayComponent = ({ currentTime, isPlaying, setTime, video }: Props) => {
           break;
       }
     }
-
-    document.addEventListener('keydown', spaceListener);
-
-    return () => document.removeEventListener('keydown', spaceListener);
   }, [setTime, video]);
+
+  useEffect(() => {
+    const buttonListener = (e: KeyboardEvent) => {
+      onButtonRef.current?.(e)
+    };
+
+    document.addEventListener('keydown', buttonListener);
+
+    return () => document.removeEventListener('keydown', buttonListener);
+  });
 
   return (
     <IconButton onClick={() => playPauseFunc()}>

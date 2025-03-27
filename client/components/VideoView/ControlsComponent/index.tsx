@@ -60,7 +60,7 @@ const ControlsComponent = ({ duration, isPlaying, offsetTime, setOffsetTime, vid
       <Toolbar style={{ display: 'flex', flexDirection: 'column' }}>
         <SliderComponent currentTime={currentTime} duration={duration} setTime={setTime}/>
         <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
-          <PlayComponent currentTime={currentTime} isPlaying={isPlaying} setTime={setTime} video={video}/>
+          <PlayComponent isPlaying={isPlaying} setTime={setTime} video={video}/>
 
           <Typography style={{ margin: '0 1rem', display: 'flex', alignItems: 'center' }}>
             <span style={{ margin: '0 0.5rem' }}>{getTimeStr(currentTime)}</span>
