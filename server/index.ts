@@ -8,7 +8,7 @@ import { connectSocket, connectWeb } from './client-connection';
 import { getCommandLineArguments, log } from './lib/utils';
 
 const { PORT } = getCommandLineArguments();
-const SECURE_PORT = PORT + 1;
+const SECURE_PORT = PORT + 1; // This shouldn't be assumed, and should be part of getCommandLineArguments
 
 ffmpeg.setFfmpegPath(join(__dirname, '..', 'bin', 'ffmpeg.exe'));
 ffmpeg.setFfprobePath(join(__dirname, '..', 'bin', 'ffprobe.exe'));
@@ -28,6 +28,7 @@ app.use((req, res, next) => {
   next();
 });
 
+// These are maybe doing too much, or not correctly named
 connectSocket(server);
 connectWeb(app);
 

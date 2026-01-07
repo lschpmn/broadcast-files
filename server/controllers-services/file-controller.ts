@@ -10,6 +10,8 @@ import { getFilePath, inspectDir, inspectFile } from './file-service';
 
 // WEB SOCKET
 
+// this has the web socket methods and regular express routes in the same file, I don't like that
+
 export const methods: SocketFunctions = {};
 
 methods[inspectNodeSendServer.toString()] = (emit) => async (pathname: string) => {
@@ -68,6 +70,7 @@ fileRouter.get(STREAM_PREFIX + '/*', (req, res) => {
   log(`FilePath: ${filePath}`);
   console.log(`Range Header: ${req.headers.range}`);
 
+  // controller shouldn't have these implementation details
   ffmpeg(filePath)
     .seekInput((+req.query.t || 0))
     .format('mp4')

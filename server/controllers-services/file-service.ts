@@ -1,8 +1,8 @@
 import ffmpeg, { FfprobeData } from 'fluent-ffmpeg';
 import { inspectAsync, listAsync } from 'fs-jetpack';
 import { InspectResult } from 'fs-jetpack/types';
+import { isImageFile, isVideoFile } from '../../client/lib/utils';
 import { NodeShrub } from '../../client/types';
-import { VIDEO_EXTENSIONS } from '../../constants';
 import { DirDetail, FileDetail } from '../../types';
 import db from '../lib/db';
 
@@ -19,16 +19,17 @@ export const getFilePath = (path: string): string | null => {
 };
 
 export const inspectFile = async (pathname: string): Promise<FileDetail | null> => {
-  const isVideo = VIDEO_EXTENSIONS.some(ext => pathname.endsWith(ext));
-  if (!isVideo) return null;
-  const data = await getVideoMetadata(getFilePath(pathname));
-  const videoStream = data.streams.find(stream => stream.height);
+  // this is too focused on video, which was the point when I made it, but now I need it to cover images as well
+  const isVideo = isVideoFile(pathname);
+  if (!isImageFile(pathname) && !isVideoFile(pathname)) return null;
+  const data = isVideo && await getVideoMetadata(getFilePath(pathname));
+  const videoStream = isVideo && data.streams.find(stream => stream.height);
 
   return {
     pathname,
-    size: data.format.size,
+    size: isVideo && data.format.size,
     type: 'file',
-    videoDetail: {
+    videoDetail: isVideo &&  {
       duration: data.format.duration,
       height: videoStream.height,
       width: videoStream.width,

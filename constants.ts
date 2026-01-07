@@ -5,6 +5,15 @@ export const DOWNLOAD_PREFIX = '/d';
 
 export const STREAM_PREFIX = '/s';
 
+export const IMAGE_EXTENSIONS = [
+  '.jpg',
+  '.jpeg',
+  '.gif',
+  '.png',
+  '.svg',
+  '.webp',
+];
+
 export const VIDEO_EXTENSIONS = [
   '.3g2',
   '.3gp',

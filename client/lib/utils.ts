@@ -2,7 +2,7 @@ import { debounce } from 'lodash';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useLocation } from 'react-router-dom';
-import { VIDEO_EXTENSIONS } from '../../constants';
+import { IMAGE_EXTENSIONS, VIDEO_EXTENSIONS } from '../../constants';
 import { State } from '../types';
 
 const OPACITY = 0.95;
@@ -30,7 +30,10 @@ export const getTimeStr = (duration: number) => {
   return returnStr;
 };
 
-export const isVideoFile = (file: string) =>
+export const isImageFile = (file: string = '') =>
+  IMAGE_EXTENSIONS.some(v => file.endsWith(v));
+
+export const isVideoFile = (file: string = '') =>
   VIDEO_EXTENSIONS.some(v => file.endsWith(v));
 
 export const selectSortedNodeList = (pathname: string) => (state: State) => {
