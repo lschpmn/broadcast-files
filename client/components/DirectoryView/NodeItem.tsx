@@ -17,7 +17,7 @@ const NodeItem = ({ pathname }: Props) => {
   const targetPath = '/' + paths.map(encodeURIComponent).join('/');
 
   return (
-    <Link to={item.type === 'dir' ? targetPath : targetPath}>
+    <Link to={targetPath}>
       <Card raised style={{ margin: '1rem', width: 300, overflowWrap: 'anywhere' }}>
         <CardActionArea>
           <CardMedia style={{ height: 168, width: '100%' }}>
