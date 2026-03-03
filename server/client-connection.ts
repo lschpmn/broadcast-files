@@ -42,13 +42,17 @@ export const connectWeb = (app: Express) => {
     app.use(webpackHotMiddleware(compiler));
   }
 
+  app.use((req, res, next) => {
+    log('returning file', req);
+    next();
+  });
+
   app.use(fileRouter);
 
   // App Routes
   app.use(express.static(join(__dirname, '..', 'public')));
 
   app.use((req: Request, res: Response) => {
-    log(`404 - ${req.url} - sending index.html`);
     res.sendFile(join(__dirname, '..', 'client', 'index.html'));
   });
 };

@@ -1,7 +1,7 @@
 import ffmpeg, { FfprobeData } from 'fluent-ffmpeg';
 import { inspectAsync, listAsync } from 'fs-jetpack';
 import { InspectResult } from 'fs-jetpack/types';
-import { isImageFile, isVideoFile } from '../../client/lib/utils';
+import { isImageFile, isVideoFile } from '../lib/utils';
 import { NodeShrub } from '../../client/types';
 import { DirDetail, FileDetail } from '../../types';
 import db from '../lib/db';
